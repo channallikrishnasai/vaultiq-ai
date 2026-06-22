@@ -1,12 +1,19 @@
 "use client";
 
-import { healthScore } from "@/lib/dashboard-data";
 import { Heart } from "lucide-react";
 
-export default function HealthScoreCard() {
+interface HealthScoreCardProps {
+  healthScore: {
+    score: number;
+    label: string;
+    breakdown: { name: string; value: number }[];
+  };
+}
+
+export default function HealthScoreCard({ healthScore }: HealthScoreCardProps) {
   const circumference = 2 * Math.PI * 52;
   const strokeDashoffset =
-    circumference - (healthScore.score / healthScore.maxScore) * circumference;
+    circumference - (healthScore.score / 1000) * circumference;
 
   return (
     <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/50 p-6">

@@ -1,7 +1,27 @@
 "use client";
 
-import { portfolio } from "@/lib/dashboard-data";
-import { Compass, ArrowUpRight } from "lucide-react";
+import { Compass, ArrowUpRight, Plus } from "lucide-react";
+import Link from "next/link";
+
+interface PortfolioCardProps {
+  portfolio: {
+    totalValue: number;
+    cashBalance: number;
+    change: number;
+    changePercent: number;
+    allocation: {
+      name: string;
+      percent: number;
+      color: string;
+    }[];
+    topHoldings: {
+      name: string;
+      value: number;
+      change: number;
+    }[];
+    isEmpty: boolean;
+  };
+}
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-IN", {
@@ -11,7 +31,37 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-export default function PortfolioCard() {
+export default function PortfolioCard({ portfolio }: PortfolioCardProps) {
+  if (portfolio.isEmpty) {
+    return (
+      <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/50 p-6">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10">
+            <Compass className="h-5 w-5 text-amber-400" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-zinc-50">Portfolio</h3>
+            <p className="text-xs text-zinc-500">No portfolio yet</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-center py-10 text-center">
+          <p className="text-sm text-zinc-500">You haven't created a portfolio.</p>
+          <p className="mt-1 text-xs text-zinc-600">
+            Start tracking your investments today.
+          </p>
+          <Link
+            href="/dashboard/portfolio"
+            className="mt-4 flex items-center gap-2 rounded-xl bg-teal-500 px-5 py-2.5 text-sm font-semibold text-zinc-950 transition-all hover:bg-teal-400"
+          >
+            <Plus className="h-4 w-4" />
+            Create Portfolio
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/50 p-6">
       <div className="mb-5 flex items-center justify-between">
@@ -30,7 +80,7 @@ export default function PortfolioCard() {
           </span>
           <div className="flex items-center justify-end gap-1 text-xs font-medium text-emerald-400">
             <ArrowUpRight className="h-3 w-3" />
-            +{portfolio.changePercent}%
+            +{portfolio.changePercent.toFixed(1)}%
           </div>
         </div>
       </div>
@@ -74,7 +124,7 @@ export default function PortfolioCard() {
                 {formatCurrency(holding.value)}
               </span>
               <span className="text-xs text-emerald-400">
-                +{holding.change}%
+                +{holding.change.toFixed(1)}%
               </span>
             </div>
           </div>
