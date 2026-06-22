@@ -1,0 +1,401 @@
+// VaultIQ AI — production-ready Prisma schema
+// SQLite for development; swap datasource provider to postgresql for production
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum RiskAppetite {
+  CONSERVATIVE
+  MODERATE
+  AGGRESSIVE
+}
+
+enum FraudInputType {
+  SCREENSHOT
+  LINK
+  PHONE
+  MESSAGE
+}
+
+enum TradeType {
+  BUY
+  SELL
+}
+
+enum GoalType {
+  SAVINGS
+  EMERGENCY
+  INVESTMENT
+}
+
+enum ChatRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+// ---------------------------------------------------------------------------
+// Auth — NextAuth (@auth/prisma-adapter compatible)
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts                Account[]
+  sessions                Session[]
+  profile                 Profile?
+  expenses                Expense[]
+  budgets                 Budget[]
+  goals                   Goal[]
+  fraudReports            FraudReport[]
+  learningProgress        LearningProgress[]
+  quizResults             QuizResult[]
+  roadmaps                Roadmap[]
+  emergencyPlans          EmergencyPlan[]
+  platformRecommendations PlatformRecommendation[]
+  chatHistory             ChatHistory[]
+  portfolios              Portfolio[]
+  watchlists              Watchlist[]
+  financialTwins          FinancialTwin[]
+
+  @@index([createdAt])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// User profile & gamification
+// ---------------------------------------------------------------------------
+
+model Profile {
+  id             String       @id @default(cuid())
+  userId         String       @unique
+  age            Int?
+  income         Float?
+  currency       String       @default("INR")
+  riskAppetite   RiskAppetite @default(MODERATE)
+  xp             Int          @default(0)
+  streak         Int          @default(0)
+  lastActiveDate DateTime?
+  badges         Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Personal finance
+// ---------------------------------------------------------------------------
+
+model Expense {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Float
+  category  String
+  notes     String?
+  date      DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, date])
+  @@index([userId, category])
+}
+
+model Budget {
+  id        String   @id @default(cuid())
+  userId    String
+  category  String
+  limit     Float
+  month     Int
+  year      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category, month, year])
+  @@index([userId])
+  @@index([userId, year, month])
+}
+
+model Goal {
+  id            String    @id @default(cuid())
+  userId        String
+  name          String
+  targetAmount  Float
+  currentAmount Float     @default(0)
+  type          GoalType
+  deadline      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, type])
+}
+
+// ---------------------------------------------------------------------------
+// Fraud Shield
+// ---------------------------------------------------------------------------
+
+model FraudReport {
+  id             String         @id @default(cuid())
+  userId         String
+  inputType      FraudInputType
+  content        String
+  riskScore      Int
+  threatCategory String
+  explanation    String
+  actions        Json
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@index([riskScore])
+}
+
+// ---------------------------------------------------------------------------
+// Learning Academy
+// ---------------------------------------------------------------------------
+
+model LearningProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  courseId    String
+  lessonId    String
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId, lessonId])
+  @@index([userId])
+  @@index([userId, courseId])
+}
+
+model QuizResult {
+  id        String   @id @default(cuid())
+  userId    String
+  courseId  String
+  score     Int
+  total     Int
+  passed    Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, courseId])
+  @@index([userId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Roadmap, emergency, platform advisor
+// ---------------------------------------------------------------------------
+
+model Roadmap {
+  id        String   @id @default(cuid())
+  userId    String
+  input     Json
+  output    Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, createdAt])
+}
+
+model EmergencyPlan {
+  id        String   @id @default(cuid())
+  userId    String
+  scenario  String
+  plan      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, scenario])
+}
+
+model PlatformRecommendation {
+  id          String   @id @default(cuid())
+  userId      String
+  preferences Json
+  result      Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// AI assistant
+// ---------------------------------------------------------------------------
+
+model ChatHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  sessionId String?
+  role      ChatRole
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, sessionId])
+  @@index([userId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Virtual Trading Lab
+// ---------------------------------------------------------------------------
+
+model Portfolio {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String   @default("Main Portfolio")
+  cashBalance  Float    @default(100000)
+  totalValue   Float    @default(100000)
+  isDefault    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades Trade[]
+
+  @@index([userId])
+  @@index([userId, isDefault])
+}
+
+model Trade {
+  id          String    @id @default(cuid())
+  portfolioId String
+  symbol      String
+  type        TradeType
+  quantity    Float
+  price       Float
+  totalAmount Float
+  notes       String?
+  executedAt  DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
+  @@index([portfolioId, executedAt])
+  @@index([symbol])
+}
+
+model Watchlist {
+  id          String   @id @default(cuid())
+  userId      String
+  symbol      String
+  companyName String?
+  targetPrice Float?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, symbol])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Financial Twin AI
+// ---------------------------------------------------------------------------
+
+model FinancialTwin {
+  id              String       @id @default(cuid())
+  userId          String
+  name            String       @default("My Financial Twin")
+  healthScore     Int          @default(0)
+  riskAppetite    RiskAppetite @default(MODERATE)
+  snapshot        Json
+  projections     Json?
+  recommendations Json?
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isActive])
+}
