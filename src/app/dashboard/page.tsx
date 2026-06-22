@@ -1,53 +1,59 @@
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import Link from "next/link";
+import WelcomeCard from "@/components/dashboard/WelcomeCard";
+import HealthScoreCard from "@/components/dashboard/HealthScoreCard";
+import AIAdvisorCard from "@/components/dashboard/AIAdvisorCard";
+import ExpenseSummaryCard from "@/components/dashboard/ExpenseSummaryCard";
+import PortfolioCard from "@/components/dashboard/PortfolioCard";
+import GoalsCard from "@/components/dashboard/GoalsCard";
+import { Shield } from "lucide-react";
 
-export default async function DashboardPage() {
-  const session = await auth();
-  if (!session?.user) redirect("/sign-in");
-
+export default function DashboardPage() {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      <header className="border-b border-zinc-800 px-6 py-4">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <h1 className="text-xl font-bold">VaultIQ Dashboard</h1>
-          <p className="text-sm text-zinc-400">{session.user.email}</p>
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-6 py-8">
-        <p className="mb-6 text-zinc-400">
-          Welcome back, {session.user.name ?? "User"}. Your backend APIs are ready.
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            { href: "/api/dashboard/stats", label: "Dashboard Stats" },
-            { href: "/api/chat", label: "AI Chat" },
-            { href: "/api/fraud/reports", label: "Fraud Reports" },
-            { href: "/api/expenses", label: "Expenses" },
-            { href: "/api/finance/health-score", label: "Health Score" },
-            { href: "/api/learning/courses", label: "Courses" },
-            { href: "/api/trading/portfolio", label: "Trading Portfolio" },
-            { href: "/api/financial-twin", label: "Financial Twin" },
-            { href: "/api/roadmap", label: "Roadmaps" },
-          ].map((item) => (
-            <div
-              key={item.href}
-              className="rounded-lg border border-zinc-800 bg-zinc-900 p-4"
-            >
-              <p className="font-medium">{item.label}</p>
-              <code className="mt-1 block text-xs text-zinc-500">{item.href}</code>
+    <main className="min-h-screen bg-zinc-950 px-4 py-6 pt-24 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        {/* VaultIQ Header */}
+        <div className="flex flex-col gap-4 rounded-3xl border border-zinc-800/60 bg-zinc-900/40 p-6 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/10">
+              <Shield className="h-7 w-7 text-teal-400" />
             </div>
-          ))}
+
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-zinc-50">
+                VaultIQ AI
+              </h1>
+              <p className="mt-1 text-sm text-zinc-400">
+                AI-Powered Financial Intelligence Dashboard
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-400">
+              System Online
+            </div>
+
+            <div className="rounded-xl border border-teal-500/20 bg-teal-500/10 px-4 py-2 text-sm font-medium text-teal-400">
+              Premium Dashboard
+            </div>
+          </div>
         </div>
-        <form action="/api/auth/signout" method="POST" className="mt-8">
-          <Link
-            href="/api/auth/signout"
-            className="text-sm text-zinc-400 hover:text-white"
-          >
-            Sign out
-          </Link>
-        </form>
-      </main>
-    </div>
+
+        {/* Welcome Hero */}
+        <WelcomeCard />
+
+        {/* Row 1 */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <HealthScoreCard />
+          <AIAdvisorCard />
+        </div>
+
+        {/* Row 2 */}
+        <div className="grid gap-6 lg:grid-cols-3">
+          <ExpenseSummaryCard />
+          <PortfolioCard />
+          <GoalsCard />
+        </div>
+      </div>
+    </main>
   );
 }
