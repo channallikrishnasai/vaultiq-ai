@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { navLinks } from "@/lib/landing-data";
 import { Menu, X, Shield } from "lucide-react";
 

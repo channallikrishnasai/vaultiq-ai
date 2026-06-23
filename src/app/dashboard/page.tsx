@@ -8,7 +8,11 @@ import ExpenseSummaryCard from "@/components/dashboard/ExpenseSummaryCard";
 import PortfolioCard from "@/components/dashboard/PortfolioCard";
 import GoalsCard from "@/components/dashboard/GoalsCard";
 import KPICards from "@/components/dashboard/KPICards";
+import QuickActionsCard from "@/components/dashboard/QuickActionsCard";
 import { Shield } from "lucide-react";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import { ExpenseList } from "@/components/expenses/ExpenseList";
+import { GoalList } from "@/components/goals/GoalList";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -39,6 +43,7 @@ interface DashboardData {
     breakdown: { name: string; value: number }[];
   };
   expenses: {
+    
     total: number;
     categories: { name: string; amount: number; color: string; percent: number }[];
   };
@@ -52,6 +57,8 @@ interface DashboardData {
     isEmpty: boolean;
   };
   goals: {
+   
+    
     id: string;
     name: string;
     target: number;
@@ -60,6 +67,8 @@ interface DashboardData {
     icon: string;
     percent: number;
   }[];
+  expensesList: any[];
+  goalsList: any[];
 }
 
 // ---------------------------------------------------------------------------
@@ -179,6 +188,10 @@ async function getDashboardData(userId: string): Promise<DashboardData> {
     },
     select: { amount: true, category: true },
   });
+  const expensesList = await prisma.expense.findMany({
+  where: { userId },
+  orderBy: { date: "desc" },
+});
 
   const categoryTotals: Record<string, number> = {};
   let totalExpenses = 0;
@@ -210,6 +223,10 @@ async function getDashboardData(userId: string): Promise<DashboardData> {
     select: { id: true, name: true, targetAmount: true, currentAmount: true, type: true },
     take: 3,
   });
+  const goalsList = await prisma.goal.findMany({
+  where: { userId },
+  orderBy: { createdAt: "desc" },
+});
 
   const goalColors: Record<string, string> = {
     SAVINGS: "bg-emerald-500",
@@ -307,6 +324,9 @@ async function getDashboardData(userId: string): Promise<DashboardData> {
     expenses: { total: totalExpenses, categories },
     portfolio,
     goals,
+
+    expensesList,
+    goalsList,
   };
 }
 // ---------------------------------------------------------------------------
@@ -325,33 +345,8 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-screen bg-zinc-950 px-4 py-6 pt-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
-        {/* VaultIQ Header */}
-        <div className="flex flex-col gap-4 rounded-3xl border border-zinc-800/60 bg-zinc-900/40 p-6 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-500/10">
-              <Shield className="h-7 w-7 text-teal-400" />
-            </div>
-
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-zinc-50">
-                VaultIQ AI
-              </h1>
-              <p className="mt-1 text-sm text-zinc-400">
-                AI-Powered Financial Intelligence Dashboard
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-400">
-              System Online
-            </div>
-
-            <div className="rounded-xl border border-teal-500/20 bg-teal-500/10 px-4 py-2 text-sm font-medium text-teal-400">
-              Premium Dashboard
-            </div>
-          </div>
-        </div>
+    
+        <DashboardHeader user={data.user} />
 
         {/* KPI Cards */}
         <KPICards
@@ -364,10 +359,11 @@ export default async function DashboardPage() {
         />
 
         {/* Row 1: Health + Advisor */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <HealthScoreCard healthScore={data.healthScore} />
-          <AIAdvisorCard userId={session.user.id} />
-        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+  <HealthScoreCard healthScore={data.healthScore} />
+  <AIAdvisorCard userId={session.user.id} />
+  <QuickActionsCard />
+</div>
 
         {/* Row 2: Expenses + Portfolio + Goals */}
         <div className="grid gap-6 lg:grid-cols-3">
@@ -375,6 +371,16 @@ export default async function DashboardPage() {
           <PortfolioCard portfolio={data.portfolio} />
           <GoalsCard goals={data.goals} />
         </div>
+        {/* Row 3: Expense & Goal Management */}
+<div className="grid gap-6 lg:grid-cols-2">
+  <div className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-5">
+    <ExpenseList expenses={data.expensesList} />
+  </div>
+
+  <div className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-5">
+    <GoalList goals={data.goalsList} />
+  </div>
+</div>
       </div>
     </main>
   );

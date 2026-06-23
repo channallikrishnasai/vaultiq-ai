@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Sparkles, Send, Loader2 } from "lucide-react";
 
 interface AIAdvisorCardProps {
