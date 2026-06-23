@@ -41,7 +41,7 @@ export default function AIAdvisorCard({ userId }: AIAdvisorCardProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message,
-          sessionId: userId,
+          sessionId: crypto.randomUUID(),
         }),
       });
 
@@ -51,13 +51,15 @@ export default function AIAdvisorCard({ userId }: AIAdvisorCardProps) {
 
       const data = await res.json();
 
-      const assistantMsg: ChatMessage = {
-        role: "assistant",
-        content:
-          data?.data?.content ||
-          data?.content ||
-          "I'm analyzing your financial data. Please check back shortly.",
-      };
+      const assistantMsg = {
+  role: "assistant",
+  content:
+    data?.data?.message ||
+    data?.message ||
+    data?.data?.content ||
+    data?.content ||
+    "No response received.",
+};
 
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {

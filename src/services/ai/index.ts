@@ -1,3 +1,9 @@
+import Groq from "groq-sdk";
+
+// ---------------------------------------------------------------------------
+// Interfaces
+// ---------------------------------------------------------------------------
+
 export interface AIMessage {
   role: "user" | "assistant" | "system";
   content: string;
@@ -6,6 +12,10 @@ export interface AIMessage {
 export interface AIService {
   chat(messages: AIMessage[]): Promise<string>;
 }
+
+// ---------------------------------------------------------------------------
+// MockAIProvider — Fallback when no real AI is available
+// ---------------------------------------------------------------------------
 
 export class MockAIProvider implements AIService {
   async chat(messages: AIMessage[]): Promise<string> {
@@ -25,6 +35,60 @@ export class MockAIProvider implements AIService {
     return `I'm VaultIQ AI, your personal finance assistant. You asked: "${query.slice(0, 100)}". I can help with budgeting, investments, fraud detection, financial planning, and learning. What would you like to explore?`;
   }
 }
+
+// ---------------------------------------------------------------------------
+// GroqProvider — Uses Groq SDK with llama-3.3-70b-versatile
+// ---------------------------------------------------------------------------
+
+export class GroqProvider implements AIService {
+  private client: Groq;
+
+  constructor() {
+    this.client = new Groq({
+      apiKey: process.env.GROQ_API_KEY,
+    });
+  }
+
+  async chat(messages: AIMessage[]): Promise<string> {
+    const apiKey = process.env.GROQ_API_KEY;
+
+    // Fallback 1: No API key
+    if (!apiKey) {
+      console.warn("[GroqProvider] GROQ_API_KEY missing. Falling back to MockAIProvider.");
+      return new MockAIProvider().chat(messages);
+    }
+
+    try {
+      const chatCompletion = await this.client.chat.completions.create({
+        messages: messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+        model: "llama-3.3-70b-versatile",
+        max_completion_tokens: 1024,
+        temperature: 0.7,
+      });
+
+      const content = chatCompletion.choices[0]?.message?.content ?? "";
+
+      if (!content) {
+        console.warn("[GroqProvider] Empty response from Groq. Falling back to MockAIProvider.");
+        return new MockAIProvider().chat(messages);
+      }
+
+      return content;
+    } catch (error) {
+      // Fallback 2: API error
+      console.error("[GroqProvider] API error:", error);
+      console.warn("[GroqProvider] Falling back to MockAIProvider due to API error.");
+      return new MockAIProvider().chat(messages);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// OpenAIProvider — Kept for backward compatibility
+// ---------------------------------------------------------------------------
 
 export class OpenAIProvider implements AIService {
   async chat(messages: AIMessage[]): Promise<string> {
@@ -48,7 +112,24 @@ export class OpenAIProvider implements AIService {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Provider Factory
+// ---------------------------------------------------------------------------
+
 export function getAIProvider(): AIService {
   const provider = process.env.AI_PROVIDER ?? "mock";
-  return provider === "openai" ? new OpenAIProvider() : new MockAIProvider();
+
+  console.log("AI_PROVIDER =", provider);
+  console.log("GROQ KEY EXISTS =", !!process.env.GROQ_API_KEY);
+  console.log("USING PROVIDER =", provider === "groq" ? "Groq" : provider === "openai" ? "OpenAI" : "Mock");
+
+  if (provider === "groq") {
+    return new GroqProvider();
+  }
+
+  if (provider === "openai") {
+    return new OpenAIProvider();
+  }
+
+  return new MockAIProvider();
 }
