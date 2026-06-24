@@ -12,9 +12,24 @@ export const expenseRepository = {
     return prisma.expense.findFirst({ where: { id, userId } });
   },
 
-  create(userId: string, data: { amount: number; category: string; notes?: string; date: Date }) {
-    return prisma.expense.create({ data: { userId, ...data } });
-  },
+  async create(userId: string, data: { amount: number; category: string; notes?: string; date: Date }) {
+  const expense = await prisma.expense.create({
+    data: { userId, ...data },
+  });
+
+  const profile = await prisma.profile.update({
+    where: { userId },
+    data: {
+      xp: {
+        increment: 2,
+      },
+    },
+  });
+
+  console.log("[XP] Updated profile xp:", profile.xp);
+
+  return expense;
+},
 
   update(id: string, userId: string, data: Partial<{ amount: number; category: string; notes: string; date: Date }>) {
     return prisma.expense.updateMany({ where: { id, userId }, data });

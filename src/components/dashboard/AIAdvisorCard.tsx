@@ -52,15 +52,15 @@ export default function AIAdvisorCard({ userId }: AIAdvisorCardProps) {
 
       const data = await res.json();
 
-      const assistantMsg = {
-  role: "assistant",
-  content:
-    data?.data?.message ||
-    data?.message ||
-    data?.data?.content ||
-    data?.content ||
-    "No response received.",
-};
+      const assistantMsg: ChatMessage = {
+        role: "assistant",
+        content:
+          data?.data?.message ||
+          data?.message ||
+          data?.data?.content ||
+          data?.content ||
+          "No response received.",
+      };
 
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err) {

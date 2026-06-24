@@ -13,6 +13,9 @@ import { Shield } from "lucide-react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { ExpenseList } from "@/components/expenses/ExpenseList";
 import { GoalList } from "@/components/goals/GoalList";
+import LevelCard from "@/components/dashboard/LevelCard";
+import FraudShieldCard from "@/components/dashboard/FraudShieldCard";
+import FinancialTwinCard from "@/components/dashboard/FinancialTwinCard";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -69,6 +72,13 @@ interface DashboardData {
   }[];
   expensesList: any[];
   goalsList: any[];
+  fraudStats: { scanCount: number; highRiskCount: number };
+  twinStats: {
+    hasTwin: boolean;
+    healthScore: number;
+    netWorth: number;
+    twinName: string | null;
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -309,11 +319,48 @@ async function getDashboardData(userId: string): Promise<DashboardData> {
   const monthlyExpenses = totalExpenses;
   const savingsRate = monthlyIncome > 0 ? ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100 : 0;
 
-  const healthScore = computeHealthScore(profile, { total: totalExpenses, categories }, goals, portfolio);
+  const healthScore = computeHealthScore(
+    profile ? { ...profile, income: profile.income ?? 0 } : null,
+    { total: totalExpenses, categories },
+    goals,
+    portfolio,
+  );
+
+  const [fraudReports, activeTwin] = await Promise.all([
+    prisma.fraudReport.findMany({
+      where: { userId },
+      select: { riskScore: true },
+    }),
+    prisma.financialTwin.findFirst({
+      where: { userId, isActive: true },
+      select: { name: true, healthScore: true, snapshot: true },
+    }),
+  ]);
+
+  const fraudStats = {
+    scanCount: fraudReports.length,
+    highRiskCount: fraudReports.filter((r) => r.riskScore > 60).length,
+  };
+
+  const twinSnapshot = activeTwin?.snapshot as { netWorth?: number } | null;
+  const twinStats = {
+    hasTwin: !!activeTwin,
+    healthScore: activeTwin?.healthScore ?? 0,
+    netWorth: twinSnapshot?.netWorth ?? 0,
+    twinName: activeTwin?.name ?? null,
+  };
 
   return {
     user,
-    profile,
+    profile: profile
+      ? {
+          income: profile.income ?? 0,
+          currency: profile.currency,
+          riskAppetite: profile.riskAppetite,
+          xp: profile.xp,
+          streak: profile.streak,
+        }
+      : null,
     netWorth,
     netWorthChange,
     netWorthChangePercent,
@@ -327,6 +374,8 @@ async function getDashboardData(userId: string): Promise<DashboardData> {
 
     expensesList,
     goalsList,
+    fraudStats,
+    twinStats,
   };
 }
 // ---------------------------------------------------------------------------
@@ -359,7 +408,12 @@ export default async function DashboardPage() {
         />
 
         {/* Row 1: Health + Advisor */}
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-4">
+          <LevelCard
+  xp={data.profile?.xp ?? 0}
+  streak={data.profile?.streak ?? 0}
+ 
+/>
   <HealthScoreCard healthScore={data.healthScore} />
   <AIAdvisorCard userId={session.user.id} />
   <QuickActionsCard />
@@ -371,13 +425,28 @@ export default async function DashboardPage() {
           <PortfolioCard portfolio={data.portfolio} />
           <GoalsCard goals={data.goals} />
         </div>
+
+        {/* Row 2b: Fraud Shield + Financial Twin */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <FraudShieldCard
+            scanCount={data.fraudStats.scanCount}
+            highRiskCount={data.fraudStats.highRiskCount}
+          />
+          <FinancialTwinCard
+            hasTwin={data.twinStats.hasTwin}
+            healthScore={data.twinStats.healthScore}
+            netWorth={data.twinStats.netWorth}
+            twinName={data.twinStats.twinName ?? undefined}
+          />
+        </div>
+
         {/* Row 3: Expense & Goal Management */}
-<div className="grid gap-6 lg:grid-cols-2">
+<div id="expenses" className="grid gap-6 lg:grid-cols-2">
   <div className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-5">
     <ExpenseList expenses={data.expensesList} />
   </div>
 
-  <div className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-5">
+  <div id="goals" className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-5">
     <GoalList goals={data.goalsList} />
   </div>
 </div>

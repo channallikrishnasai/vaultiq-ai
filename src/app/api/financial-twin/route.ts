@@ -5,6 +5,7 @@ import { financialTwinRepository } from "@/repositories/financial-twin.repositor
 import { successResponse } from "@/lib/api-response";
 import { handleApiError } from "@/lib/api-handler";
 import { RiskAppetite } from "@/generated/prisma/enums";
+import type { Prisma } from "@/generated/prisma/client";
 
 export async function GET() {
   try {
@@ -28,9 +29,9 @@ export async function POST(request: Request) {
       name: generated.name,
       healthScore: generated.healthScore,
       riskAppetite: (generated.riskAppetite as RiskAppetite) ?? RiskAppetite.MODERATE,
-      snapshot: generated.snapshot,
-      projections: generated.projections,
-      recommendations: { items: generated.recommendations, summary: generated.twinSummary },
+      snapshot: generated.snapshot as unknown as Prisma.InputJsonValue,
+      projections: generated.projections as unknown as Prisma.InputJsonValue,
+      recommendations: { items: generated.recommendations, summary: generated.twinSummary } as unknown as Prisma.InputJsonValue,
     });
 
     return successResponse({ ...generated, id: twin.id });

@@ -4,8 +4,8 @@ import Link from "next/link";
 import {
   Plus,
   Target,
-  Compass,
-  Wallet,
+  Shield,
+  Bot,
   Settings,
   Rocket,
 } from "lucide-react";
@@ -14,23 +14,23 @@ export default function QuickActionsCard() {
   const actions = [
     {
       label: "Add Expense",
-      href: "/dashboard/expenses",
+      href: "/dashboard#expenses",
       icon: Plus,
     },
     {
       label: "Add Goal",
-      href: "/dashboard/goals",
+      href: "/dashboard#goals",
       icon: Target,
     },
     {
-      label: "Portfolio",
-      href: "/dashboard/portfolio",
-      icon: Compass,
+      label: "Fraud Shield",
+      href: "/dashboard/fraud",
+      icon: Shield,
     },
     {
-      label: "Add Income",
-      href: "/dashboard/profile",
-      icon: Wallet,
+      label: "Financial Twin",
+      href: "/dashboard/twin",
+      icon: Bot,
     },
     {
       label: "Settings",
