@@ -4,8 +4,10 @@ export interface FraudAnalysisResult {
   riskScore: number;
   riskBand: "Safe" | "Medium" | "High";
   threatCategory: string;
+  threatIndicators: string[];
   explanation: string;
   actions: string[];
+  confidence: number;
 }
 
 const SUSPICIOUS_PATTERNS = [
@@ -18,7 +20,7 @@ const SUSPICIOUS_PATTERNS = [
   { pattern: /kyc.*update|pan.*link|aadhaar.*verify/i, weight: 24, category: "KYC Fraud" },
   { pattern: /\+91[6-9]\d{9}/g, weight: 5, category: "Phone Contact" },
   { pattern: /\.(tk|ml|ga|cf|gq|xyz|top|buzz)/i, weight: 20, category: "Suspicious Domain" },
-  { pattern: /paytm|phonepe|gpay.*link/i, weight: 12, category: "Payment App Phishing" },
+  { pattern: /paytm|phonepe|gpay.*link|upi.*payment/i, weight: 12, category: "Payment App Phishing" },
 ];
 
 const SAFE_INDICATORS = [
@@ -78,7 +80,17 @@ function analyzeContent(content: string, inputType: FraudInputType): FraudAnalys
       ? "No significant fraud indicators detected in the provided content."
       : `Detected ${categories.length} threat indicator(s): ${categories.join(", ")}. Risk score: ${score}/100.`;
 
-  return { riskScore: score, riskBand, threatCategory, explanation, actions };
+  const confidence = Math.min(98, Math.max(72, 72 + categories.length * 6 + Math.floor(score / 10)));
+
+  return {
+    riskScore: score,
+    riskBand,
+    threatCategory,
+    threatIndicators: categories.length > 0 ? categories : riskBand === "Safe" ? ["No indicators"] : ["General Suspicion"],
+    explanation,
+    actions,
+    confidence,
+  };
 }
 
 export const fraudDetectorService = {

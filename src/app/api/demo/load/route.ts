@@ -1,6 +1,12 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import {
+  DEMO_PROFILE,
+  DEMO_EXPENSES,
+  DEMO_FRAUD_REPORTS,
+} from "@/lib/demo-profile";
+import { financialTwinService } from "@/services/financial-twin/twin.service";
 
 export async function POST() {
   try {
@@ -9,159 +15,145 @@ export async function POST() {
     if (!session?.user?.id) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const userId = session.user.id;
-
-    // -----------------------------------------------------------------------
-    // Create Expenses
-    // -----------------------------------------------------------------------
-
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    await prisma.expense.createMany({
-      data: [
-        {
-          userId,
-          amount: 4000,
-          category: "Food",
-          notes: "Groceries & dining",
-          date: new Date(startOfMonth.getTime() + 86400000 * 2),
-        },
-        {
-          userId,
-          amount: 2500,
-          category: "Transport",
-          notes: "Fuel & cab rides",
-          date: new Date(startOfMonth.getTime() + 86400000 * 5),
-          
-        },
-        {
-          userId,
-          amount: 3500,
-          category: "Shopping",
-          notes: "Online purchases",
-          date: new Date(startOfMonth.getTime() + 86400000 * 8),
-          
-        },
-      ],
+    // Profile
+    await prisma.profile.upsert({
+      where: { userId },
+      create: {
+        userId,
+        income: DEMO_PROFILE.monthlyIncome,
+        currency: DEMO_PROFILE.currency,
+        riskAppetite: DEMO_PROFILE.riskAppetite,
+        xp: 420,
+        streak: 7,
+      },
+      update: {
+        income: DEMO_PROFILE.monthlyIncome,
+        currency: DEMO_PROFILE.currency,
+        riskAppetite: DEMO_PROFILE.riskAppetite,
+      },
     });
 
-    // -----------------------------------------------------------------------
-    // Create Goals
-    // -----------------------------------------------------------------------
+    // Expenses
+    await prisma.expense.createMany({
+      data: DEMO_EXPENSES.map((e, i) => ({
+        userId,
+        amount: e.amount,
+        category: e.category,
+        notes: e.notes,
+        date: new Date(startOfMonth.getTime() + 86400000 * (i + 1)),
+      })),
+    });
+
+    // Goals
+    const goalEntries = [
+      DEMO_PROFILE.goals.emergency,
+      DEMO_PROFILE.goals.laptop,
+      DEMO_PROFILE.goals.europeTrip,
+    ];
 
     await prisma.goal.createMany({
-      data: [
-        {
-          userId,
-          name: "Emergency Fund",
-          targetAmount: 50000,
-          currentAmount: 12500,
-          deadline: new Date(now.getFullYear(), now.getMonth() + 6, 1),
-          type: "EMERGENCY",
-         
-        },
-        {
-          userId,
-          name: "Laptop",
-          targetAmount: 80000,
-          currentAmount: 20000,
-          deadline: new Date(now.getFullYear(), now.getMonth() + 4, 1),
-          type: "SAVINGS",
-          
-        },
-        {
-          userId,
-          name: "Europe Trip",
-          targetAmount: 200000,
-          currentAmount: 35000,
-          deadline: new Date(now.getFullYear() + 1, now.getMonth(), 1),
-          type: "SAVINGS",
-         
-        },
-      ],
+      data: goalEntries.map((g) => ({
+        userId,
+        name: g.name,
+        targetAmount: g.target,
+        currentAmount: g.current,
+        deadline: new Date(now.getFullYear() + 1, now.getMonth(), 1),
+        type: g.type,
+      })),
     });
 
-    // -----------------------------------------------------------------------
-    // Create Portfolio + Trades
-    // -----------------------------------------------------------------------
-
+    // Portfolio + Trades
     const portfolio = await prisma.portfolio.create({
       data: {
         userId,
-        name: "Default Portfolio",
-        cashBalance: 5000,
-        totalValue: 50000,
+        name: DEMO_PROFILE.portfolio.name,
+        cashBalance: DEMO_PROFILE.portfolio.cashBalance,
+        totalValue: DEMO_PROFILE.portfolio.totalValue,
         isDefault: true,
       },
     });
 
     await prisma.trade.createMany({
-      data: [
-        {
-          portfolioId: portfolio.id,
-          symbol: "TCS",
-          type: "BUY",
-          quantity: 5,
-          price: 3000,
-          totalAmount: 15000,
-          executedAt: new Date(startOfMonth.getTime() + 86400000 * 3),
-        },
-        {
-          portfolioId: portfolio.id,
-          symbol: "Infosys",
-          type: "BUY",
-          quantity: 10,
-          price: 1200,
-          totalAmount: 12000,
-          executedAt: new Date(startOfMonth.getTime() + 86400000 * 6),
-        },
-        {
-          portfolioId: portfolio.id,
-          symbol: "Reliance",
-          type: "BUY",
-          quantity: 6,
-          price: 3000,
-          totalAmount: 18000,
-          executedAt: new Date(startOfMonth.getTime() + 86400000 * 9),
-        },
-      ],
+      data: DEMO_PROFILE.portfolio.trades.map((t, i) => ({
+        portfolioId: portfolio.id,
+        symbol: t.symbol,
+        type: "BUY" as const,
+        quantity: t.quantity,
+        price: t.price,
+        totalAmount: t.totalAmount,
+        executedAt: new Date(startOfMonth.getTime() + 86400000 * (i + 2)),
+      })),
     });
 
-    // -----------------------------------------------------------------------
-    // Update Portfolio totalValue
-    // -----------------------------------------------------------------------
-
-    const trades = await prisma.trade.findMany({
-      where: { portfolioId: portfolio.id },
+    // Fraud demo history
+    await prisma.fraudReport.createMany({
+      data: DEMO_FRAUD_REPORTS.map((r) => ({
+        userId,
+        inputType: r.inputType,
+        content: r.content,
+        riskScore: r.riskScore,
+        threatCategory: r.threatCategory,
+        explanation: r.explanation,
+        actions: r.actions,
+        createdAt: new Date(now.getTime() - r.daysAgo * 86400000),
+      })),
     });
 
-    const invested = trades.reduce((sum, t) => sum + t.totalAmount, 0);
-    const totalValue = portfolio.cashBalance + invested;
+    // Deactivate existing twins, generate fresh one
+    await prisma.financialTwin.updateMany({
+      where: { userId, isActive: true },
+      data: { isActive: false },
+    });
 
-    await prisma.portfolio.update({
-      where: { id: portfolio.id },
-      data: { totalValue },
+    const twinData = await financialTwinService.generate(userId, {
+      name: "Demo Financial Twin",
+      riskAppetite: DEMO_PROFILE.riskAppetite,
+      snapshot: {
+        income: DEMO_PROFILE.annualIncome,
+        expenses: DEMO_PROFILE.annualExpenses,
+        savings: DEMO_PROFILE.savingsBalance,
+        investments: DEMO_PROFILE.investments,
+        debt: DEMO_PROFILE.debt,
+      },
+    });
+
+    await prisma.financialTwin.create({
+      data: {
+        userId,
+        name: twinData.name,
+        healthScore: twinData.healthScore,
+        riskAppetite: twinData.riskAppetite,
+        snapshot: twinData.snapshot,
+        projections: twinData.projections as object,
+        recommendations: { items: twinData.recommendations, summary: twinData.twinSummary },
+        isActive: true,
+      },
     });
 
     return NextResponse.json({
       success: true,
       data: {
-        expensesCreated: 3,
-        goalsCreated: 3,
+        expensesCreated: DEMO_EXPENSES.length,
+        goalsCreated: goalEntries.length,
         portfolioCreated: 1,
-        tradesCreated: 3,
+        tradesCreated: DEMO_PROFILE.portfolio.trades.length,
+        fraudReportsCreated: DEMO_FRAUD_REPORTS.length,
+        twinCreated: true,
       },
     });
   } catch (error) {
     console.error("[Demo Load] Error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to load demo data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

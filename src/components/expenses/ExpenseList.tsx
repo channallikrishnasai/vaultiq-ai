@@ -30,18 +30,7 @@ interface ExpenseListProps {
   expenses: Expense[];
 }
 
-const CATEGORY_CONFIG: Record<string, { emoji: string }> = {
-  "Food & Dining": { emoji: "🍽️" },
-  Transportation: { emoji: "🚗" },
-  Shopping: { emoji: "🛍️" },
-  Entertainment: { emoji: "🎬" },
-  "Bills & Utilities": { emoji: "💡" },
-  Healthcare: { emoji: "🏥" },
-  Education: { emoji: "📚" },
-  Travel: { emoji: "✈️" },
-  Investments: { emoji: "📈" },
-  Other: { emoji: "📦" },
-};
+import { getCategoryEmoji, normalizeCategory } from "@/lib/expense-categories";
 
 export function ExpenseList({ expenses = [] }: ExpenseListProps) {
     const router = useRouter();
@@ -134,7 +123,8 @@ export function ExpenseList({ expenses = [] }: ExpenseListProps) {
         <div className="space-y-2">
           <AnimatePresence mode="popLayout">
             {expenses.map((expense, index) => {
-              const cfg = CATEGORY_CONFIG[expense.category] || CATEGORY_CONFIG["Other"];
+              const emoji = getCategoryEmoji(expense.category);
+              const categoryLabel = normalizeCategory(expense.category);
               return (
                 <motion.div
                   key={expense.id}
@@ -146,13 +136,13 @@ export function ExpenseList({ expenses = [] }: ExpenseListProps) {
                   className="group relative flex items-center gap-3 rounded-xl border border-white/[0.04] bg-white/[0.02] p-3 transition hover:border-white/[0.08] hover:bg-white/[0.04] sm:gap-4 sm:p-3.5"
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] text-lg ring-1 ring-white/[0.06] sm:h-11 sm:w-11">
-                    {cfg.emoji}
+                    {emoji}
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="truncate text-sm font-medium text-white">
-                        {expense.category}
+                        {categoryLabel}
                       </p>
                       {expense.notes && (
                         <span

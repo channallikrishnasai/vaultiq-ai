@@ -31,10 +31,12 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-       <AuthSessionProvider>
-  {children}
-  <ToastProvider />
-</AuthSessionProvider>
+        <ThemeProvider>
+          <AuthSessionProvider>
+            {children}
+            <ToastProvider />
+          </AuthSessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

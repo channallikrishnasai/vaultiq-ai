@@ -1,6 +1,9 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Wallet, TrendingUp, TrendingDown, PiggyBank, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { AnimatedNumber } from "@/components/ui/animated-number";
+import { staggerContainer, fadeInUp } from "@/lib/motion";
 
 interface KPICardsProps {
   netWorth: number;
@@ -21,18 +24,18 @@ function formatCurrency(amount: number): string {
 
 export default function KPICards({
   netWorth,
-  netWorthChange,
   netWorthChangePercent,
   monthlyIncome,
   monthlyExpenses,
   savingsRate,
 }: KPICardsProps) {
-  const isNetWorthPositive = netWorthChange >= 0;
+  const isNetWorthPositive = netWorthChangePercent >= 0;
 
   const kpis = [
     {
       label: "Net Worth",
-      value: formatCurrency(netWorth),
+      rawValue: netWorth,
+      formatted: formatCurrency(netWorth),
       change: `${isNetWorthPositive ? "+" : ""}${netWorthChangePercent.toFixed(1)}%`,
       isPositive: isNetWorthPositive,
       icon: Wallet,
@@ -40,10 +43,12 @@ export default function KPICards({
       iconColor: "text-teal-400",
       borderColor: "border-teal-500/20",
       glowColor: "from-teal-500/5 to-transparent",
+      animate: true,
     },
     {
       label: "Monthly Income",
-      value: formatCurrency(monthlyIncome),
+      rawValue: monthlyIncome,
+      formatted: formatCurrency(monthlyIncome),
       change: monthlyIncome > 0 ? "This month" : "No data",
       isPositive: true,
       icon: TrendingUp,
@@ -51,10 +56,12 @@ export default function KPICards({
       iconColor: "text-emerald-400",
       borderColor: "border-emerald-500/20",
       glowColor: "from-emerald-500/5 to-transparent",
+      animate: monthlyIncome > 0,
     },
     {
       label: "Monthly Expenses",
-      value: formatCurrency(monthlyExpenses),
+      rawValue: monthlyExpenses,
+      formatted: formatCurrency(monthlyExpenses),
       change: monthlyExpenses > 0 ? "This month" : "No data",
       isPositive: false,
       icon: TrendingDown,
@@ -62,41 +69,48 @@ export default function KPICards({
       iconColor: "text-rose-400",
       borderColor: "border-rose-500/20",
       glowColor: "from-rose-500/5 to-transparent",
+      animate: monthlyExpenses > 0,
     },
     {
       label: "Savings Rate",
-      value: `${savingsRate.toFixed(1)}%`,
-      change: savingsRate > 20 ? "Healthy" : savingsRate > 0 ? "Work on it" : "Start saving",
-      isPositive: savingsRate > 20,
+      rawValue: savingsRate,
+      formatted: `${savingsRate.toFixed(1)}%`,
+      change: savingsRate >= 30 ? "Healthy" : savingsRate > 0 ? "Work on it" : "Start saving",
+      isPositive: savingsRate >= 20,
       icon: PiggyBank,
       iconBg: "bg-blue-500/10",
       iconColor: "text-blue-400",
       borderColor: "border-blue-500/20",
       glowColor: "from-blue-500/5 to-transparent",
+      animate: savingsRate > 0,
     },
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <motion.div
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
+      className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+    >
       {kpis.map((kpi) => {
         const Icon = kpi.icon;
         const ChangeIcon = kpi.isPositive ? ArrowUpRight : ArrowDownRight;
 
         return (
-          <div
+          <motion.div
             key={kpi.label}
-            className={`group relative overflow-hidden rounded-2xl border ${kpi.borderColor} bg-zinc-900/40 p-5 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:bg-zinc-900/60`}
+            variants={fadeInUp}
+            whileHover={{ y: -4, transition: { duration: 0.2 } }}
+            className={`group relative overflow-hidden rounded-2xl border ${kpi.borderColor} bg-zinc-900/40 p-5 backdrop-blur-sm`}
           >
-            {/* Subtle gradient glow on hover */}
             <div
               className={`absolute inset-0 bg-gradient-to-br ${kpi.glowColor} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
             />
 
             <div className="relative flex items-start justify-between">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${kpi.iconBg}`}>
-                  <Icon className={`h-5 w-5 ${kpi.iconColor}`} />
-                </div>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${kpi.iconBg}`}>
+                <Icon className={`h-5 w-5 ${kpi.iconColor}`} />
               </div>
 
               {kpi.label === "Net Worth" && (
@@ -118,7 +132,23 @@ export default function KPICards({
                 {kpi.label}
               </p>
               <p className="mt-1 text-2xl font-bold tracking-tight text-zinc-50">
-                {kpi.value}
+                {kpi.animate && kpi.label !== "Savings Rate" ? (
+                  <AnimatedNumber
+                    value={kpi.rawValue}
+                    formatter={(n) =>
+                      kpi.label === "Savings Rate"
+                        ? `${n.toFixed(1)}%`
+                        : formatCurrency(n)
+                    }
+                  />
+                ) : kpi.label === "Savings Rate" && kpi.animate ? (
+                  <AnimatedNumber
+                    value={kpi.rawValue}
+                    formatter={(n) => `${n.toFixed(1)}%`}
+                  />
+                ) : (
+                  kpi.formatted
+                )}
               </p>
               {kpi.label !== "Net Worth" && (
                 <p
@@ -130,9 +160,9 @@ export default function KPICards({
                 </p>
               )}
             </div>
-          </div>
+          </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }

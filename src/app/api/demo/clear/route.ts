@@ -9,15 +9,11 @@ export async function POST() {
     if (!session?.user?.id) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const userId = session.user.id;
-
-    // -----------------------------------------------------------------------
-    // Find and delete portfolio trades first (foreign key constraint)
-    // -----------------------------------------------------------------------
 
     const portfolios = await prisma.portfolio.findMany({
       where: { userId },
@@ -32,21 +28,14 @@ export async function POST() {
       });
     }
 
-    // -----------------------------------------------------------------------
-    // Delete demo data
-    // -----------------------------------------------------------------------
-
-    const expensesDeleted = await prisma.expense.deleteMany({
-      where: { userId },
-    });
-
-    const goalsDeleted = await prisma.goal.deleteMany({
-      where: { userId },
-    });
-
-    const portfoliosDeleted = await prisma.portfolio.deleteMany({
-      where: { userId },
-    });
+    const [expensesDeleted, goalsDeleted, portfoliosDeleted, fraudDeleted, twinsDeleted] =
+      await Promise.all([
+        prisma.expense.deleteMany({ where: { userId } }),
+        prisma.goal.deleteMany({ where: { userId } }),
+        prisma.portfolio.deleteMany({ where: { userId } }),
+        prisma.fraudReport.deleteMany({ where: { userId } }),
+        prisma.financialTwin.deleteMany({ where: { userId } }),
+      ]);
 
     return NextResponse.json({
       success: true,
@@ -54,13 +43,15 @@ export async function POST() {
         expensesDeleted: expensesDeleted.count,
         goalsDeleted: goalsDeleted.count,
         portfoliosDeleted: portfoliosDeleted.count,
+        fraudReportsDeleted: fraudDeleted.count,
+        twinsDeleted: twinsDeleted.count,
       },
     });
   } catch (error) {
     console.error("[Demo Clear] Error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to clear demo data" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

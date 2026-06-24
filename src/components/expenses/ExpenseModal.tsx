@@ -22,31 +22,7 @@ interface ExpenseModalProps {
   expense?: Expense | null;
 }
 
-const EXPENSE_CATEGORIES = [
-  "Food & Dining",
-  "Transportation",
-  "Shopping",
-  "Entertainment",
-  "Bills & Utilities",
-  "Healthcare",
-  "Education",
-  "Travel",
-  "Investments",
-  "Other",
-];
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  "Food & Dining": "🍽️",
-  Transportation: "🚗",
-  Shopping: "🛍️",
-  Entertainment: "🎬",
-  "Bills & Utilities": "💡",
-  Healthcare: "🏥",
-  Education: "📚",
-  Travel: "✈️",
-  Investments: "📈",
-  Other: "📦",
-};
+import { EXPENSE_CATEGORIES, getCategoryEmoji } from "@/lib/expense-categories";
 
 export function ExpenseModal({ isOpen, onClose, onSuccess, expense }: ExpenseModalProps) {
   const [amount, setAmount] = useState("");
@@ -118,7 +94,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess, expense }: ExpenseMod
       }
 
       toast.success(isEditing ? "Expense updated" : "Expense added", {
-        description: `${CATEGORY_EMOJI[category] || "💰"} ${category} — ₹${parseFloat(amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
+        description: `${getCategoryEmoji(category)} ${category} — ₹${parseFloat(amount).toLocaleString("en-IN", { minimumFractionDigits: 2 })}`,
       });
 
       onSuccess();
@@ -228,7 +204,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess, expense }: ExpenseMod
                               : "rounded-lg border border-white/[0.06] bg-white/[0.02] px-2.5 py-2 text-xs font-medium text-zinc-400 transition hover:bg-white/[0.05] hover:text-zinc-300"
                           }
                         >
-                          <span className="mr-1">{CATEGORY_EMOJI[cat]}</span>
+                          <span className="mr-1">{getCategoryEmoji(cat)}</span>
                           {cat}
                         </button>
                       );

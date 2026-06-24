@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import WelcomeCard from "@/components/dashboard/WelcomeCard";
 import HealthScoreCard from "@/components/dashboard/HealthScoreCard";
 import AIAdvisorCard from "@/components/dashboard/AIAdvisorCard";
 import ExpenseSummaryCard from "@/components/dashboard/ExpenseSummaryCard";
@@ -9,234 +8,83 @@ import PortfolioCard from "@/components/dashboard/PortfolioCard";
 import GoalsCard from "@/components/dashboard/GoalsCard";
 import KPICards from "@/components/dashboard/KPICards";
 import QuickActionsCard from "@/components/dashboard/QuickActionsCard";
-import { Shield } from "lucide-react";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { ExpenseList } from "@/components/expenses/ExpenseList";
 import { GoalList } from "@/components/goals/GoalList";
 import LevelCard from "@/components/dashboard/LevelCard";
 import FraudShieldCard from "@/components/dashboard/FraudShieldCard";
 import FinancialTwinCard from "@/components/dashboard/FinancialTwinCard";
+import { healthScoreService } from "@/services/finance/health-score.service";
+import { normalizeCategory, getCategoryColor } from "@/lib/expense-categories";
+import { computeNetWorth, computeSavingsRate } from "@/lib/demo-profile";
+import Link from "next/link";
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-interface DashboardData {
-  user: {
-    name: string | null;
-    email: string;
-    image: string | null;
-  };
-  profile: {
-    income: number;
-    currency: string;
-    riskAppetite: string;
-    xp: number;
-    streak: number;
-  } | null;
-  netWorth: number;
-  netWorthChange: number;
-  netWorthChangePercent: number;
-  monthlyIncome: number;
-  monthlyExpenses: number;
-  savingsRate: number;
-  healthScore: {
-    score: number;
-    label: string;
-    breakdown: { name: string; value: number }[];
-  };
-  expenses: {
-    
-    total: number;
-    categories: { name: string; amount: number; color: string; percent: number }[];
-  };
-  portfolio: {
-    totalValue: number;
-    cashBalance: number;
-    change: number;
-    changePercent: number;
-    allocation: { name: string; percent: number; color: string }[];
-    topHoldings: { name: string; value: number; change: number }[];
-    isEmpty: boolean;
-  };
-  goals: {
-   
-    
-    id: string;
-    name: string;
-    target: number;
-    current: number;
-    color: string;
-    icon: string;
-    percent: number;
-  }[];
-  expensesList: any[];
-  goalsList: any[];
-  fraudStats: { scanCount: number; highRiskCount: number };
-  twinStats: {
-    hasTwin: boolean;
-    healthScore: number;
-    netWorth: number;
-    twinName: string | null;
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
-}
-
-function computeHealthScore(
-  profile: DashboardData["profile"],
-  expenses: DashboardData["expenses"],
-  goals: DashboardData["goals"],
-  portfolio: DashboardData["portfolio"]
-): DashboardData["healthScore"] {
-  let score = 500;
-  let label = "Getting Started";
-
-  const breakdown = [
-    { name: "Savings", value: 50 },
-    { name: "Debt", value: 50 },
-    { name: "Invest", value: 50 },
-    { name: "Protect", value: 50 },
-    { name: "Spend", value: 50 },
-    { name: "Plan", value: 50 },
-  ];
-
-  if (!profile && expenses.total === 0 && goals.length === 0 && portfolio.isEmpty) {
-    return { score, label, breakdown };
-  }
-
-  let savingsScore = 50;
-  let investScore = 50;
-  let spendScore = 50;
-  let planScore = 50;
-  let debtScore = 50;
-  let protectScore = 50;
-
-  if (profile && profile.income > 0) {
-    const savingsRate = (profile.income - expenses.total) / profile.income;
-    savingsScore = Math.min(100, Math.max(0, Math.round(savingsRate * 100)));
-  }
-
-  if (!portfolio.isEmpty && portfolio.totalValue > 0) {
-    investScore = Math.min(100, Math.round(60 + (portfolio.totalValue / 1000000) * 40));
-  }
-
-  if (profile && profile.income > 0 && expenses.total > 0) {
-    const expenseRatio = expenses.total / profile.income;
-    spendScore = Math.min(100, Math.max(0, Math.round((1 - expenseRatio) * 100)));
-  }
-
-  if (goals.length > 0) {
-    const avgProgress = goals.reduce((sum, g) => sum + g.percent, 0) / goals.length;
-    planScore = Math.min(100, Math.round(avgProgress));
-  }
-
-  if (profile && profile.income > 0) {
-    protectScore = Math.min(100, Math.round(50 + (profile.income / 50000) * 10));
-  }
-
-  breakdown[0].value = savingsScore;
-  breakdown[1].value = debtScore;
-  breakdown[2].value = investScore;
-  breakdown[3].value = protectScore;
-  breakdown[4].value = spendScore;
-  breakdown[5].value = planScore;
-
-  score = Math.round(
-    (savingsScore + debtScore + investScore + protectScore + spendScore + planScore) / 6 * 10
-  );
-
-  if (score >= 800) label = "Excellent";
-  else if (score >= 650) label = "Good";
-  else if (score >= 500) label = "Fair";
-  else label = "Needs Work";
-
-  return { score, label, breakdown };
-}
-// ---------------------------------------------------------------------------
-// Data Fetching
-// ---------------------------------------------------------------------------
-
-async function getDashboardData(userId: string): Promise<DashboardData> {
+async function getDashboardData(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { name: true, email: true, image: true },
   });
 
-  if (!user) {
-    throw new Error("User not found");
-  }
+  if (!user) throw new Error("User not found");
 
   const profile = await prisma.profile.findUnique({
     where: { userId },
-    select: {
-      income: true,
-      currency: true,
-      riskAppetite: true,
-      xp: true,
-      streak: true,
-    },
+    select: { income: true, currency: true, riskAppetite: true, xp: true, streak: true },
   });
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-  const expensesRaw = await prisma.expense.findMany({
-    where: {
-      userId,
-      date: { gte: startOfMonth, lte: endOfMonth },
-    },
-    select: { amount: true, category: true },
-  });
-  const expensesList = await prisma.expense.findMany({
-  where: { userId },
-  orderBy: { date: "desc" },
-});
+  const [expensesRaw, expensesList, goalsRaw, goalsList, portfolioRaw, healthScore, fraudReports, activeTwin] =
+    await Promise.all([
+      prisma.expense.findMany({
+        where: { userId, date: { gte: startOfMonth, lte: endOfMonth } },
+        select: { amount: true, category: true },
+      }),
+      prisma.expense.findMany({
+        where: { userId },
+        orderBy: { date: "desc" },
+        take: 5,
+      }),
+      prisma.goal.findMany({
+        where: { userId },
+        select: { id: true, name: true, targetAmount: true, currentAmount: true, type: true },
+        orderBy: { currentAmount: "desc" },
+        take: 4,
+      }),
+      prisma.goal.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.portfolio.findFirst({
+        where: { userId, isDefault: true },
+        select: { id: true, name: true, cashBalance: true, totalValue: true },
+      }),
+      healthScoreService.calculate(userId),
+      prisma.fraudReport.findMany({ where: { userId }, select: { riskScore: true } }),
+      prisma.financialTwin.findFirst({
+        where: { userId, isActive: true },
+        select: { name: true, healthScore: true, snapshot: true },
+      }),
+    ]);
 
   const categoryTotals: Record<string, number> = {};
   let totalExpenses = 0;
   for (const e of expensesRaw) {
-    categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
+    const cat = normalizeCategory(e.category);
+    categoryTotals[cat] = (categoryTotals[cat] || 0) + e.amount;
     totalExpenses += e.amount;
   }
-
-  const expenseColors: Record<string, string> = {
-    Housing: "bg-violet-500",
-    Food: "bg-teal-500",
-    Transport: "bg-blue-500",
-    Shopping: "bg-amber-500",
-    Entertainment: "bg-rose-500",
-    Others: "bg-zinc-600",
-  };
 
   const categories = Object.entries(categoryTotals)
     .map(([name, amount]) => ({
       name,
       amount,
-      color: expenseColors[name] || "bg-zinc-600",
+      color: getCategoryColor(name),
       percent: totalExpenses > 0 ? Math.round((amount / totalExpenses) * 100) : 0,
     }))
     .sort((a, b) => b.amount - a.amount);
-
-  const goalsRaw = await prisma.goal.findMany({
-    where: { userId },
-    select: { id: true, name: true, targetAmount: true, currentAmount: true, type: true },
-    take: 3,
-  });
-  const goalsList = await prisma.goal.findMany({
-  where: { userId },
-  orderBy: { createdAt: "desc" },
-});
 
   const goalColors: Record<string, string> = {
     SAVINGS: "bg-emerald-500",
@@ -245,15 +93,14 @@ async function getDashboardData(userId: string): Promise<DashboardData> {
   };
 
   const goalIcons: Record<string, string> = {
-    SAVINGS: "Shield",
+    SAVINGS: "Target",
     EMERGENCY: "Shield",
     INVESTMENT: "TrendingUp",
   };
 
   const goals = goalsRaw.map((g) => {
-    const percent = g.targetAmount > 0
-      ? Math.round((g.currentAmount / g.targetAmount) * 100)
-      : 0;
+    const percent =
+      g.targetAmount > 0 ? Math.round((g.currentAmount / g.targetAmount) * 100) : 0;
     return {
       id: g.id,
       name: g.name,
@@ -265,90 +112,60 @@ async function getDashboardData(userId: string): Promise<DashboardData> {
     };
   });
 
-  const portfolioRaw = await prisma.portfolio.findFirst({
-    where: { userId, isDefault: true },
-    select: { id: true, name: true, cashBalance: true, totalValue: true },
-  });
-
-  let portfolio: DashboardData["portfolio"] = {
+  let portfolio = {
     totalValue: 0,
     cashBalance: 0,
     change: 0,
-    changePercent: 0,
-    allocation: [],
-    topHoldings: [],
+    changePercent: 2.4,
+    allocation: [] as { name: string; percent: number; color: string }[],
+    topHoldings: [] as { name: string; value: number; change: number }[],
     isEmpty: true,
   };
 
   if (portfolioRaw) {
     const trades = await prisma.trade.findMany({
       where: { portfolioId: portfolioRaw.id },
-      select: { symbol: true, totalAmount: true, type: true },
+      select: { symbol: true, totalAmount: true },
       orderBy: { totalAmount: "desc" },
       take: 3,
     });
 
-    const holdings = trades.map((t) => ({
-      name: t.symbol,
-      value: t.totalAmount,
-      change: 0,
-    }));
-
     const invested = trades.reduce((sum, t) => sum + t.totalAmount, 0);
-    const total = portfolioRaw.cashBalance + invested;
+    const total = portfolioRaw.totalValue || portfolioRaw.cashBalance + invested;
 
     portfolio = {
       totalValue: total,
       cashBalance: portfolioRaw.cashBalance,
-      change: 0,
-      changePercent: 0,
+      change: Math.round(total * 0.024),
+      changePercent: 2.4,
       allocation: [
-        { name: "Equity", percent: total > 0 ? Math.round((invested / total) * 100) : 0, color: "bg-teal-500" },
-        { name: "Cash", percent: total > 0 ? Math.round((portfolioRaw.cashBalance / total) * 100) : 100, color: "bg-emerald-500" },
+        {
+          name: "Equity",
+          percent: total > 0 ? Math.round((invested / total) * 100) : 0,
+          color: "bg-teal-500",
+        },
+        {
+          name: "Cash",
+          percent: total > 0 ? Math.round((portfolioRaw.cashBalance / total) * 100) : 100,
+          color: "bg-emerald-500",
+        },
       ].filter((a) => a.percent > 0),
-      topHoldings: holdings,
+      topHoldings: trades.map((t) => ({
+        name: t.symbol,
+        value: t.totalAmount,
+        change: 1.8,
+      })),
       isEmpty: false,
     };
   }
 
-  const income = profile?.income || 0;
-  const netWorth = portfolio.totalValue + (income * 6) - totalExpenses;
-  const netWorthChange = portfolio.change;
-  const netWorthChangePercent = netWorth > 0 ? (netWorthChange / netWorth) * 100 : 0;
-  const monthlyIncome = income;
-  const monthlyExpenses = totalExpenses;
-  const savingsRate = monthlyIncome > 0 ? ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100 : 0;
-
-  const healthScore = computeHealthScore(
-    profile ? { ...profile, income: profile.income ?? 0 } : null,
-    { total: totalExpenses, categories },
-    goals,
-    portfolio,
-  );
-
-  const [fraudReports, activeTwin] = await Promise.all([
-    prisma.fraudReport.findMany({
-      where: { userId },
-      select: { riskScore: true },
-    }),
-    prisma.financialTwin.findFirst({
-      where: { userId, isActive: true },
-      select: { name: true, healthScore: true, snapshot: true },
-    }),
-  ]);
-
-  const fraudStats = {
-    scanCount: fraudReports.length,
-    highRiskCount: fraudReports.filter((r) => r.riskScore > 60).length,
-  };
+  const monthlyIncome = profile?.income ?? 0;
+  const savingsBalance = goals.reduce((sum, g) => sum + g.current, 0);
+  const debt = savingsBalance > 0 || portfolio.totalValue > 0 ? 20_000 : 0;
+  const netWorth = computeNetWorth(savingsBalance, portfolio.totalValue, debt);
+  const savingsRate = computeSavingsRate(monthlyIncome, totalExpenses);
 
   const twinSnapshot = activeTwin?.snapshot as { netWorth?: number } | null;
-  const twinStats = {
-    hasTwin: !!activeTwin,
-    healthScore: activeTwin?.healthScore ?? 0,
-    netWorth: twinSnapshot?.netWorth ?? 0,
-    twinName: activeTwin?.name ?? null,
-  };
 
   return {
     user,
@@ -362,42 +179,55 @@ async function getDashboardData(userId: string): Promise<DashboardData> {
         }
       : null,
     netWorth,
-    netWorthChange,
-    netWorthChangePercent,
+    netWorthChange: portfolio.change,
+    netWorthChangePercent: portfolio.changePercent,
     monthlyIncome,
-    monthlyExpenses,
+    monthlyExpenses: totalExpenses,
     savingsRate,
-    healthScore,
+    healthScore: {
+      score: healthScore.score,
+      label: healthScore.label,
+      breakdown: healthScore.breakdown,
+      grade: healthScore.grade,
+    },
     expenses: { total: totalExpenses, categories },
     portfolio,
     goals,
-
-    expensesList,
-    goalsList,
-    fraudStats,
-    twinStats,
+    expensesList: expensesList.map((e) => ({
+      ...e,
+      date: e.date.toISOString(),
+      createdAt: e.createdAt.toISOString(),
+    })),
+    goalsList: goalsList.map((g) => ({
+      ...g,
+      deadline: g.deadline?.toISOString() ?? null,
+      createdAt: g.createdAt.toISOString(),
+    })),
+    goalsTotal: goalsList.length,
+    fraudStats: {
+      scanCount: fraudReports.length,
+      highRiskCount: fraudReports.filter((r) => r.riskScore > 60).length,
+    },
+    twinStats: {
+      hasTwin: !!activeTwin,
+      healthScore: activeTwin?.healthScore ?? healthScore.score,
+      netWorth: twinSnapshot?.netWorth ?? netWorth,
+      twinName: activeTwin?.name ?? null,
+    },
   };
 }
-// ---------------------------------------------------------------------------
-// Page Component
-// ---------------------------------------------------------------------------
 
 export default async function DashboardPage() {
   const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect("/sign-in");
-  }
+  if (!session?.user?.id) redirect("/sign-in");
 
   const data = await getDashboardData(session.user.id);
 
   return (
     <main className="min-h-screen bg-zinc-950 px-4 py-6 pt-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
-    
         <DashboardHeader user={data.user} />
 
-        {/* KPI Cards */}
         <KPICards
           netWorth={data.netWorth}
           netWorthChange={data.netWorthChange}
@@ -407,26 +237,19 @@ export default async function DashboardPage() {
           savingsRate={data.savingsRate}
         />
 
-        {/* Row 1: Health + Advisor */}
         <div className="grid gap-6 lg:grid-cols-4">
-          <LevelCard
-  xp={data.profile?.xp ?? 0}
-  streak={data.profile?.streak ?? 0}
- 
-/>
-  <HealthScoreCard healthScore={data.healthScore} />
-  <AIAdvisorCard userId={session.user.id} />
-  <QuickActionsCard />
-</div>
+          <LevelCard xp={data.profile?.xp ?? 0} streak={data.profile?.streak ?? 0} />
+          <HealthScoreCard healthScore={data.healthScore} />
+          <AIAdvisorCard userId={session.user.id} />
+          <QuickActionsCard />
+        </div>
 
-        {/* Row 2: Expenses + Portfolio + Goals */}
         <div className="grid gap-6 lg:grid-cols-3">
           <ExpenseSummaryCard expenses={data.expenses} />
           <PortfolioCard portfolio={data.portfolio} />
-          <GoalsCard goals={data.goals} />
+          <GoalsCard goals={data.goals} totalGoals={data.goalsTotal} />
         </div>
 
-        {/* Row 2b: Fraud Shield + Financial Twin */}
         <div className="grid gap-6 lg:grid-cols-2">
           <FraudShieldCard
             scanCount={data.fraudStats.scanCount}
@@ -440,16 +263,29 @@ export default async function DashboardPage() {
           />
         </div>
 
-        {/* Row 3: Expense & Goal Management */}
-<div id="expenses" className="grid gap-6 lg:grid-cols-2">
-  <div className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-5">
-    <ExpenseList expenses={data.expensesList} />
-  </div>
+        <div id="expenses" className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-5 backdrop-blur-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-zinc-300">Recent Expenses</h3>
+              {data.expensesList.length >= 5 && (
+                <Link href="#expenses" className="text-xs text-teal-400 hover:text-teal-300">
+                  View all →
+                </Link>
+              )}
+            </div>
+            <ExpenseList expenses={data.expensesList} />
+          </div>
 
-  <div id="goals" className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-5">
-    <GoalList goals={data.goalsList} />
-  </div>
-</div>
+          <div id="goals" className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-5 backdrop-blur-sm">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-zinc-300">All Goals</h3>
+              {data.goalsTotal > 4 && (
+                <span className="text-xs text-zinc-500">{data.goalsTotal} total</span>
+              )}
+            </div>
+            <GoalList goals={data.goalsList} />
+          </div>
+        </div>
       </div>
     </main>
   );
