@@ -22,6 +22,10 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+function formatPercent(n: number): string {
+  return `${n.toFixed(1)}%`;
+}
+
 export default function KPICards({
   netWorth,
   netWorthChangePercent,
@@ -35,7 +39,8 @@ export default function KPICards({
     {
       label: "Net Worth",
       rawValue: netWorth,
-      formatted: formatCurrency(netWorth),
+      isCurrency: true,
+      isPercent: false,
       change: `${isNetWorthPositive ? "+" : ""}${netWorthChangePercent.toFixed(1)}%`,
       isPositive: isNetWorthPositive,
       icon: Wallet,
@@ -43,12 +48,13 @@ export default function KPICards({
       iconColor: "text-teal-400",
       borderColor: "border-teal-500/20",
       glowColor: "from-teal-500/5 to-transparent",
-      animate: true,
+      showChangeBadge: true,
     },
     {
       label: "Monthly Income",
       rawValue: monthlyIncome,
-      formatted: formatCurrency(monthlyIncome),
+      isCurrency: true,
+      isPercent: false,
       change: monthlyIncome > 0 ? "This month" : "No data",
       isPositive: true,
       icon: TrendingUp,
@@ -56,12 +62,13 @@ export default function KPICards({
       iconColor: "text-emerald-400",
       borderColor: "border-emerald-500/20",
       glowColor: "from-emerald-500/5 to-transparent",
-      animate: monthlyIncome > 0,
+      showChangeBadge: false,
     },
     {
       label: "Monthly Expenses",
       rawValue: monthlyExpenses,
-      formatted: formatCurrency(monthlyExpenses),
+      isCurrency: true,
+      isPercent: false,
       change: monthlyExpenses > 0 ? "This month" : "No data",
       isPositive: false,
       icon: TrendingDown,
@@ -69,12 +76,13 @@ export default function KPICards({
       iconColor: "text-rose-400",
       borderColor: "border-rose-500/20",
       glowColor: "from-rose-500/5 to-transparent",
-      animate: monthlyExpenses > 0,
+      showChangeBadge: false,
     },
     {
       label: "Savings Rate",
       rawValue: savingsRate,
-      formatted: `${savingsRate.toFixed(1)}%`,
+      isCurrency: false,
+      isPercent: true,
       change: savingsRate >= 30 ? "Healthy" : savingsRate > 0 ? "Work on it" : "Start saving",
       isPositive: savingsRate >= 20,
       icon: PiggyBank,
@@ -82,9 +90,9 @@ export default function KPICards({
       iconColor: "text-blue-400",
       borderColor: "border-blue-500/20",
       glowColor: "from-blue-500/5 to-transparent",
-      animate: savingsRate > 0,
+      showChangeBadge: false,
     },
-  ];
+  ] as const;
 
   return (
     <motion.div
@@ -113,7 +121,7 @@ export default function KPICards({
                 <Icon className={`h-5 w-5 ${kpi.iconColor}`} />
               </div>
 
-              {kpi.label === "Net Worth" && (
+              {kpi.showChangeBadge && (
                 <div
                   className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${
                     kpi.isPositive
@@ -132,25 +140,18 @@ export default function KPICards({
                 {kpi.label}
               </p>
               <p className="mt-1 text-2xl font-bold tracking-tight text-zinc-50">
-                {kpi.animate && kpi.label !== "Savings Rate" ? (
+                {kpi.rawValue > 0 ? (
                   <AnimatedNumber
                     value={kpi.rawValue}
                     formatter={(n) =>
-                      kpi.label === "Savings Rate"
-                        ? `${n.toFixed(1)}%`
-                        : formatCurrency(n)
+                      kpi.isPercent ? formatPercent(n) : formatCurrency(n)
                     }
                   />
-                ) : kpi.label === "Savings Rate" && kpi.animate ? (
-                  <AnimatedNumber
-                    value={kpi.rawValue}
-                    formatter={(n) => `${n.toFixed(1)}%`}
-                  />
                 ) : (
-                  kpi.formatted
+                  kpi.isPercent ? formatPercent(kpi.rawValue) : formatCurrency(kpi.rawValue)
                 )}
               </p>
-              {kpi.label !== "Net Worth" && (
+              {!kpi.showChangeBadge && (
                 <p
                   className={`mt-1 text-xs font-medium ${
                     kpi.isPositive ? "text-emerald-400" : "text-zinc-500"

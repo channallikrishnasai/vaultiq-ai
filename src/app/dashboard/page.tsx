@@ -1,23 +1,12 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import HealthScoreCard from "@/components/dashboard/HealthScoreCard";
-import AIAdvisorCard from "@/components/dashboard/AIAdvisorCard";
-import ExpenseSummaryCard from "@/components/dashboard/ExpenseSummaryCard";
-import PortfolioCard from "@/components/dashboard/PortfolioCard";
-import GoalsCard from "@/components/dashboard/GoalsCard";
-import KPICards from "@/components/dashboard/KPICards";
-import QuickActionsCard from "@/components/dashboard/QuickActionsCard";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { ExpenseList } from "@/components/expenses/ExpenseList";
-import { GoalList } from "@/components/goals/GoalList";
-import LevelCard from "@/components/dashboard/LevelCard";
-import FraudShieldCard from "@/components/dashboard/FraudShieldCard";
-import FinancialTwinCard from "@/components/dashboard/FinancialTwinCard";
 import { healthScoreService } from "@/services/finance/health-score.service";
 import { normalizeCategory, getCategoryColor } from "@/lib/expense-categories";
 import { computeNetWorth, computeSavingsRate } from "@/lib/demo-profile";
-import Link from "next/link";
+import DashboardClient from "@/components/dashboard/DashboardClient";
+
+// ─── All data fetching is UNCHANGED ──────────────────────────────────────────
 
 async function getDashboardData(userId: string) {
   const user = await prisma.user.findUnique({
@@ -164,7 +153,6 @@ async function getDashboardData(userId: string) {
   const debt = savingsBalance > 0 || portfolio.totalValue > 0 ? 20_000 : 0;
   const netWorth = computeNetWorth(savingsBalance, portfolio.totalValue, debt);
   const savingsRate = computeSavingsRate(monthlyIncome, totalExpenses);
-
   const twinSnapshot = activeTwin?.snapshot as { netWorth?: number } | null;
 
   return {
@@ -217,76 +205,15 @@ async function getDashboardData(userId: string) {
   };
 }
 
+// ─── Page (server component) ──────────────────────────────────────────────────
+
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/sign-in");
 
   const data = await getDashboardData(session.user.id);
 
-  return (
-    <main className="min-h-screen bg-zinc-950 px-4 py-6 pt-24 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-8">
-        <DashboardHeader user={data.user} />
-
-        <KPICards
-          netWorth={data.netWorth}
-          netWorthChange={data.netWorthChange}
-          netWorthChangePercent={data.netWorthChangePercent}
-          monthlyIncome={data.monthlyIncome}
-          monthlyExpenses={data.monthlyExpenses}
-          savingsRate={data.savingsRate}
-        />
-
-        <div className="grid gap-6 lg:grid-cols-4">
-          <LevelCard xp={data.profile?.xp ?? 0} streak={data.profile?.streak ?? 0} />
-          <HealthScoreCard healthScore={data.healthScore} />
-          <AIAdvisorCard userId={session.user.id} />
-          <QuickActionsCard />
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-3">
-          <ExpenseSummaryCard expenses={data.expenses} />
-          <PortfolioCard portfolio={data.portfolio} />
-          <GoalsCard goals={data.goals} totalGoals={data.goalsTotal} />
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <FraudShieldCard
-            scanCount={data.fraudStats.scanCount}
-            highRiskCount={data.fraudStats.highRiskCount}
-          />
-          <FinancialTwinCard
-            hasTwin={data.twinStats.hasTwin}
-            healthScore={data.twinStats.healthScore}
-            netWorth={data.twinStats.netWorth}
-            twinName={data.twinStats.twinName ?? undefined}
-          />
-        </div>
-
-        <div id="expenses" className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-5 backdrop-blur-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-300">Recent Expenses</h3>
-              {data.expensesList.length >= 5 && (
-                <Link href="#expenses" className="text-xs text-teal-400 hover:text-teal-300">
-                  View all →
-                </Link>
-              )}
-            </div>
-            <ExpenseList expenses={data.expensesList} />
-          </div>
-
-          <div id="goals" className="rounded-2xl border border-white/[0.04] bg-white/[0.02] p-5 backdrop-blur-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-300">All Goals</h3>
-              {data.goalsTotal > 4 && (
-                <span className="text-xs text-zinc-500">{data.goalsTotal} total</span>
-              )}
-            </div>
-            <GoalList goals={data.goalsList} />
-          </div>
-        </div>
-      </div>
-    </main>
-  );
+  // Hand everything to the client compositor
+  // DashboardClient owns all visual layers — page.tsx is now just a data fetcher
+  return <DashboardClient data={data} userId={session.user.id} />;
 }

@@ -1,0 +1,526 @@
+"use client";
+
+import {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+} from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Send,
+  Mic,
+  TrendingUp,
+  PiggyBank,
+  Receipt,
+  GraduationCap,
+  ShieldCheck,
+  Landmark,
+} from "lucide-react";
+import { useOrb } from "@/contexts/OrbContext";
+
+interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  streamed?: boolean;
+}
+
+const PROMPTS = [
+  { icon: Landmark, label: "Prepay home loan?" },
+  { icon: TrendingUp, label: "Portfolio check" },
+  { icon: PiggyBank, label: "Goal planner" },
+  { icon: Receipt, label: "Reduce taxes" },
+  { icon: GraduationCap, label: "Education planning" },
+  { icon: ShieldCheck, label: "Health score" },
+];
+
+// ─── Waveform ─────────────────────────────────────────────────────────────────
+
+function Waveform({ active }: { active: boolean }) {
+  const heights = [4, 8, 14, 14, 8, 4];
+  return (
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 16 }}>
+      {heights.map((h, i) => (
+        <motion.div
+          key={i}
+          style={{
+            width: 2,
+            height: h,
+            borderRadius: 2,
+            background: "rgba(212,175,55,0.65)",
+          }}
+          animate={active ? { scaleY: [0.25, 1, 0.25] } : { scaleY: 0.25 }}
+          transition={{
+            duration: 0.75,
+            repeat: active ? Infinity : 0,
+            delay: i * 0.08,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ─── Markdown renderer ────────────────────────────────────────────────────────
+
+function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((p, i) =>
+    p.startsWith("**") && p.endsWith("**") ? (
+      <strong key={i} style={{ fontWeight: 600, color: "rgba(255,255,255,0.9)" }}>
+        {p.slice(2, -2)}
+      </strong>
+    ) : (
+      <span key={i}>{p}</span>
+    )
+  );
+}
+
+function MarkdownContent({ text }: { text: string }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+      {text
+        .split("\n")
+        .filter(Boolean)
+        .map((line, i) => {
+          if (line.startsWith("### "))
+            return (
+              <p
+                key={i}
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "rgba(251,191,36,0.88)",
+                  marginTop: 6,
+                }}
+              >
+                {renderInline(line.slice(4))}
+              </p>
+            );
+          if (/^[-*]\s/.test(line))
+            return (
+              <p key={i} style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", paddingLeft: 10 }}>
+                <span style={{ color: "rgba(212,175,55,0.45)", marginRight: 5 }}>·</span>
+                {renderInline(line.slice(2))}
+              </p>
+            );
+          return (
+            <p key={i} style={{ fontSize: 12, lineHeight: 1.7, color: "rgba(255,255,255,0.42)" }}>
+              {renderInline(line)}
+            </p>
+          );
+        })}
+    </div>
+  );
+}
+
+// ─── Main AIChat ──────────────────────────────────────────────────────────────
+
+interface AIChatProps {
+  userId: string;
+}
+
+export default function AIChat({ userId }: AIChatProps) {
+  const { orbState, setOrbState, uiReady } = useOrb();
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [thinking, setThinking] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Track interval so it can be cleared on unmount or new message
+  const streamIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Cleanup on unmount — prevents memory leak mid-stream
+  useEffect(() => {
+    return () => {
+      if (streamIntervalRef.current !== null) {
+        clearInterval(streamIntervalRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({
+      top: scrollRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages, thinking]);
+
+  const sendMessage = useCallback(
+    async (msg: string) => {
+      if (!msg.trim() || thinking) return;
+
+      // Clear any in-flight stream before starting a new one
+      if (streamIntervalRef.current !== null) {
+        clearInterval(streamIntervalRef.current);
+        streamIntervalRef.current = null;
+      }
+
+      setInput("");
+      setMessages((p) => [...p, { role: "user", content: msg }]);
+      setOrbState("thinking");
+      setThinking(true);
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg, sessionId: crypto.randomUUID() }),
+        });
+        if (!res.ok) throw new Error("API error");
+        const data = await res.json();
+        const content =
+          data?.data?.message ||
+          data?.message ||
+          data?.content ||
+          "Response unavailable.";
+
+        setOrbState("speaking");
+        let i = 0;
+        setMessages((p) => [...p, { role: "assistant", content: "", streamed: false }]);
+
+        streamIntervalRef.current = setInterval(() => {
+          i += 5;
+          setMessages((p) =>
+            p.map((m, idx) =>
+              idx === p.length - 1 ? { ...m, content: content.slice(0, i) } : m
+            )
+          );
+          if (i >= content.length) {
+            if (streamIntervalRef.current !== null) {
+              clearInterval(streamIntervalRef.current);
+              streamIntervalRef.current = null;
+            }
+            setMessages((p) =>
+              p.map((m, idx) =>
+                idx === p.length - 1 ? { ...m, content, streamed: true } : m
+              )
+            );
+            setOrbState("idle");
+            setThinking(false);
+          }
+        }, 12);
+      } catch {
+        setMessages((p) => [
+          ...p,
+          {
+            role: "assistant",
+            content: "Connection issue — please try again.",
+            streamed: true,
+          },
+        ]);
+        setOrbState("error");
+        // Brief error state then back to idle
+        setTimeout(() => setOrbState("idle"), 2000);
+        setThinking(false);
+      }
+    },
+    [thinking, setOrbState]
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: uiReady ? 1 : 0, y: uiReady ? 0 : 20 }}
+      transition={{ duration: 0.7, delay: 0.7 }}
+      style={{
+        position: "fixed",
+        bottom: "2%",
+        left: "50%",
+        transform: "translateX(-50%)",
+        width: "min(520px, 88vw)",
+        zIndex: 20,
+        background: "rgba(3,3,6,0.95)",
+        border: "1px solid rgba(212,175,55,0.16)",
+        borderRadius: 18,
+        backdropFilter: "blur(22px)",
+        WebkitBackdropFilter: "blur(22px)",
+        boxShadow:
+          "0 0 80px rgba(0,0,0,0.85), 0 0 40px rgba(212,175,55,0.03), inset 0 1px 0 rgba(255,255,255,0.04)",
+      }}
+    >
+      {/* Orb state indicator */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "10px 16px 0",
+        }}
+      >
+        <motion.div
+          animate={{
+            background:
+              orbState === "thinking"
+                ? ["#D4AF37", "#F5D060", "#D4AF37"]
+                : orbState === "speaking"
+                ? ["#34d399", "#6ee7b7", "#34d399"]
+                : orbState === "listening"
+                ? ["#60a5fa", "#93c5fd", "#60a5fa"]
+                : orbState === "processing"
+                ? ["#a855f7", "#c084fc", "#a855f7"]
+                : orbState === "celebrating"
+                ? ["#22c55e", "#4ade80", "#22c55e"]
+                : orbState === "error"
+                ? ["#ef4444", "#f87171", "#ef4444"]
+                : orbState === "sleeping"
+                ? ["rgba(100,116,139,0.4)", "rgba(100,116,139,0.6)", "rgba(100,116,139,0.4)"]
+                : ["rgba(212,175,55,0.4)", "rgba(212,175,55,0.7)", "rgba(212,175,55,0.4)"],
+          }}
+          transition={{ duration: orbState === "idle" ? 3 : 0.8, repeat: Infinity }}
+          style={{ width: 6, height: 6, borderRadius: "50%" }}
+        />
+        <span
+          style={{
+            fontSize: 10,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: "rgba(255,255,255,0.2)",
+          }}
+        >
+          {orbState === "thinking"
+            ? "Analyzing…"
+            : orbState === "speaking"
+            ? "Responding"
+            : orbState === "listening"
+            ? "Listening"
+            : orbState === "processing"
+            ? "Processing…"
+            : orbState === "celebrating"
+            ? "Celebrating"
+            : orbState === "sleeping"
+            ? "Standby"
+            : orbState === "error"
+            ? "Connection error"
+            : "VaultIQ AI · Online"}
+        </span>
+      </div>
+
+      {/* Messages */}
+      <div
+        ref={scrollRef}
+        style={{
+          maxHeight: 160,
+          overflowY: "auto",
+          padding: "10px 16px 8px",
+          scrollbarWidth: "thin",
+          scrollbarColor: "rgba(255,255,255,0.08) transparent",
+        }}
+      >
+        <AnimatePresence initial={false}>
+          {messages.length === 0 && (
+            <motion.div
+              key="welcome"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.65 }}>
+                Your financial intelligence is online. Ask me anything about your portfolio,
+                goals, or financial health.
+              </p>
+            </motion.div>
+          )}
+
+          {messages.map((m, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              style={{
+                display: "flex",
+                justifyContent: m.role === "user" ? "flex-end" : "flex-start",
+                marginTop: i > 0 ? 10 : 0,
+              }}
+            >
+              {m.role === "user" ? (
+                <span
+                  style={{
+                    display: "inline-block",
+                    fontSize: 12,
+                    color: "rgba(236,253,245,0.88)",
+                    padding: "7px 12px",
+                    borderRadius: 10,
+                    background: "rgba(52,211,153,0.08)",
+                    border: "1px solid rgba(52,211,153,0.16)",
+                  }}
+                >
+                  {m.content}
+                </span>
+              ) : (
+                <div style={{ maxWidth: "88%" }}>
+                  <p
+                    style={{
+                      fontSize: 9,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "rgba(212,175,55,0.45)",
+                      marginBottom: 4,
+                    }}
+                  >
+                    VaultIQ AI
+                  </p>
+                  <div
+                    style={{
+                      display: "inline-block",
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                      background: "rgba(212,175,55,0.04)",
+                      border: "1px solid rgba(212,175,55,0.1)",
+                    }}
+                  >
+                    <MarkdownContent text={m.content} />
+                    {!m.streamed && (
+                      <motion.span
+                        animate={{ opacity: [1, 0] }}
+                        transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                        style={{
+                          display: "inline-block",
+                          width: 2,
+                          height: 12,
+                          background: "rgba(212,175,55,0.8)",
+                          marginLeft: 2,
+                          verticalAlign: "middle",
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          ))}
+
+          {thinking && (
+            <motion.div
+              key="thinking"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "8px 12px",
+                borderRadius: 10,
+                background: "rgba(255,255,255,0.02)",
+                border: "1px solid rgba(255,255,255,0.05)",
+                marginTop: 10,
+              }}
+            >
+              <Waveform active />
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+                Analyzing your profile…
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Quick prompts */}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "0 16px 8px" }}>
+        {PROMPTS.slice(0, 4).map(({ icon: Icon, label }) => (
+          <motion.button
+            key={label}
+            onClick={() => sendMessage(label)}
+            whileHover={{ borderColor: "rgba(212,175,55,0.35)", background: "rgba(212,175,55,0.07)" }}
+            whileTap={{ scale: 0.97 }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              fontSize: 10.5,
+              padding: "5px 10px",
+              borderRadius: 7,
+              background: "rgba(255,255,255,0.025)",
+              border: "1px solid rgba(255,255,255,0.07)",
+              color: "rgba(255,255,255,0.4)",
+              cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+          >
+            <Icon size={10} style={{ color: "rgba(212,175,55,0.6)" }} />
+            {label}
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Input row */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "10px 14px 14px",
+          borderTop: "1px solid rgba(255,255,255,0.05)",
+        }}
+      >
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
+          placeholder="Ask VaultIQ anything…"
+          style={{
+            flex: 1,
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.09)",
+            borderRadius: 10,
+            padding: "8px 12px",
+            fontSize: 12,
+            color: "rgba(255,255,255,0.88)",
+            outline: "none",
+            transition: "border-color 0.15s",
+          }}
+          onFocus={(e) => {
+            (e.target as HTMLInputElement).style.borderColor = "rgba(212,175,55,0.32)";
+          }}
+          onBlur={(e) => {
+            (e.target as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.09)";
+          }}
+        />
+
+        {/* Mic (future) */}
+        <button
+          disabled
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 9,
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "not-allowed",
+            flexShrink: 0,
+          }}
+        >
+          <Mic size={13} style={{ color: "rgba(255,255,255,0.2)" }} />
+        </button>
+
+        {/* Send */}
+        <motion.button
+          onClick={() => sendMessage(input)}
+          disabled={!input.trim() || thinking}
+          whileHover={{ y: -1, boxShadow: "0 0 18px rgba(212,175,55,0.45)" }}
+          whileTap={{ scale: 0.94 }}
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 9,
+            background: "linear-gradient(135deg, #F5D060, #C8922A)",
+            border: "none",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: !input.trim() || thinking ? "not-allowed" : "pointer",
+            opacity: !input.trim() || thinking ? 0.32 : 1,
+            flexShrink: 0,
+          }}
+        >
+          <Send size={13} color="#000" />
+        </motion.button>
+      </div>
+    </motion.div>
+  );
+}
