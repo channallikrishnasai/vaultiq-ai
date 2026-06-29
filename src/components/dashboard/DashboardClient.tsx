@@ -6,6 +6,7 @@ import DashboardScene from "./DashboardScene";
 import DashboardHeader from "./DashboardHeader";
 import DashboardHUD from "./DashboardHUD";
 import DashboardWidgets from "./DashboardWidgets";
+import OrbitSystem from "../orbit/OrbitSystem";
 import NeuralNetwork from "./NeuralNetwork";
 import FloatingNews from "./FloatingNews";
 import AIChat from "./AIChat";
@@ -46,17 +47,10 @@ function DashboardInner({
       />
 
       {/* Layer 5: Scrollable widget grid */}
-      <div
-        style={{
-          position: "relative",
-          zIndex: 15,
-          overflowY: "auto",
-          minHeight: "100vh",
-          // Scrolling is on this container, not the fixed layers
-        }}
-      >
-        <DashboardWidgets data={data} visible={uiReady} />
-      </div>
+      {/* Layer 5: Orbit System */}
+{uiReady && (
+  <OrbitSystem data={data} />
+)}
 
       {/* Layer 6: AI chat panel (always on top) */}
       <AIChat userId={userId} />
