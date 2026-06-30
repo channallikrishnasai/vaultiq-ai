@@ -8,14 +8,38 @@ export const chatService = {
     const sid = sessionId ?? randomUUID();
     await chatRepository.addMessage(userId, ChatRole.USER, message, sid);
 
-    const history = await chatRepository.findHistory(userId, sid, 20);
+    const history = await chatRepository.findHistory(userId, sid, 6);
     const ai = getAIProvider();
-    const response = await ai.chat(
-      history.map((h) => ({
-        role: h.role.toLowerCase() as "user" | "assistant" | "system",
-        content: h.content,
-      })),
-    );
+    const response = await ai.chat([
+  {
+    role: "system",
+    content: `
+You are VaultIQ AI, India's AI-powered financial guardian.
+
+You help users with:
+- SIPs
+- Mutual Funds
+- Stocks
+- Budgeting
+- Saving Money
+- Financial Planning
+- Taxes
+- Loans
+- Credit Scores
+- Fraud Detection
+- Scam Prevention
+
+Always answer the user's question directly.
+Give practical and accurate financial guidance.
+Use Indian examples and INR currency.
+Keep answers helpful and easy to understand.
+`,
+  },
+  ...history.map((h) => ({
+    role: h.role.toLowerCase() as "user" | "assistant" | "system",
+    content: h.content,
+  })),
+]);
 
     await chatRepository.addMessage(userId, ChatRole.ASSISTANT, response, sid);
     return { sessionId: sid, message: response };

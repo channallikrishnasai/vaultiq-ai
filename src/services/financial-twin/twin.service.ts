@@ -1,51 +1,115 @@
 import type { RiskAppetite } from "@/generated/prisma/enums";
 import { healthScoreService } from "@/services/finance/health-score.service";
+import { expenseRepository } from "@/repositories/expense.repository";
+import { goalRepository } from "@/repositories/goal.repository";
+import { userRepository } from "@/repositories/user.repository";
+import { prisma } from "@/lib/prisma";
+import { computeProjections } from "@/lib/twin-utils";
+import { generateTwinRecommendations } from "@/lib/twin-recommendations";
+import { DEMO_PROFILE } from "@/lib/demo-profile";
+
+async function buildUserSnapshot(userId: string) {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+  const [user, goals, portfolio, monthlyExpensesRaw] = await Promise.all([
+    userRepository.findById(userId),
+    goalRepository.findAll(userId),
+    prisma.portfolio.findFirst({ where: { userId, isDefault: true } }),
+    expenseRepository.findAll(userId).then((expenses) =>
+      expenses
+        .filter((e) => {
+          const d = new Date(e.date);
+          return d >= startOfMonth && d <= endOfMonth;
+        })
+        .reduce((sum, e) => sum + e.amount, 0),
+    ),
+  ]);
+
+  const monthlyIncome = user?.profile?.income ?? 0;
+  const annualIncome = monthlyIncome > 0 ? monthlyIncome * 12 : DEMO_PROFILE.annualIncome;
+  const annualExpenses =
+    monthlyExpensesRaw > 0 ? monthlyExpensesRaw * 12 : DEMO_PROFILE.annualExpenses;
+
+  const savings = goals.reduce((sum, g) => sum + g.currentAmount, 0);
+  let investments = portfolio?.totalValue ?? 0;
+
+  if (investments === 0 && portfolio) {
+    const trades = await prisma.trade.findMany({
+      where: { portfolioId: portfolio.id },
+      select: { totalAmount: true },
+    });
+    investments = portfolio.cashBalance + trades.reduce((sum, t) => sum + t.totalAmount, 0);
+  }
+
+  const debt = savings > 0 || investments > 0 ? DEMO_PROFILE.debt : 0;
+
+  return {
+    income: annualIncome,
+    expenses: annualExpenses,
+    savings: savings > 0 ? savings : 0,
+    investments,
+    debt,
+  };
+}
 
 export const financialTwinService = {
-  async generate(userId: string, data: {
-    name?: string;
-    riskAppetite?: RiskAppetite;
-    snapshot?: {
-      income: number;
-      expenses: number;
-      savings: number;
-      investments: number;
-      debt: number;
-    };
-  }) {
+  async generate(
+    userId: string,
+    data: {
+      name?: string;
+      riskAppetite?: RiskAppetite;
+      snapshot?: {
+        income: number;
+        expenses: number;
+        savings: number;
+        investments: number;
+        debt: number;
+      };
+    },
+  ) {
     const health = await healthScoreService.calculate(userId);
-    const snapshot = data.snapshot ?? {
-      income: 600000,
-      expenses: 350000,
-      savings: 150000,
-      investments: 200000,
-      debt: 50000,
-    };
+    const baseSnapshot = data.snapshot ?? (await buildUserSnapshot(userId));
 
-    const netWorth = snapshot.savings + snapshot.investments - snapshot.debt;
-    const savingsRate = snapshot.income > 0
-      ? (snapshot.income - snapshot.expenses) / snapshot.income
-      : 0;
+    const netWorth = baseSnapshot.savings + baseSnapshot.investments - baseSnapshot.debt;
+    const savingsRate =
+      baseSnapshot.income > 0
+        ? (baseSnapshot.income - baseSnapshot.expenses) / baseSnapshot.income
+        : 0;
 
-    const projections = {
-      oneYear: Math.round(netWorth * 1.08),
-      threeYear: Math.round(netWorth * Math.pow(1.1, 3)),
-      fiveYear: Math.round(netWorth * Math.pow(1.12, 5)),
-      tenYear: Math.round(netWorth * Math.pow(1.12, 10)),
-    };
+    const riskAppetite = data.riskAppetite ?? "MODERATE";
+    const projections = computeProjections(netWorth, riskAppetite);
 
-    const recommendations = [
-      savingsRate < 0.2 ? "Increase savings rate to at least 20%" : "Maintain current savings discipline",
-      snapshot.debt > snapshot.savings ? "Prioritize debt reduction" : "Debt levels are manageable",
-      health.score < 60 ? "Focus on building emergency fund" : "Consider increasing equity allocation",
-      "Review and rebalance portfolio quarterly",
-    ];
+    const goals = await goalRepository.findAll(userId);
+    const monthlyExpenses = baseSnapshot.expenses / 12;
+    const emergencyGoal = goals.find((g) => g.type === "EMERGENCY");
+
+    const recommendations = generateTwinRecommendations({
+      savingsRate: Math.round(savingsRate * 100),
+      debt: baseSnapshot.debt,
+      savings: baseSnapshot.savings,
+      investments: baseSnapshot.investments,
+      monthlyExpenses,
+      emergencyFundCurrent: emergencyGoal?.currentAmount ?? 0,
+      emergencyFundTarget: emergencyGoal?.targetAmount ?? monthlyExpenses * 6,
+      goalProgress: goals.map((g) => ({
+        name: g.name,
+        percent: g.targetAmount > 0 ? Math.round((g.currentAmount / g.targetAmount) * 100) : 0,
+        remaining: Math.max(0, g.targetAmount - g.currentAmount),
+      })),
+      riskAppetite,
+    });
 
     return {
       name: data.name ?? "My Financial Twin",
       healthScore: health.score,
-      riskAppetite: data.riskAppetite ?? "MODERATE",
-      snapshot: { ...snapshot, netWorth, savingsRate: Math.round(savingsRate * 100) },
+      riskAppetite,
+      snapshot: {
+        ...baseSnapshot,
+        netWorth,
+        savingsRate: Math.round(savingsRate * 100),
+      },
       projections,
       recommendations,
       twinSummary: `Net worth: ₹${netWorth.toLocaleString("en-IN")} | Health: ${health.grade} (${health.score}/100) | Savings rate: ${Math.round(savingsRate * 100)}%`,
