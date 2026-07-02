@@ -18,6 +18,8 @@ import {
   Landmark,
   ChevronDown,
   ChevronUp,
+  RefreshCw,
+  Zap,
 } from "lucide-react";
 import { useOrb } from "@/contexts/OrbContext";
 
@@ -584,14 +586,14 @@ export default function AIChat({ userId, isGlobal = false, isMinimized = false, 
         bottom: "14px",
         left: "50%",
         transform: "translateX(-50%)",
-        width: "min(480px, 60vw)",
+        width: "min(620px, 85vw)",
         zIndex: 20,
-        background: "rgba(4,4,8,0.95)",
-        border: "1px solid rgba(212,175,55,0.18)",
-        borderRadius: 18,
-        backdropFilter: "blur(22px)",
-        WebkitBackdropFilter: "blur(22px)",
-        boxShadow: "0 0 60px rgba(0,0,0,0.85), 0 0 30px rgba(212,175,55,0.04), inset 0 1px 0 rgba(255,255,255,0.04)",
+        background: "rgba(5,3,1,0.96)",
+        border: "1px solid rgba(212,175,55,0.28)",
+        borderRadius: 20,
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        boxShadow: "0 0 80px rgba(0,0,0,0.9), 0 0 40px rgba(212,175,55,0.12), inset 0 1px 0 rgba(255,255,255,0.06)",
       }}
     >
       {/* Orb state indicator */}
@@ -620,17 +622,18 @@ export default function AIChat({ userId, isGlobal = false, isMinimized = false, 
                 ? ["#ef4444", "#f87171", "#ef4444"]
                 : orbState === "sleeping"
                 ? ["rgba(100,116,139,0.4)", "rgba(100,116,139,0.6)", "rgba(100,116,139,0.4)"]
-                : ["rgba(212,175,55,0.4)", "rgba(212,175,55,0.7)", "rgba(212,175,55,0.4)"],
+                : ["rgba(34,197,94,0.7)", "rgba(34,197,94,1)", "rgba(34,197,94,0.7)"],
           }}
-          transition={{ duration: orbState === "idle" ? 3 : 0.8, repeat: Infinity }}
-          style={{ width: 6, height: 6, borderRadius: "50%" }}
+          transition={{ duration: orbState === "idle" ? 1.5 : 0.8, repeat: Infinity }}
+          style={{ width: 8, height: 8, borderRadius: "50%", boxShadow: orbState === "idle" ? "0 0 10px rgba(34,197,94,0.6)" : "none" }}
         />
         <span
           style={{
             fontSize: 10,
+            fontWeight: 700,
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: "rgba(255,255,255,0.2)",
+            color: "rgba(255,255,255,0.6)",
           }}
         >
           {orbState === "thinking"
@@ -772,29 +775,42 @@ export default function AIChat({ userId, isGlobal = false, isMinimized = false, 
         </AnimatePresence>
       </div>
 
-      {/* Quick prompts */}
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "0 16px 8px" }}>
-        {PROMPTS.slice(0, 4).map(({ icon: Icon, label }) => (
+      {/* Suggested Chips */}
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          overflowX: "auto",
+          padding: "0 20px 12px",
+          scrollbarWidth: "none",
+        }}
+      >
+        {[
+          { label: "Analyze spending", icon: TrendingUp },
+          { label: "Rebalance portfolio", icon: RefreshCw },
+          { label: "Tax harvesting", icon: Zap },
+        ].map(({ label, icon: Icon }, i) => (
           <motion.button
-            key={label}
+            key={i}
+            whileHover={{ scale: 1.02, background: "rgba(212,175,55,0.08)", borderColor: "rgba(212,175,55,0.3)" }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => sendMessage(label)}
-            whileHover={{ borderColor: "rgba(212,175,55,0.35)", background: "rgba(212,175,55,0.07)" }}
-            whileTap={{ scale: 0.97 }}
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 4,
-              fontSize: 10.5,
-              padding: "5px 10px",
-              borderRadius: 7,
+              gap: 6,
+              whiteSpace: "nowrap",
+              padding: "6px 12px",
+              borderRadius: 14,
+              fontSize: 10,
               background: "rgba(255,255,255,0.025)",
               border: "1px solid rgba(255,255,255,0.07)",
-              color: "rgba(255,255,255,0.4)",
+              color: "rgba(255,255,255,0.6)",
               cursor: "pointer",
               transition: "all 0.15s",
             }}
           >
-            <Icon size={10} style={{ color: "rgba(212,175,55,0.6)" }} />
+            <Icon size={12} style={{ color: "rgba(212,175,55,0.8)" }} />
             {label}
           </motion.button>
         ))}
@@ -805,11 +821,29 @@ export default function AIChat({ userId, isGlobal = false, isMinimized = false, 
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
+          gap: 10,
           padding: "10px 14px 14px",
           borderTop: "1px solid rgba(255,255,255,0.05)",
         }}
       >
+        {/* Avatar Icon */}
+        <div
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #10b981 0%, #064e3b 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid rgba(16,185,129,0.3)",
+            boxShadow: "0 0 10px rgba(16,185,129,0.2)",
+            flexShrink: 0
+          }}
+        >
+          <Zap size={16} color="#fff" />
+        </div>
+
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}

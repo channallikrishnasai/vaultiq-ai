@@ -20,7 +20,7 @@ export default function DashboardScene() {
         inset: 0,
         zIndex: 0,
         background: [
-          "radial-gradient(ellipse 60% 55% at 50% 48%, rgba(20,12,0,1) 0%, rgba(6,4,1,0.9) 40%, rgba(2,2,5,1) 80%, #040407 100%)",
+          "radial-gradient(ellipse 70% 60% at 50% 46%, rgba(35,18,0,1) 0%, rgba(14,8,0,0.92) 35%, rgba(4,3,1,0.98) 70%, #040200 100%)",
         ].join(","),
       }}
     >

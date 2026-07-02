@@ -41,12 +41,12 @@ export default function AnalyticsWorkspace({ data }: { data: DashboardData }) {
       case "Portfolio":
         return <>
           <Label text="Portfolio" />
-          <div className="h-[90px]">
+          <div className="h-[100px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={PORT}>
                 <XAxis dataKey="m" stroke="#3f3f46" fontSize={6} tickLine={false} axisLine={false} />
                 <Tooltip {...TT} />
-                <Line type="monotone" dataKey="v" stroke="#D4AF37" strokeWidth={1.5} dot={false} />
+                <Line type="monotone" dataKey="v" stroke="#D4AF37" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -178,21 +178,23 @@ export default function AnalyticsWorkspace({ data }: { data: DashboardData }) {
   return (
     <div
       className="flex h-full w-full flex-col overflow-hidden"
-      style={{ background: "rgba(5,5,8,0.90)", borderLeft: "1px solid rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+      style={{ background: "rgba(6,4,1,0.93)", borderLeft: "1px solid rgba(212,175,55,0.12)", backdropFilter: "blur(22px)", WebkitBackdropFilter: "blur(22px)" }}
     >
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 scrollbar-none">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3.5 scrollbar-none">
 
         {/* ── Smart Notification ── */}
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5">
-              <Bell size={10} className="text-zinc-300" />
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-2">
+              <div style={{width:3,height:12,borderRadius:2,background:"#D4AF37",boxShadow:"0 0 6px #D4AF3788"}}/>
+              <Bell size={11} className="text-zinc-300" />
               <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-100">Smart notification</span>
             </div>
             <motion.div
               animate={{ opacity: [0.4,1,0.4] }}
               transition={{ duration: 2, repeat: Infinity }}
-              className="h-1.5 w-1.5 rounded-full bg-[#D4AF37]"
+              className="h-2 w-2 rounded-full"
+              style={{ background: "#D4AF37", boxShadow: "0 0 6px #D4AF3788" }}
             />
           </div>
 
@@ -200,19 +202,19 @@ export default function AnalyticsWorkspace({ data }: { data: DashboardData }) {
             {NOTIFS.map((n, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity:0, x:8 }}
+                initial={{ opacity:0, x:10 }}
                 animate={{ opacity:1, x:0 }}
                 transition={{ delay: i * 0.07 }}
-                className="flex items-start gap-2 rounded-lg px-2 py-1.5"
-                style={{ background: n.bg, border: `1px solid ${n.dot}22` }}
+                className="flex items-start gap-2.5 rounded-xl px-2.5 py-2"
+                style={{ background: n.bg, border: `1px solid ${n.dot}33`, boxShadow: `0 2px 8px rgba(0,0,0,0.4)` }}
               >
-                <span className="mt-[5px] h-1.5 w-1.5 rounded-full shrink-0" style={{ background: n.dot }} />
+                <span className="mt-[6px] h-2 w-2 rounded-full shrink-0 flex-none" style={{ background: n.dot, boxShadow: `0 0 5px ${n.dot}99` }} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[8px] font-bold text-zinc-100 truncate">{n.title}</span>
+                    <span className="text-[8.5px] font-bold text-zinc-100 truncate">{n.title}</span>
                     <span className="text-[7px] text-zinc-600 shrink-0 ml-1">{n.time}</span>
                   </div>
-                  <p className="text-[7px] text-zinc-500 leading-tight truncate mt-0.5">{n.desc}</p>
+                  <p className="text-[7.5px] text-zinc-500 leading-tight truncate mt-0.5">{n.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -221,22 +223,25 @@ export default function AnalyticsWorkspace({ data }: { data: DashboardData }) {
 
         {/* ── Analytics Workspace ── */}
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-100">Analytics workspace</span>
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-2">
+              <div style={{width:3,height:12,borderRadius:2,background:"#D4AF37",boxShadow:"0 0 6px #D4AF3788"}}/>
+              <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-100">Analytics workspace</span>
+            </div>
             <X size={9} className="text-zinc-600 cursor-pointer hover:text-zinc-400 transition-colors" />
           </div>
 
           {/* Tab strip */}
-          <div className="flex gap-0.5 overflow-x-auto pb-1.5 scrollbar-none mb-2">
+          <div className="flex gap-0.5 overflow-x-auto pb-1.5 scrollbar-none mb-2.5">
             {TABS.map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className="shrink-0 rounded px-1.5 py-0.5 text-[6.5px] font-bold uppercase tracking-wider border transition-all"
+                className="shrink-0 rounded-md px-1.5 py-1 text-[6.5px] font-bold uppercase tracking-wider border transition-all"
                 style={
                   tab === t
-                    ? { background:"rgba(212,175,55,0.1)", borderColor:"rgba(212,175,55,0.3)", color:"#D4AF37" }
-                    : { background:"rgba(255,255,255,0.03)", borderColor:"rgba(255,255,255,0.07)", color:"#71717a" }
+                    ? { background:"rgba(212,175,55,0.12)", borderColor:"rgba(212,175,55,0.4)", color:"#D4AF37", boxShadow:"0 0 8px rgba(212,175,55,0.15)", borderBottom:"2px solid #D4AF37" }
+                    : { background:"rgba(255,255,255,0.02)", borderColor:"rgba(255,255,255,0.06)", color:"#52525b" }
                 }
               >
                 {t}
@@ -261,10 +266,11 @@ export default function AnalyticsWorkspace({ data }: { data: DashboardData }) {
 
         {/* ── Personalised AI ── */}
         <div>
-          <div
-            className="flex items-center justify-between mb-2 cursor-pointer"
-          >
-            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-100">Personalised AI</span>
+          <div className="flex items-center justify-between mb-2.5 cursor-pointer">
+            <div className="flex items-center gap-2">
+              <div style={{width:3,height:12,borderRadius:2,background:"#a78bfa",boxShadow:"0 0 6px #a78bfa88"}}/>
+              <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-100">Personalised AI</span>
+            </div>
             <ChevronDown size={9} className="text-zinc-600" />
           </div>
 
