@@ -1,56 +1,55 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   LineChart, Line, ResponsiveContainer, PieChart, Pie, Cell,
   BarChart, Bar, XAxis, Tooltip,
 } from "recharts";
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function fmt(n: number) {
-  return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-const CARD: React.CSSProperties = {
-  position: "absolute",
-  background: "rgba(6,6,10,0.88)",
-  border: "1px solid rgba(212,175,55,0.18)",
-  borderRadius: 14,
-  backdropFilter: "blur(18px)",
-  WebkitBackdropFilter: "blur(18px)",
-  boxShadow: "0 8px 32px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.05)",
-  overflow: "hidden",
-  padding: "12px 14px",
-  color: "#fff",
-  zIndex: 5,
-};
-
-const SPARK = [
-  { v: 30 }, { v: 55 }, { v: 40 }, { v: 70 }, { v: 60 }, { v: 85 }, { v: 75 }, { v: 95 },
-];
-const MINI_CASHFLOW = [
-  { m: "Inflow", v: 80, c: "#10b981" }, { m: "Outflow", v: 40, c: "#ef4444" },
-  { m: "", v: 60, c: "#10b981" }, { m: "", v: 30, c: "#ef4444" },
-];
-const PIE = [
-  { name: "Asset class", value: 60, color: "#10b981" },
-  { name: "Performance", value: 20, color: "#D4AF37" },
-  { name: "Asset", value: 20, color: "#60a5fa" },
-];
-const SAVINGS_SPARK = [
-  { v: 20 }, { v: 35 }, { v: 30 }, { v: 50 }, { v: 45 }, { v: 60 }, { v: 55 },
-];
-const GOALS_SPARK = [
-  { v: 25 }, { v: 40 }, { v: 55 }, { v: 50 }, { v: 70 }, { v: 65 }, { v: 80 },
-];
+// ── Chart data ────────────────────────────────────────────────────────────────
+const SPARK  = [{v:30},{v:55},{v:40},{v:70},{v:60},{v:85},{v:75},{v:100}];
+const SPARK2 = [{v:20},{v:38},{v:30},{v:52},{v:45},{v:65},{v:58},{v:80}];
+const CASH_D = [{m:"",i:80,o:40},{m:"",i:90,o:55},{m:"",i:70,o:35},{m:"",i:100,o:60}];
+const PIE3   = [{v:60,c:"#10b981"},{v:20,c:"#D4AF37"},{v:20,c:"#60a5fa"}];
+const GOALS_D= [{v:25},{v:40},{v:55},{v:50},{v:70},{v:65},{v:82}];
+const PIE_EF = [{v:85,c:"#60a5fa"},{v:15,c:"rgba(255,255,255,0.06)"}];
 
 const TT = { contentStyle: { display: "none" }, cursor: false as any };
 
+// ── Shared card style ─────────────────────────────────────────────────────────
+const C = (extra: React.CSSProperties = {}): React.CSSProperties => ({
+  position: "absolute",
+  background: "rgba(6,6,10,0.90)",
+  border: "1px solid rgba(212,175,55,0.15)",
+  borderRadius: 14,
+  backdropFilter: "blur(20px)",
+  WebkitBackdropFilter: "blur(20px)",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.04)",
+  overflow: "hidden",
+  padding: "10px 12px",
+  color: "#fff",
+  zIndex: 5,
+  ...extra,
+});
+
+function CardHeader({ label, accent = "#D4AF37", isMinimized, onToggle }: { label: string; accent?: string; isMinimized: boolean; onToggle: () => void }) {
+  return (
+    <div className="flex items-center justify-between mb-1">
+      <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: accent }}>{label}</span>
+      <button 
+        onClick={onToggle}
+        className="p-0.5 hover:bg-white/10 rounded transition-colors"
+        style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", cursor: "pointer", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        {isMinimized ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+      </button>
+    </div>
+  );
+}
+
 interface Props {
   netWorth?: number;
-  portfolio?: { totalValue: number; changePercent: number };
   monthlyIncome?: number;
   savingsRate?: number;
   healthScore?: number;
@@ -59,391 +58,365 @@ interface Props {
 
 export default function DashboardFloatingCards({
   netWorth = 1280450.78,
-  portfolio = { totalValue: 0, changePercent: 14.5 },
   monthlyIncome = 7890.12,
   savingsRate = 48.9,
   healthScore = 94,
   goals = [],
 }: Props) {
+  const [minimized, setMinimized] = useState<Record<string, boolean>>({});
+
+  // Load minimized state from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("kpi-minimized-state");
+    if (saved) {
+      setMinimized(JSON.parse(saved));
+    }
+  }, []);
+
+  // Save minimized state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("kpi-minimized-state", JSON.stringify(minimized));
+  }, [minimized]);
+
+  const toggleMinimize = (key: string) => {
+    setMinimized(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
   const goalList = goals.length
     ? goals.slice(0, 3)
     : [
         { name: "Home purchase", percent: 32 },
-        { name: "Retirement", percent: 90 },
-        { name: "Vacation", percent: 55 },
+        { name: "Retirement",    percent: 90 },
+        { name: "Vacation",      percent: 55 },
       ];
+
+  const fmt = (n: number) =>
+    `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
     <>
-      {/* ── Portfolio Performance — top center ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        style={{
-          ...CARD,
-          width: 200,
-          top: "4%",
-          left: "50%",
-          transform: "translateX(-50%)",
-        }}
-      >
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[8px] uppercase tracking-widest text-zinc-400">Portfolio Performance</span>
-          <span className="text-[7px] text-zinc-600">···</span>
-        </div>
-        <p className="text-[7.5px] text-zinc-500 mb-1">Overall return</p>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-lg font-bold text-[#D4AF37]">+15.45%</span>
-          <span className="text-[8px] text-emerald-400">+14.55%</span>
-        </div>
-        <div className="h-10">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={SPARK}>
-              <Line type="monotone" dataKey="v" stroke="#D4AF37" strokeWidth={1.5} dot={false} />
-              <Tooltip {...TT} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="flex items-center justify-between mt-1">
-          <span className="text-[7px] text-zinc-600">Debt volume</span>
-          <span className="text-[7px] text-rose-400">-76.82%</span>
-          <span className="text-[7px] text-zinc-600">Best invest</span>
-        </div>
+      {/* ══ PORTFOLIO PERFORMANCE — top center ══ */}
+      <motion.div initial={{opacity:0,y:-14}} animate={{opacity:1,y:0}} transition={{delay:0.2}}
+        style={C({ width:190, top:"3%", left:"50%", transform:"translateX(-50%)", height: minimized["portfolio"] ? "auto" : undefined })}>
+        <CardHeader label="Portfolio Performance" isMinimized={minimized["portfolio"]} onToggle={() => toggleMinimize("portfolio")} />
+        {!minimized["portfolio"] && (
+          <>
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:3}}>Overall return</p>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span style={{fontSize:18,fontWeight:800,color:"#D4AF37",lineHeight:1}}>+15.45%</span>
+              <span style={{fontSize:8,color:"#10b981",fontWeight:600}}>+14.55%</span>
+            </div>
+            <div style={{height:40}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={SPARK}>
+                  <Line type="monotone" dataKey="v" stroke="#D4AF37" strokeWidth={1.5} dot={false}/>
+                  <Tooltip {...TT}/>
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex justify-between mt-1">
+              <span style={{fontSize:7,color:"rgba(255,255,255,0.35)"}}>Debt volume</span>
+              <span style={{fontSize:7,color:"#ef4444",fontWeight:600}}>-76.82%</span>
+              <span style={{fontSize:7,color:"rgba(255,255,255,0.35)"}}>Best invest</span>
+            </div>
+          </>
+        )}
       </motion.div>
 
-      {/* ── Net Worth — left upper ── */}
-      <motion.div
-        initial={{ opacity: 0, x: -16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.3 }}
-        style={{ ...CARD, width: 164, top: "12%", left: "19%" }}
-      >
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[8px] uppercase tracking-widest text-zinc-400">Net Worth</span>
-          <span className="text-[7px] text-zinc-600">···</span>
-        </div>
-        <p className="text-[7px] text-zinc-500 mb-1">Total assets</p>
-        <p className="text-base font-bold text-[#D4AF37] leading-none mb-2">${fmt(netWorth)}</p>
-        <div className="h-8">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={[...SPARK, { v: 100 }]}>
-              <Line type="monotone" dataKey="v" stroke="#D4AF37" strokeWidth={1.5} dot={false} />
-              <Tooltip {...TT} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-[7px] text-emerald-400">+13,250.00</span>
-          <span className="text-[7px] text-zinc-600">2016 2020 2023 2025</span>
-        </div>
+      {/* ══ NET WORTH — left upper ══ */}
+      <motion.div initial={{opacity:0,x:-16}} animate={{opacity:1,x:0}} transition={{delay:0.25}}
+        style={C({ width:158, top:"12%", left:"21%", height: minimized["netWorth"] ? "auto" : undefined })}>
+        <CardHeader label="Net Worth" isMinimized={minimized["netWorth"]} onToggle={() => toggleMinimize("netWorth")} />
+        {!minimized["netWorth"] && (
+          <>
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:4}}>Total assets</p>
+            <p style={{fontSize:15,fontWeight:800,color:"#D4AF37",lineHeight:1,marginBottom:6}}>
+              {fmt(netWorth)}
+            </p>
+            <div style={{height:36}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={SPARK}>
+                  <Line type="monotone" dataKey="v" stroke="#D4AF37" strokeWidth={1.5} dot={false}/>
+                  <Tooltip {...TT}/>
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex items-center justify-between mt-1">
+              <span style={{fontSize:7,color:"#10b981",fontWeight:600}}>+13,250.00</span>
+              <span style={{fontSize:6.5,color:"rgba(255,255,255,0.25)"}}>2016 2020 2023</span>
+            </div>
+          </>
+        )}
       </motion.div>
 
-      {/* ── Tax Planner — left mid ── */}
-      <motion.div
-        initial={{ opacity: 0, x: -16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.35 }}
-        style={{ ...CARD, width: 172, top: "30%", left: "19%", borderColor: "rgba(96,165,250,0.2)" }}
-      >
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[8px] uppercase tracking-widest text-blue-400">Tax Planner</span>
-          <span className="text-[7px] text-zinc-600">···</span>
+      {/* ══ TAX PLANNER (upper) — left mid-upper ══ */}
+      <motion.div initial={{opacity:0,x:-16}} animate={{opacity:1,x:0}} transition={{delay:0.3}}
+        style={C({ width:166, top:"31%", left:"21%", borderColor:"rgba(96,165,250,0.2)", height: minimized["taxPlanner"] ? "auto" : undefined })}>
+        <CardHeader label="Tax Planner" accent="#60a5fa" isMinimized={minimized["taxPlanner"]} onToggle={() => toggleMinimize("taxPlanner")}/>
+        {!minimized["taxPlanner"] && (
+          <>
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:6}}>Projected tax liability</p>
+            <div className="space-y-1">
+              {[
+                {k:"Amounts",  v:"$1,500.00", c:"#f4f4f5"},
+                {k:"Due date", v:"08.06.2023",c:"rgba(255,255,255,0.5)"},
+                {k:"Dep. cont",v:"08.06.2023",c:"rgba(255,255,255,0.5)"},
+                {k:"Tax tax",  v:"03.05.2023",c:"rgba(255,255,255,0.5)"},
+                {k:"Deadlines",v:"08.06.2022",c:"rgba(255,255,255,0.5)"},
+              ].map((r,i)=>(
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{background:"#60a5fa"}}/>
+                    <span style={{fontSize:7,color:"rgba(255,255,255,0.45)"}}>{r.k}</span>
+                  </div>
+                  <span style={{fontSize:7,color:r.c,fontWeight:r.c==="#f4f4f5"?700:400}}>{r.v}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </motion.div>
+
+      {/* ══ FRAUD SHIELD + AI TWIN — left mid ══ */}
+      <motion.div initial={{opacity:0,x:-16}} animate={{opacity:1,x:0}} transition={{delay:0.35}}
+        style={C({ width:166, top:"52%", left:"21%", borderColor:"rgba(251,146,60,0.2)", height: minimized["fraudShield"] ? "auto" : undefined })}>
+        <div className="flex items-center gap-2 justify-between">
+          <div style={{flex:1}}>
+            <p style={{fontSize:8,fontWeight:700,color:"#fb923c",letterSpacing:"0.1em",textTransform:"uppercase"}}>Fraud Shield</p>
+          </div>
+          <button 
+            onClick={() => toggleMinimize("fraudShield")}
+            className="p-0.5 hover:bg-white/10 rounded transition-colors"
+            style={{ fontSize: 8, color: "rgba(255,255,255,0.3)", cursor: "pointer", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            {minimized["fraudShield"] ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </button>
         </div>
-        <p className="text-[7px] text-zinc-500 mb-2">Projected tax liability</p>
-        <div className="space-y-1">
-          {[
-            { k: "Amounts", v: "$1,500.00", c: "text-zinc-200" },
-            { k: "Due date", v: "08.06.2023", c: "text-zinc-400" },
-            { k: "Dep. cont", v: "08.06.2023", c: "text-zinc-400" },
-            { k: "Tax tax", v: "03.05.2023", c: "text-zinc-400" },
-            { k: "Deadlines", v: "08.06.2022", c: "text-zinc-400" },
-          ].map((r, i) => (
-            <div key={i} className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-blue-400 shrink-0" />
-                <span className="text-[7px] text-zinc-500">{r.k}</span>
+        {!minimized["fraudShield"] && (
+          <>
+            <div style={{marginBottom:6}}>
+              <div className="space-y-0.5">
+                {["AI Twin","Unique option","Persona/ Perspective","The/locality metrics"].map((t,i)=>(
+                  <p key={i} style={{fontSize:7,color:"rgba(255,255,255,0.4)"}}>{t}</p>
+                ))}
               </div>
-              <span className={`text-[7px] ${r.c}`}>{r.v}</span>
             </div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* ── Fraud Shield + AI Twin — left lower-mid ── */}
-      <motion.div
-        initial={{ opacity: 0, x: -16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.4 }}
-        style={{ ...CARD, width: 172, top: "50%", left: "19%", borderColor: "rgba(251,146,60,0.2)" }}
-      >
-        <div className="flex items-center gap-2">
-          <div className="flex-1">
-            <p className="text-[8px] font-bold text-orange-400 mb-1">Fraud Shield</p>
-            <div className="space-y-0.5">
-              <p className="text-[7px] text-zinc-500">AI Twin</p>
-              <p className="text-[7px] text-zinc-500">Unique option</p>
-              <p className="text-[7px] text-zinc-500">Persona/ Perspective</p>
-              <p className="text-[7px] text-zinc-500">The/locality metrics</p>
+            <div style={{width:44,height:64,borderRadius:8,background:"linear-gradient(160deg,#1a3a4a,#0d2535)",border:"1px solid rgba(96,165,250,0.3)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              <div style={{width:28,height:28,borderRadius:"50%",background:"rgba(96,165,250,0.18)",border:"1px solid rgba(96,165,250,0.4)"}}/>
             </div>
-          </div>
-          {/* Avatar placeholder */}
-          <div
-            className="h-16 w-12 shrink-0 rounded-lg"
-            style={{
-              background: "linear-gradient(135deg, #1a3a4a, #0d2535)",
-              border: "1px solid rgba(96,165,250,0.3)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <div className="h-8 w-8 rounded-full" style={{ background: "rgba(96,165,250,0.2)", border: "1px solid rgba(96,165,250,0.4)" }} />
-          </div>
-        </div>
+          </>
+        )}
       </motion.div>
 
-      {/* ── Tax Planner 2 — left bottom ── */}
-      <motion.div
-        initial={{ opacity: 0, x: -16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.45 }}
-        style={{ ...CARD, width: 172, top: "67%", left: "19%", borderColor: "rgba(96,165,250,0.2)" }}
-      >
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[8px] uppercase tracking-widest text-blue-400">Tax Planner</span>
-          <span className="text-[7px] text-zinc-600">···</span>
-        </div>
-        <p className="text-[7px] text-zinc-500 mb-1.5">Projected tax liability</p>
-        <div className="space-y-1">
-          {[
-            { k: "Amounts", v: "226,000" },
-            { k: "Deductions", v: "-$6,000" },
-            { k: "Due dates", v: "Sue date" },
-            { k: "Payment", v: "5$S 2023" },
-          ].map((r, i) => (
-            <div key={i} className="flex items-center justify-between">
-              <span className="text-[7px] text-zinc-500">{r.k}</span>
-              <span className="text-[7px] text-zinc-200">{r.v}</span>
+      {/* ══ TAX PLANNER (lower) — left lower ══ */}
+      <motion.div initial={{opacity:0,x:-16}} animate={{opacity:1,x:0}} transition={{delay:0.4}}
+        style={C({ width:166, top:"70%", left:"21%", borderColor:"rgba(96,165,250,0.2)", height: minimized["taxPlannerLower"] ? "auto" : undefined })}>
+        <CardHeader label="Tax Planner" accent="#60a5fa" isMinimized={minimized["taxPlannerLower"]} onToggle={() => toggleMinimize("taxPlannerLower")}/>
+        {!minimized["taxPlannerLower"] && (
+          <>
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:6}}>Projected tax liability</p>
+            <div className="space-y-1.5">
+              {[
+                {k:"Amounts",    v:"226,000"},
+                {k:"Deductions", v:"-$6,000"},
+                {k:"Due dates",  v:"Sue date"},
+                {k:"Payment",    v:"5$S 2023"},
+              ].map((r,i)=>(
+                <div key={i} className="flex items-center justify-between">
+                  <span style={{fontSize:7,color:"rgba(255,255,255,0.45)"}}>{r.k}</span>
+                  <span style={{fontSize:7,color:"#f4f4f5",fontWeight:600}}>{r.v}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </>
+        )}
       </motion.div>
 
-      {/* ── Monthly Income — right upper ── */}
-      <motion.div
-        initial={{ opacity: 0, x: 16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.3 }}
-        style={{ ...CARD, width: 172, top: "12%", right: "25%", borderColor: "rgba(16,185,129,0.2)" }}
-      >
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[8px] uppercase tracking-widest text-emerald-400">Monthly Income</span>
-          <span className="text-[7px] text-zinc-600">···</span>
-        </div>
-        <p className="text-[7px] text-zinc-500 mb-1">Primary/secondary sources</p>
-        <p className="text-base font-bold text-white leading-none mb-0.5">${fmt(monthlyIncome)}</p>
-        <span className="text-[7.5px] text-emerald-400 mb-2 block">↑ Growth</span>
-        <div className="h-10">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={SPARK}>
-              <Line type="monotone" dataKey="v" stroke="#10b981" strokeWidth={1.5} dot={false} />
-              <Tooltip {...TT} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+      {/* ══ MONTHLY INCOME — right upper ══ */}
+      <motion.div initial={{opacity:0,x:16}} animate={{opacity:1,x:0}} transition={{delay:0.25}}
+        style={C({ width:166, top:"12%", right:"23%", borderColor:"rgba(16,185,129,0.2)", height: minimized["monthlyIncome"] ? "auto" : undefined })}>
+        <CardHeader label="Monthly Income" accent="#10b981" isMinimized={minimized["monthlyIncome"]} onToggle={() => toggleMinimize("monthlyIncome")}/>
+        {!minimized["monthlyIncome"] && (
+          <>
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:4}}>Primary/secondary sources</p>
+            <p style={{fontSize:15,fontWeight:800,color:"#f4f4f5",lineHeight:1,marginBottom:2}}>{fmt(monthlyIncome)}</p>
+            <span style={{fontSize:8,color:"#10b981",fontWeight:600,display:"block",marginBottom:6}}>↑ Growth</span>
+            <div style={{height:36}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={SPARK2}>
+                  <Line type="monotone" dataKey="v" stroke="#10b981" strokeWidth={1.5} dot={false}/>
+                  <Tooltip {...TT}/>
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
       </motion.div>
 
-      {/* ── Cash Flow — right mid ── */}
-      <motion.div
-        initial={{ opacity: 0, x: 16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.35 }}
-        style={{ ...CARD, width: 172, top: "30%", right: "25%", borderColor: "rgba(96,165,250,0.2)" }}
-      >
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[8px] uppercase tracking-widest text-blue-400">Cash Flow</span>
-          <span className="text-[7px] text-emerald-400">+</span>
-        </div>
-        <p className="text-[7px] text-zinc-500 mb-1">Inflow vs. outflow · Liquidity ratio</p>
-        <div className="h-12">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={MINI_CASHFLOW}>
-              <Bar dataKey="v" radius={[2, 2, 0, 0]}>
-                {MINI_CASHFLOW.map((e, i) => <Cell key={i} fill={e.c} />)}
-              </Bar>
-              <Tooltip {...TT} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="flex items-center gap-3 mt-0.5">
-          <span className="text-[7px] text-emerald-400">Inflow</span>
-          <span className="text-[7px] text-rose-400">Outflow</span>
-        </div>
+      {/* ══ CASH FLOW — right mid-upper ══ */}
+      <motion.div initial={{opacity:0,x:16}} animate={{opacity:1,x:0}} transition={{delay:0.3}}
+        style={C({ width:166, top:"31%", right:"23%", borderColor:"rgba(96,165,250,0.2)", height: minimized["cashFlow"] ? "auto" : undefined })}>
+        <CardHeader label="Cash Flow" accent="#60a5fa" isMinimized={minimized["cashFlow"]} onToggle={() => toggleMinimize("cashFlow")}/>
+        {!minimized["cashFlow"] && (
+          <>
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:6}}>Inflow vs. outflow · Liquidity ratio</p>
+            <div style={{height:52}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={CASH_D}>
+                  <Bar dataKey="i" fill="#10b981" radius={[2,2,0,0]}/>
+                  <Bar dataKey="o" fill="#ef4444" radius={[2,2,0,0]}/>
+                  <Tooltip {...TT}/>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex items-center gap-3 mt-1">
+              <span style={{fontSize:7,color:"#10b981",fontWeight:600}}>Inflow</span>
+              <span style={{fontSize:7,color:"#ef4444",fontWeight:600}}>Outflow</span>
+            </div>
+          </>
+        )}
       </motion.div>
 
-      {/* ── Savings Rate — right lower-mid ── */}
-      <motion.div
-        initial={{ opacity: 0, x: 16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.4 }}
-        style={{ ...CARD, width: 172, top: "50%", right: "25%", borderColor: "rgba(212,175,55,0.2)" }}
-      >
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[8px] uppercase tracking-widest text-[#D4AF37]">Savings Rate</span>
-          <span className="text-[7px] text-emerald-400">+</span>
-        </div>
-        <p className="text-[7px] text-zinc-500 mb-1">Percentage saved · Benchmark comparison</p>
-        <div className="h-10">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={SAVINGS_SPARK}>
-              <Line type="monotone" dataKey="v" stroke="#D4AF37" strokeWidth={1.5} dot={false} />
-              <Tooltip {...TT} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[7px] text-zinc-500">Savings</span>
-          <span className="text-[7px] text-zinc-500">Progress</span>
-        </div>
+      {/* ══ SAVINGS RATE — right mid ══ */}
+      <motion.div initial={{opacity:0,x:16}} animate={{opacity:1,x:0}} transition={{delay:0.35}}
+        style={C({ width:166, top:"52%", right:"23%", borderColor:"rgba(212,175,55,0.2)", height: minimized["savingsRate"] ? "auto" : undefined })}>
+        <CardHeader label="Savings Rate" accent="#D4AF37" isMinimized={minimized["savingsRate"]} onToggle={() => toggleMinimize("savingsRate")}/>
+        {!minimized["savingsRate"] && (
+          <>
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:6}}>Percentage saved · Benchmark comparison</p>
+            <div style={{height:40}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={GOALS_D}>
+                  <Line type="monotone" dataKey="v" stroke="#D4AF37" strokeWidth={1.5} dot={false}/>
+                  <Tooltip {...TT}/>
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex items-center gap-3 mt-1">
+              <span style={{fontSize:7,color:"rgba(255,255,255,0.35)"}}>Savings</span>
+              <span style={{fontSize:7,color:"rgba(255,255,255,0.35)"}}>Progress</span>
+            </div>
+          </>
+        )}
       </motion.div>
 
-      {/* ── Emergency Fund — right bottom ── */}
-      <motion.div
-        initial={{ opacity: 0, x: 16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.45 }}
-        style={{ ...CARD, width: 172, top: "65%", right: "25%", borderColor: "rgba(96,165,250,0.2)" }}
-      >
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[8px] uppercase tracking-widest text-blue-400">Emergency Fund</span>
-          <span className="text-[7px] text-emerald-400">+</span>
-        </div>
-        <p className="text-[7px] text-zinc-500 mb-2">Current balance vs. goal</p>
-        <div className="flex items-center gap-3">
-          <div className="relative h-12 w-12">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={[{ v: 85 }, { v: 15 }]} innerRadius={14} outerRadius={22} dataKey="v" startAngle={90} endAngle={-270}>
-                  <Cell fill="#60a5fa" />
-                  <Cell fill="rgba(255,255,255,0.06)" />
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <span className="absolute inset-0 flex items-center justify-center text-[7px] font-bold text-blue-400">85%</span>
-          </div>
-          <div>
-            <p className="text-[7px] text-zinc-500">Month</p>
-            <p className="text-[7px] text-zinc-500">coverage</p>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* ── Goals Progress — bottom left ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        style={{ ...CARD, width: 172, bottom: "8%", left: "19%" }}
-      >
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[8px] uppercase tracking-widest text-purple-400">Goals Progress</span>
-          <span className="text-[7px] text-zinc-600">···</span>
-        </div>
-        <p className="text-[7px] text-zinc-500 mb-2">Visualisation of progress</p>
-        <div className="flex items-center gap-2">
-          <div className="flex-1 space-y-1">
-            {goalList.map((g, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <span className="h-1 w-1 rounded-full shrink-0" style={{ background: ["#D4AF37","#10b981","#60a5fa"][i] }} />
-                <span className="text-[6.5px] text-zinc-500 truncate flex-1">{g.name}</span>
+      {/* ══ EMERGENCY FUND — right lower ══ */}
+      <motion.div initial={{opacity:0,x:16}} animate={{opacity:1,x:0}} transition={{delay:0.4}}
+        style={C({ width:166, top:"68%", right:"23%", borderColor:"rgba(96,165,250,0.2)", height: minimized["emergencyFund"] ? "auto" : undefined })}>
+        <CardHeader label="Emergency Fund" accent="#60a5fa" isMinimized={minimized["emergencyFund"]} onToggle={() => toggleMinimize("emergencyFund")}/>
+        {!minimized["emergencyFund"] && (
+          <>
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:8}}>Current balance vs. goal</p>
+            <div className="flex items-center gap-3">
+              <div style={{position:"relative",width:52,height:52,flexShrink:0}}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={PIE_EF} dataKey="v" innerRadius={15} outerRadius={24} startAngle={90} endAngle={-270}>
+                      {PIE_EF.map((e,i)=><Cell key={i} fill={e.c}/>)}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <span style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,fontWeight:700,color:"#60a5fa"}}>85%</span>
               </div>
-            ))}
-          </div>
-          <div className="relative h-10 w-10">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={[{ v: 90 }, { v: 10 }]} innerRadius={12} outerRadius={18} dataKey="v" startAngle={90} endAngle={-270}>
-                  <Cell fill="#10b981" />
-                  <Cell fill="rgba(255,255,255,0.06)" />
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <span className="absolute inset-0 flex items-center justify-center text-[6px] font-bold text-emerald-400">90%</span>
-          </div>
-        </div>
+              <div>
+                <p style={{fontSize:7,color:"rgba(255,255,255,0.45)"}}>Month</p>
+                <p style={{fontSize:7,color:"rgba(255,255,255,0.45)"}}>coverage</p>
+              </div>
+            </div>
+          </>
+        )}
       </motion.div>
 
-      {/* ── Financial Health Score — bottom center ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.55 }}
-        style={{
-          ...CARD,
-          width: 172,
-          bottom: "8%",
-          left: "50%",
-          transform: "translateX(-50%)",
-          borderColor: "rgba(16,185,129,0.2)",
-        }}
-      >
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[8px] uppercase tracking-widest text-emerald-400">Financial Health Score</span>
-          <span className="text-[7px] text-emerald-400">+</span>
-        </div>
-        <p className="text-[7px] text-zinc-500 mb-1">Calculated by AI</p>
-        <div className="flex items-center gap-3">
-          <div className="flex-1 space-y-1">
-            <p className="text-[7px] text-zinc-500">• Key factors</p>
-            <p className="text-[7px] text-zinc-500">• Improvement suggestions</p>
-            <p className="text-[7px] text-zinc-500">• Colour score</p>
-          </div>
-          <div className="relative h-12 w-12">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={[{ v: healthScore }, { v: 100 - healthScore }]} innerRadius={14} outerRadius={22} dataKey="v" startAngle={90} endAngle={-270}>
-                  <Cell fill="#10b981" />
-                  <Cell fill="rgba(255,255,255,0.06)" />
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <span className="absolute inset-0 flex items-center justify-center text-[7px] font-bold text-emerald-400">{healthScore}</span>
-          </div>
-        </div>
-        <p className="text-sm font-bold text-emerald-400 mt-1">{healthScore}/100</p>
+      {/* ══ GOALS PROGRESS — bottom left ══ */}
+      <motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={{delay:0.45}}
+        style={C({ width:166, bottom:"7%", left:"21%", height: minimized["goalsProgress"] ? "auto" : undefined })}>
+        <CardHeader label="Goals Progress" accent="#a78bfa" isMinimized={minimized["goalsProgress"]} onToggle={() => toggleMinimize("goalsProgress")}/>
+        {!minimized["goalsProgress"] && (
+          <>
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:6}}>Visualisation of progress</p>
+            <div className="flex items-center gap-2">
+              <div style={{flex:1}}>
+                {goalList.map((g,i)=>(
+                  <div key={i} className="flex items-center gap-1.5 mb-1">
+                    <span className="h-1 w-1 rounded-full shrink-0" style={{background:["#D4AF37","#10b981","#60a5fa"][i]}}/>
+                    <span style={{fontSize:7,color:"rgba(255,255,255,0.45)"}}>{g.name}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={{position:"relative",width:44,height:44,flexShrink:0}}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={[{v:90},{v:10}]} dataKey="v" innerRadius={13} outerRadius={20} startAngle={90} endAngle={-270}>
+                      <Cell fill="#10b981"/>
+                      <Cell fill="rgba(255,255,255,0.05)"/>
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <span style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,fontWeight:700,color:"#10b981"}}>90%</span>
+              </div>
+            </div>
+          </>
+        )}
       </motion.div>
 
-      {/* ── Investment Returns — bottom right ── */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        style={{ ...CARD, width: 172, bottom: "8%", right: "25%" }}
-      >
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[8px] uppercase tracking-widest text-[#D4AF37]">Investment Returns</span>
-          <span className="text-[7px] text-emerald-400">+</span>
-        </div>
-        <p className="text-[7px] text-zinc-500 mb-2">ROI over various periods · good often</p>
-        <div className="flex items-center gap-2">
-          <div className="flex-1 space-y-0.5">
-            <p className="text-[7px] text-zinc-500">• Asset class</p>
-            <p className="text-[7px] text-zinc-500">• Performance</p>
-            <p className="text-[7px] text-zinc-500">• Asset</p>
-            <p className="text-[7px] text-zinc-500">• Heatmap</p>
-          </div>
-          <div className="relative h-10 w-10">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={PIE} innerRadius={12} outerRadius={18} dataKey="value">
-                  {PIE.map((e, i) => <Cell key={i} fill={e.color} />)}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <span className="absolute inset-0 flex items-center justify-center text-[6px] font-bold text-[#D4AF37]">90%</span>
-          </div>
-        </div>
+      {/* ══ FINANCIAL HEALTH SCORE — bottom center ══ */}
+      <motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={{delay:0.5}}
+        style={C({ width:166, bottom:"7%", left:"50%", transform:"translateX(-50%)", borderColor:"rgba(16,185,129,0.2)", height: minimized["healthScore"] ? "auto" : undefined })}>
+        <CardHeader label="Financial Health Score" accent="#10b981" isMinimized={minimized["healthScore"]} onToggle={() => toggleMinimize("healthScore")}/>
+        {!minimized["healthScore"] && (
+          <>
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:6}}>Calculated by AI</p>
+            <div className="flex items-center gap-3">
+              <div style={{flex:1}}>
+                <p style={{fontSize:7,color:"rgba(255,255,255,0.45)"}}>• Key factors</p>
+                <p style={{fontSize:7,color:"rgba(255,255,255,0.45)"}}>• Improvement suggestions</p>
+                <p style={{fontSize:7,color:"rgba(255,255,255,0.45)"}}>• Colour score</p>
+              </div>
+              <div style={{position:"relative",width:44,height:44,flexShrink:0}}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={[{v:healthScore},{v:100-healthScore}]} dataKey="v" innerRadius={13} outerRadius={20} startAngle={90} endAngle={-270}>
+                      <Cell fill="#10b981"/>
+                      <Cell fill="rgba(255,255,255,0.05)"/>
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <span style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,fontWeight:700,color:"#10b981"}}>{healthScore}</span>
+              </div>
+            </div>
+            <p style={{fontSize:13,fontWeight:800,color:"#10b981",marginTop:4}}>{healthScore}/100</p>
+          </>
+        )}
+      </motion.div>
+
+      {/* ══ INVESTMENT RETURNS — bottom right ══ */}
+      <motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={{delay:0.55}}
+        style={C({ width:166, bottom:"7%", right:"23%", height: minimized["investmentReturns"] ? "auto" : undefined })}>
+        <CardHeader label="Investment Returns" isMinimized={minimized["investmentReturns"]} onToggle={() => toggleMinimize("investmentReturns")}/>
+        {!minimized["investmentReturns"] && (
+          <>
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:6}}>ROI over various periods · good often</p>
+            <div className="flex items-center gap-2">
+              <div style={{flex:1}}>
+                {["Asset class","Performance","Asset","Heatmap"].map((t,i)=>(
+                  <p key={i} style={{fontSize:7,color:"rgba(255,255,255,0.45)",marginBottom:2}}>• {t}</p>
+                ))}
+              </div>
+              <div style={{position:"relative",width:44,height:44,flexShrink:0}}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={PIE3} dataKey="v" innerRadius={13} outerRadius={20}>
+                      {PIE3.map((e,i)=><Cell key={i} fill={e.c}/>)}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <span style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,fontWeight:700,color:"#D4AF37"}}>90%</span>
+              </div>
+            </div>
+          </>
+        )}
       </motion.div>
     </>
   );

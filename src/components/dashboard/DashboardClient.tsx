@@ -15,10 +15,12 @@ function DashboardInner({ data, userId }: { data: DashboardData; userId: string 
   const { uiReady } = useOrb();
 
   return (
-    <div className="relative flex h-full w-full flex-col overflow-hidden" style={{ background: "#040407" }}>
-
-      {/* ── TOP: 8 KPI cards strip ── */}
-      <div className="relative z-20 shrink-0 px-3 pt-2.5 pb-2">
+    <div
+      className="relative flex h-full w-full flex-col overflow-hidden"
+      style={{ background: "#040407" }}
+    >
+      {/* ── TOP STRIP: KPI bar (minimizable) ── */}
+      <div className="relative z-20 shrink-0 px-3 pt-2.5 pb-4">
         <DashboardKPIRow
           netWorth={data.netWorth}
           monthlyIncome={data.monthlyIncome}
@@ -31,20 +33,19 @@ function DashboardInner({ data, userId }: { data: DashboardData; userId: string 
         />
       </div>
 
-      {/* ── BOTTOM: Full canvas + all overlays ── */}
+      {/* ── CANVAS: fills all remaining height ── */}
       <div className="relative flex-1 overflow-hidden">
 
-        {/* Layer 0: Three.js space scene (orb, particles, nebula) */}
+        {/* Layer 0 — Three.js space scene */}
         <DashboardScene />
 
-        {/* Layer 1: Neural network SVG */}
+        {/* Layer 1 — Neural network SVG */}
         <NeuralNetwork visible={uiReady} />
 
-        {/* Layer 2: Rich floating data cards around the orb */}
+        {/* Layer 2 — 11 rich floating data cards around the orb */}
         {uiReady && (
           <DashboardFloatingCards
             netWorth={data.netWorth}
-            portfolio={data.portfolio}
             monthlyIncome={data.monthlyIncome}
             savingsRate={data.savingsRate}
             healthScore={data.healthScore.score}
@@ -52,26 +53,27 @@ function DashboardInner({ data, userId }: { data: DashboardData; userId: string 
           />
         )}
 
-        {/* Layer 3: Left panel — Financial Level, Badges, Goals, Quick Actions */}
-        {uiReady && (
-          <FinancialLevelOverlay data={data} />
-        )}
+        {/* Layer 3 — Left panel: Financial Level, Badges, Goal Rings, Quick Actions */}
+        {uiReady && <FinancialLevelOverlay data={data} />}
 
-        {/* Layer 4: Right panel — Notifications + Analytics + AI */}
+        {/* Layer 4 — Right panel: Notifications + Analytics + AI */}
         {uiReady && (
-          <div className="absolute right-0 top-0 bottom-0 z-10" style={{ width: 228 }}>
+          <div
+            className="absolute right-0 top-0 bottom-0 z-10"
+            style={{ width: 230 }}
+          >
             <AnalyticsWorkspace data={data} />
           </div>
         )}
 
-        {/* Layer 5: AI Chat bar — bottom center */}
+        {/* Layer 5 — AI Chat bar, bottom center */}
         <AIChat userId={userId} />
       </div>
     </div>
   );
 }
 
-interface Props { data: DashboardData; userId: string; }
+interface Props { data: DashboardData; userId: string }
 
 export default function DashboardClient({ data, userId }: Props) {
   return (
