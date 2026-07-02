@@ -391,29 +391,59 @@ export default function DashboardFloatingCards({
         )}
       </motion.div>
 
-      {/* ══ INVESTMENT RETURNS — bottom right ══ */}
+      {/* ══ LEARN HUB — bottom right ══ */}
       <motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={{delay:0.55}}
-        style={C({ width:166, bottom:"7%", right:"23%", height: minimized["investmentReturns"] ? "auto" : undefined })}>
-        <CardHeader label="Investment Returns" isMinimized={minimized["investmentReturns"]} onToggle={() => toggleMinimize("investmentReturns")}/>
+        style={C({ width:166, bottom:"7%", right:"23%", borderColor:"rgba(167,139,250,0.18)", height: minimized["investmentReturns"] ? "auto" : undefined })}>
+        <CardHeader label="Learn Hub" accent="#a78bfa" isMinimized={minimized["investmentReturns"]} onToggle={() => toggleMinimize("investmentReturns")}/>
         {!minimized["investmentReturns"] && (
           <>
-            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:6}}>ROI over various periods · good often</p>
-            <div className="flex items-center gap-2">
-              <div style={{flex:1}}>
-                {["Asset class","Performance","Asset","Heatmap"].map((t,i)=>(
-                  <p key={i} style={{fontSize:7,color:"rgba(255,255,255,0.45)",marginBottom:2}}>• {t}</p>
-                ))}
+            <p style={{fontSize:7,color:"rgba(255,255,255,0.4)",marginBottom:6}}>Premium courses & video tutorials</p>
+            {/* Video Thumbnail mockup */}
+            <div style={{
+              position: "relative",
+              height: 52,
+              borderRadius: 8,
+              background: "linear-gradient(135deg, #1e1b4b, #311042)",
+              border: "1px solid rgba(167,139,250,0.3)",
+              overflow: "hidden",
+              marginBottom: 6,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer"
+            }}>
+              {/* Play symbol */}
+              <div style={{
+                width: 22, height: 22, borderRadius: "50%",
+                background: "rgba(167,139,250,0.8)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                boxShadow: "0 0 8px #a78bfa",
+                zIndex: 2
+              }}>
+                <span style={{ fontSize: 9, color: "#fff", marginLeft: 2 }}>▶</span>
               </div>
-              <div style={{position:"relative",width:44,height:44,flexShrink:0}}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={PIE3} dataKey="v" innerRadius={13} outerRadius={20}>
-                      {PIE3.map((e,i)=><Cell key={i} fill={e.c}/>)}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-                <span style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:7,fontWeight:700,color:"#D4AF37"}}>90%</span>
-              </div>
+              <span style={{ position: "absolute", bottom: 4, left: 6, fontSize: 6.5, color: "rgba(255,255,255,0.7)", zIndex: 2 }}>
+                Intro to Tax Optimization
+              </span>
+              <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.25)" }} />
+            </div>
+
+            {/* Modules/Courses list */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
+              {[
+                { n: "Asset Allocation Basics", p: "80%" },
+                { n: "Advanced Mutual Funds", p: "20%" },
+                { n: "Understanding Regimes", p: "0%" }
+              ].map((c, i) => (
+                <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 6.5, color: "rgba(255,255,255,0.5)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 105 }}>
+                    • {c.n}
+                  </span>
+                  <span style={{ fontSize: 6.5, color: c.p === "0%" ? "rgba(255,255,255,0.25)" : "#a78bfa", fontWeight: 700 }}>
+                    {c.p}
+                  </span>
+                </div>
+              ))}
             </div>
           </>
         )}

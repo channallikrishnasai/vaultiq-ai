@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { name: "Home",         href: "/",                    icon: Home          },
   { name: "Dashboard",    href: "/dashboard",            icon: LayoutDashboard},
   { name: "Portfolio",    href: "/dashboard/portfolio",  icon: Briefcase     },
-  { name: "Investments",  href: "/dashboard/investments",icon: LineChart     },
+  { name: "Learning",     href: "/dashboard/learning",   icon: LineChart     },
   { name: "Expenses",     href: "/dashboard/expenses",   icon: TrendingDown  },
   { name: "Income",       href: "/dashboard/income",     icon: TrendingUp    },
   { name: "Budgets",      href: "/dashboard/budgets",    icon: PiggyBank     },
@@ -34,7 +34,7 @@ export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: str
 
   return (
     <div
-      className="flex h-screen shrink-0 flex-col items-center py-3 gap-0.5"
+      className="flex h-full shrink-0 flex-col items-center py-3 gap-0.5"
       style={{
         width: 54,
         background: "rgba(5,5,8,0.98)",

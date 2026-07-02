@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Info, ChevronUp, ChevronDown } from "lucide-react";
+import { Info, ChevronUp, BarChart3 } from "lucide-react";
 
 interface KPIItem {
   label: string;
@@ -100,55 +100,55 @@ export default function DashboardKPIRow({
   return (
     <div className="relative w-full">
       <AnimatePresence initial={false}>
-        {!minimized && (
+        {!minimized ? (
           <motion.div
             key="kpi-expanded"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden"
+            initial={{ opacity: 0, height: 0, scaleY: 0.95 }}
+            animate={{ opacity: 1, height: "auto", scaleY: 1 }}
+            exit={{ opacity: 0, height: 0, scaleY: 0.95 }}
+            transition={{ duration: 0.28, ease: "easeInOut" }}
+            className="overflow-hidden pb-3"
           >
-            <div className="grid grid-cols-8 gap-1.5 w-full">
+            <div className="grid grid-cols-8 gap-1.5 w-full pr-24">
               {items.map((item, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: i * 0.04 }}
-                  className="relative overflow-hidden rounded-xl px-3 py-2.5"
+                  transition={{ duration: 0.3, delay: i * 0.03 }}
+                  className="relative overflow-hidden rounded-xl px-3 py-2"
                   style={{
-                    background: "rgba(10,10,14,0.95)",
+                    background: "rgba(8,8,13,0.96)",
                     border: "1px solid rgba(255,255,255,0.07)",
                     boxShadow:
                       "0 2px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.03)",
                   }}
                 >
                   {/* Label row */}
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-1">
                     <span
                       style={{
-                        fontSize: 8,
+                        fontSize: 7.5,
                         fontWeight: 600,
-                        letterSpacing: "0.1em",
+                        letterSpacing: "0.08em",
                         textTransform: "uppercase",
-                        color: "rgba(161,161,170,0.8)",
+                        color: "rgba(161,161,170,0.75)",
                         lineHeight: 1,
                       }}
                     >
                       {item.label}
                     </span>
                     <Info
-                      size={9}
-                      style={{ color: "rgba(255,255,255,0.15)", flexShrink: 0 }}
+                      size={8}
+                      style={{ color: "rgba(255,255,255,0.12)", flexShrink: 0 }}
                     />
                   </div>
 
                   {/* Value */}
-                  <div className="flex items-baseline gap-1 mb-2">
+                  <div className="flex items-baseline gap-1 mb-1.5">
                     <span
                       style={{
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: 700,
                         letterSpacing: "-0.01em",
                         lineHeight: 1,
@@ -160,8 +160,8 @@ export default function DashboardKPIRow({
                     {item.sub && (
                       <span
                         style={{
-                          fontSize: 8,
-                          color: "rgba(161,161,170,0.6)",
+                          fontSize: 7.5,
+                          color: "rgba(161,161,170,0.55)",
                           fontWeight: 500,
                         }}
                       >
@@ -184,106 +184,73 @@ export default function DashboardKPIRow({
                       initial={{ width: 0 }}
                       animate={{ width: `${item.bar}%` }}
                       transition={{
-                        duration: 1.2,
-                        delay: i * 0.06 + 0.3,
+                        duration: 1.1,
+                        delay: i * 0.05 + 0.2,
                         ease: "easeOut",
                       }}
                       style={{
                         height: "100%",
                         borderRadius: 2,
                         background: item.barColor,
-                        boxShadow: `0 0 6px ${item.barColor}88`,
+                        boxShadow: `0 0 5px ${item.barColor}88`,
                       }}
                     />
                   </div>
                 </motion.div>
               ))}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Minimized view — single slim bar showing values */}
-      <AnimatePresence initial={false}>
-        {minimized && (
-          <motion.div
-            key="kpi-minimized"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <div
-              className="flex items-center gap-4 px-3 py-2 rounded-xl overflow-x-auto scrollbar-none"
+            {/* Minimize toggle pill inside expanded state */}
+            <motion.button
+              onClick={() => setMinimized(true)}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.94 }}
+              className="absolute top-2 right-2 z-30 flex items-center gap-1 rounded-full px-2.5 py-1.5"
               style={{
-                background: "rgba(10,10,14,0.95)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "rgba(10,10,14,0.98)",
+                border: "1px solid rgba(212,175,55,0.25)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
               }}
             >
-              {items.map((item, i) => (
-                <div key={i} className="flex items-center gap-1.5 shrink-0">
-                  <span
-                    style={{
-                      fontSize: 7.5,
-                      color: "rgba(113,113,122,0.8)",
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {item.label.split(" ").slice(-1)[0]}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: item.valueColor ?? "#f4f4f5",
-                    }}
-                  >
-                    {item.value}
-                    {item.sub && (
-                      <span style={{ fontSize: 7, color: "rgba(161,161,170,0.5)", marginLeft: 2 }}>
-                        {item.sub}
-                      </span>
-                    )}
-                  </span>
-                  {/* Mini color dot */}
-                  <span
-                    className="h-1 w-1 rounded-full shrink-0"
-                    style={{ background: item.barColor, boxShadow: `0 0 4px ${item.barColor}` }}
-                  />
-                  {i < items.length - 1 && (
-                    <span style={{ color: "rgba(255,255,255,0.07)", fontSize: 12, marginLeft: 4 }}>|</span>
-                  )}
-                </div>
-              ))}
-            </div>
+              <ChevronUp size={10} style={{ color: "#D4AF37" }} />
+              <span style={{ fontSize: 7.5, color: "#D4AF37", fontWeight: 700, letterSpacing: "0.08em" }}>
+                MINIMIZE
+              </span>
+            </motion.button>
+          </motion.div>
+        ) : (
+          /* Minimized state: Completely vanished bar, only a glowing floating button launcher icon */
+          <motion.div
+            key="kpi-minimized-trigger"
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.7 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="absolute top-2 right-2 z-40"
+          >
+            <motion.button
+              onClick={() => setMinimized(false)}
+              whileHover={{ scale: 1.1, boxShadow: "0 0 14px rgba(212,175,55,0.7)" }}
+              whileTap={{ scale: 0.92 }}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                background: "rgba(8,8,13,0.96)",
+                border: "1.5px solid #D4AF37",
+                boxShadow: "0 0 8px rgba(212,175,55,0.45)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+              title="Show KPI metrics"
+            >
+              <BarChart3 size={15} style={{ color: "#D4AF37" }} />
+            </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Toggle button — always visible, floats at right edge */}
-      <motion.button
-        onClick={() => setMinimized((v) => !v)}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.94 }}
-        className="absolute -bottom-3 right-3 z-30 flex items-center gap-1 rounded-full px-2 py-0.5"
-        style={{
-          background: "rgba(10,10,14,0.98)",
-          border: "1px solid rgba(212,175,55,0.25)",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.5)",
-        }}
-      >
-        {minimized ? (
-          <ChevronDown size={10} style={{ color: "#D4AF37" }} />
-        ) : (
-          <ChevronUp size={10} style={{ color: "#D4AF37" }} />
-        )}
-        <span style={{ fontSize: 7.5, color: "#D4AF37", fontWeight: 700, letterSpacing: "0.08em" }}>
-          {minimized ? "EXPAND" : "MINIMIZE"}
-        </span>
-      </motion.button>
     </div>
   );
 }
