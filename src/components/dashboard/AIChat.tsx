@@ -16,6 +16,8 @@ import {
   GraduationCap,
   ShieldCheck,
   Landmark,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useOrb } from "@/contexts/OrbContext";
 
@@ -118,14 +120,30 @@ function MarkdownContent({ text }: { text: string }) {
 
 interface AIChatProps {
   userId: string;
+  isGlobal?: boolean;
+  isMinimized?: boolean;
+  setIsMinimized?: (value: boolean) => void;
 }
 
-export default function AIChat({ userId }: AIChatProps) {
-  const { orbState, setOrbState, uiReady } = useOrb();
+export default function AIChat({ userId, isGlobal = false, isMinimized = false, setIsMinimized }: AIChatProps) {
+  const orbContext = useOrb && typeof useOrb === 'function' ? useOrb() : null;
+  const { orbState, setOrbState, uiReady } = orbContext || { orbState: "idle", setOrbState: () => {}, uiReady: true };
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
+  const [localMinimized, setLocalMinimized] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Handle minimize state
+  const handleMinimize = (value: boolean) => {
+    if (isGlobal && setIsMinimized) {
+      setIsMinimized(value);
+    } else {
+      setLocalMinimized(value);
+    }
+  };
+
+  const isCurrentlyMinimized = isGlobal ? isMinimized : localMinimized;
 
   // Track interval so it can be cleared on unmount or new message
   const streamIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -158,7 +176,7 @@ export default function AIChat({ userId }: AIChatProps) {
 
       setInput("");
       setMessages((p) => [...p, { role: "user", content: msg }]);
-      setOrbState("thinking");
+      if (setOrbState) setOrbState("thinking");
       setThinking(true);
 
       try {
@@ -175,7 +193,7 @@ export default function AIChat({ userId }: AIChatProps) {
           data?.content ||
           "Response unavailable.";
 
-        setOrbState("speaking");
+        if (setOrbState) setOrbState("speaking");
         let i = 0;
         setMessages((p) => [...p, { role: "assistant", content: "", streamed: false }]);
 
@@ -196,7 +214,7 @@ export default function AIChat({ userId }: AIChatProps) {
                 idx === p.length - 1 ? { ...m, content, streamed: true } : m
               )
             );
-            setOrbState("idle");
+            if (setOrbState) setOrbState("idle");
             setThinking(false);
           }
         }, 12);
@@ -209,15 +227,386 @@ export default function AIChat({ userId }: AIChatProps) {
             streamed: true,
           },
         ]);
-        setOrbState("error");
+        if (setOrbState) setOrbState("error");
         // Brief error state then back to idle
-        setTimeout(() => setOrbState("idle"), 2000);
+        setTimeout(() => setOrbState && setOrbState("idle"), 2000);
         setThinking(false);
       }
     },
     [thinking, setOrbState]
   );
 
+  // For global chat on the left sidebar
+  if (isGlobal) {
+    // If minimized, show only the icon button on the left
+    if (isCurrentlyMinimized) {
+      return (
+        <motion.button
+          onClick={() => handleMinimize(false)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          style={{
+            position: "fixed",
+            left: "16px",
+            bottom: "50%",
+            transform: "translateY(50%)",
+            width: 50,
+            height: 50,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, #F5D060, #C8922A)",
+            border: "2px solid rgba(212,175,55,0.3)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            zIndex: 9999,
+            boxShadow: "0 0 20px rgba(212,175,55,0.3)",
+          }}
+          title="Open VaultIQ AI Chat"
+        >
+          <Send size={20} color="#000" />
+        </motion.button>
+      );
+    }
+
+    // Full chat panel on the left side when expanded
+    return (
+      <motion.div
+        initial={{ x: -400, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={{ x: -400, opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          position: "fixed",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: 380,
+          zIndex: 9999,
+          background: "rgba(4,4,8,0.95)",
+          border: "1px solid rgba(212,175,55,0.18)",
+          borderRight: "1px solid rgba(212,175,55,0.18)",
+          backdropFilter: "blur(22px)",
+          WebkitBackdropFilter: "blur(22px)",
+          boxShadow: "2px 0 60px rgba(0,0,0,0.85), inset -1px 0 0 rgba(255,255,255,0.04)",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Header with minimize button */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 8,
+            padding: "14px 16px",
+            borderBottom: "1px solid rgba(255,255,255,0.05)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <motion.div
+              animate={{
+                background:
+                  orbState === "thinking"
+                    ? ["#D4AF37", "#F5D060", "#D4AF37"]
+                    : orbState === "speaking"
+                    ? ["#34d399", "#6ee7b7", "#34d399"]
+                    : orbState === "listening"
+                    ? ["#60a5fa", "#93c5fd", "#60a5fa"]
+                    : orbState === "processing"
+                    ? ["#a855f7", "#c084fc", "#a855f7"]
+                    : orbState === "celebrating"
+                    ? ["#22c55e", "#4ade80", "#22c55e"]
+                    : orbState === "error"
+                    ? ["#ef4444", "#f87171", "#ef4444"]
+                    : orbState === "sleeping"
+                    ? ["rgba(100,116,139,0.4)", "rgba(100,116,139,0.6)", "rgba(100,116,139,0.4)"]
+                    : ["rgba(212,175,55,0.4)", "rgba(212,175,55,0.7)", "rgba(212,175,55,0.4)"],
+              }}
+              transition={{ duration: orbState === "idle" ? 3 : 0.8, repeat: Infinity }}
+              style={{ width: 6, height: 6, borderRadius: "50%" }}
+            />
+            <span
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "rgba(255,255,255,0.2)",
+              }}
+            >
+              {orbState === "thinking"
+                ? "Analyzing…"
+                : orbState === "speaking"
+                ? "Responding"
+                : orbState === "listening"
+                ? "Listening"
+                : orbState === "processing"
+                ? "Processing…"
+                : orbState === "celebrating"
+                ? "Celebrating"
+                : orbState === "sleeping"
+                ? "Standby"
+                : orbState === "error"
+                ? "Connection error"
+                : "VaultIQ AI"}
+            </span>
+          </div>
+
+          {/* Minimize/Close button */}
+          <button
+            onClick={() => handleMinimize(true)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "rgba(255,255,255,0.4)",
+              cursor: "pointer",
+              padding: "4px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            className="hover:text-white transition-colors"
+            title="Minimize chat"
+          >
+            <ChevronUp size={18} />
+          </button>
+        </div>
+
+        {/* Messages (hidden when minimized) */}
+        {!isCurrentlyMinimized && (
+          <>
+            <div
+              ref={scrollRef}
+              style={{
+                maxHeight: 160,
+                overflowY: "auto",
+                padding: "10px 16px 8px",
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgba(255,255,255,0.08) transparent",
+              }}
+            >
+              <AnimatePresence initial={false}>
+                {messages.length === 0 && (
+                  <motion.div
+                    key="welcome"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.65 }}>
+                      Your financial intelligence is online. Ask me anything about your portfolio,
+                      goals, or financial health.
+                    </p>
+                  </motion.div>
+                )}
+
+                {messages.map((m, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      display: "flex",
+                      justifyContent: m.role === "user" ? "flex-end" : "flex-start",
+                      marginTop: i > 0 ? 10 : 0,
+                    }}
+                  >
+                    {m.role === "user" ? (
+                      <span
+                        style={{
+                          display: "inline-block",
+                          fontSize: 12,
+                          color: "rgba(236,253,245,0.88)",
+                          padding: "7px 12px",
+                          borderRadius: 10,
+                          background: "rgba(52,211,153,0.08)",
+                          border: "1px solid rgba(52,211,153,0.16)",
+                        }}
+                      >
+                        {m.content}
+                      </span>
+                    ) : (
+                      <div style={{ maxWidth: "88%" }}>
+                        <p
+                          style={{
+                            fontSize: 9,
+                            letterSpacing: "0.14em",
+                            textTransform: "uppercase",
+                            color: "rgba(212,175,55,0.45)",
+                            marginBottom: 4,
+                          }}
+                        >
+                          VaultIQ AI
+                        </p>
+                        <div
+                          style={{
+                            display: "inline-block",
+                            padding: "8px 12px",
+                            borderRadius: 10,
+                            background: "rgba(212,175,55,0.04)",
+                            border: "1px solid rgba(212,175,55,0.1)",
+                          }}
+                        >
+                          <MarkdownContent text={m.content} />
+                          {!m.streamed && (
+                            <motion.span
+                              animate={{ opacity: [1, 0] }}
+                              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                              style={{
+                                display: "inline-block",
+                                width: 2,
+                                height: 12,
+                                background: "rgba(212,175,55,0.8)",
+                                marginLeft: 2,
+                                verticalAlign: "middle",
+                              }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+
+                {thinking && (
+                  <motion.div
+                    key="thinking"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                      background: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      marginTop: 10,
+                    }}
+                  >
+                    <Waveform active />
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+                      Analyzing your profile…
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Quick prompts */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "0 16px 8px" }}>
+              {PROMPTS.slice(0, 4).map(({ icon: Icon, label }) => (
+                <motion.button
+                  key={label}
+                  onClick={() => sendMessage(label)}
+                  whileHover={{ borderColor: "rgba(212,175,55,0.35)", background: "rgba(212,175,55,0.07)" }}
+                  whileTap={{ scale: 0.97 }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    fontSize: 10.5,
+                    padding: "5px 10px",
+                    borderRadius: 7,
+                    background: "rgba(255,255,255,0.025)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    color: "rgba(255,255,255,0.4)",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <Icon size={10} style={{ color: "rgba(212,175,55,0.6)" }} />
+                  {label}
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Input row */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 14px 14px",
+                borderTop: "1px solid rgba(255,255,255,0.05)",
+              }}
+            >
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
+                placeholder="Ask VaultIQ anything…"
+                style={{
+                  flex: 1,
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  borderRadius: 10,
+                  padding: "8px 12px",
+                  fontSize: 12,
+                  color: "rgba(255,255,255,0.88)",
+                  outline: "none",
+                  transition: "border-color 0.15s",
+                }}
+                onFocus={(e) => {
+                  (e.target as HTMLInputElement).style.borderColor = "rgba(212,175,55,0.32)";
+                }}
+                onBlur={(e) => {
+                  (e.target as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.09)";
+                }}
+              />
+
+              {/* Mic (future) */}
+              <button
+                disabled
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 9,
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "not-allowed",
+                  flexShrink: 0,
+                }}
+              >
+                <Mic size={13} style={{ color: "rgba(255,255,255,0.2)" }} />
+              </button>
+
+              {/* Send */}
+              <motion.button
+                onClick={() => sendMessage(input)}
+                disabled={!input.trim() || thinking}
+                whileHover={{ y: -1, boxShadow: "0 0 18px rgba(212,175,55,0.45)" }}
+                whileTap={{ scale: 0.94 }}
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 9,
+                  background: "linear-gradient(135deg, #F5D060, #C8922A)",
+                  border: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: !input.trim() || thinking ? "not-allowed" : "pointer",
+                  opacity: !input.trim() || thinking ? 0.32 : 1,
+                  flexShrink: 0,
+                }}
+              >
+                <Send size={13} color="#000" />
+              </motion.button>
+            </div>
+          </>
+        )}
+      </>
+    );
+  }
+
+  // Original dashboard mode (absolute positioning)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

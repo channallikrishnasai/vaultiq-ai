@@ -6,6 +6,7 @@ import "./globals.css";
 import ThemeProvider from "@/components/providers/ThemeProvider";
 import LearningProgressProvider from "@/components/providers/learning-progress-provider";
 import LeftNav from "@/components/dashboard/LeftNav";
+import GlobalAIChat from "@/components/dashboard/GlobalAIChat";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -32,6 +33,8 @@ export default function RootLayout({
               <LeftNav activeItem="Dashboard" />
               {/* Main content fills the rest */}
               <main className="flex-1 overflow-hidden h-full">{children}</main>
+              {/* Global AI Chat — available on all pages */}
+              <GlobalAIChat />
               <ToastProvider />
             </LearningProgressProvider>
           </AuthSessionProvider>
