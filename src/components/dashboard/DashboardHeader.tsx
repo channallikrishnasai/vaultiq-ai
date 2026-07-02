@@ -10,10 +10,10 @@ interface DashboardHeaderProps {
     email: string | null;
     image: string | null;
   };
-  visible: boolean;
+  visible?: boolean;
 }
 
-export default function DashboardHeader({ user, visible }: DashboardHeaderProps) {
+export default function DashboardHeader({ user, visible = true }: DashboardHeaderProps) {
   const { orbState } = useOrb();
 
   return (
@@ -31,10 +31,10 @@ export default function DashboardHeader({ user, visible }: DashboardHeaderProps)
         alignItems: "center",
         justifyContent: "space-between",
         padding: "14px 28px",
-        background: "rgba(0,0,0,0.6)",
-        borderBottom: "1px solid rgba(212,175,55,0.09)",
-        backdropFilter: "blur(18px)",
-        WebkitBackdropFilter: "blur(18px)",
+        background: "rgba(255,255,255,0.06)",
+        borderBottom: "1px solid rgba(255,255,255,0.08)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
       }}
     >
       {/* Logo */}

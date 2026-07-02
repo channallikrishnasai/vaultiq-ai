@@ -1,23 +1,59 @@
 @import "tailwindcss";
 
+/* ── VaultIQ AI — Dark Space Theme ─────────────────────────────────────────── */
+
+:root {
+  --color-gold:       #D4AF37;
+  --color-gold-light: #F5D060;
+  --background:       #040407;
+  --foreground:       #fafafa;
+}
+
+.dark {
+  --background: #040407;
+  --foreground: #fafafa;
+}
+
+/* Reset body to dark space */
+html, body {
+  height: 100%;
+  background: #040407;
+  color: #fafafa;
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle global transition — do NOT apply to all (breaks animations) */
+a, button {
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: rgba(10, 10, 16, 0.80);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+}
+
+/* Scrollbar utilities */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+.scrollbar-thin::-webkit-scrollbar { width: 3px; height: 3px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 99px; }
+
+/* Neon glow utility */
+.neon-gold {
+  box-shadow: 0 0 8px #D4AF37, 0 0 20px rgba(212,175,55,0.4);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-:root {
-  --background: #ffffff;
-  --foreground: #09090b;
-}
-
-.dark {
-  --background: #09090b;
-  --foreground: #fafafa;
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
 }

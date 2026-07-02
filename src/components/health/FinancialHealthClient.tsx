@@ -68,7 +68,7 @@ export function FinancialHealthClient({ user }: FinancialHealthClientProps) {
   return (
     <main className="min-h-screen bg-zinc-950 px-4 py-6 pt-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl space-y-8">
-        <DashboardHeader user={user} />
+        <DashboardHeader user={user} visible={true} />
 
         <div className="flex items-center gap-4">
           <Link

@@ -10,7 +10,7 @@ import type { OrbitCardId } from "@/store/useOrbitStore";
 
 // ─── Icon map ─────────────────────────────────────────────────────────────────
 
-const ICONS: Record<string, React.ElementType> = {
+const ICONS: Record<string, React.ComponentType<any>> = {
   Heart, Compass, Wallet, Target, Receipt, PiggyBank,
   Shield, Bot, Zap, Star,
 };

@@ -35,7 +35,7 @@ export interface DashboardPortfolio {
 export interface DashboardHealthScore {
   score: number;
   label: string;
-  breakdown: Record<string, number>;
+  breakdown: { name: string; value: number }[];
   grade: string;
 }
 

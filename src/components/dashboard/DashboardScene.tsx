@@ -16,10 +16,12 @@ export default function DashboardScene() {
   return (
     <div
       style={{
-        position: "fixed",
+        position: "absolute",
         inset: 0,
         zIndex: 0,
-        background: "radial-gradient(ellipse at 50% 40%, #0a0700 0%, #050505 55%, #000000 100%)",
+        background: [
+          "radial-gradient(ellipse 60% 55% at 50% 48%, rgba(20,12,0,1) 0%, rgba(6,4,1,0.9) 40%, rgba(2,2,5,1) 80%, #040407 100%)",
+        ].join(","),
       }}
     >
       <Canvas

@@ -34,10 +34,7 @@ function CardContent({
     score: data.healthScore.score,
     label: data.healthScore.label,
     grade: data.healthScore.grade,
-   breakdown: Object.entries(data.healthScore.breakdown).map(([name, value]) => ({
-  name,
-  value,
-})),
+    breakdown: data.healthScore.breakdown,
   };
 
   switch (id) {

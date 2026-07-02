@@ -1,0 +1,301 @@
+"use client";
+
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Bell, X, ChevronRight, ChevronDown } from "lucide-react";
+import {
+  ResponsiveContainer, LineChart, Line, BarChart, Bar,
+  PieChart, Pie, Cell, XAxis, Tooltip,
+} from "recharts";
+import { DashboardData } from "@/types/dashboard";
+
+// ── Static data matching the mockup ──────────────────────────────────────────
+
+const NOTIFS = [
+  { title: "New Deposits",         desc: "New Deposits in 12,500...",      time: "10m", dot: "#10b981", bg: "rgba(16,185,129,0.08)"  },
+  { title: "Investment Milestones",desc: "New deposit milestones...",       time: "1h",  dot: "#D4AF37", bg: "rgba(212,175,55,0.08)"  },
+  { title: "Fraud Alerts",         desc: "New alert/notice to fraud.",      time: "4h",  dot: "#ef4444", bg: "rgba(239,68,68,0.08)"   },
+  { title: "Goal Updates",         desc: "Goal updates for goal...",        time: "Now", dot: "#a78bfa", bg: "rgba(167,139,250,0.08)" },
+];
+
+const TABS = ["Portfolio","Spending","Cash Flow","Goals","Investments","Reports","AI Insights"];
+
+const PORT  = [{m:"Jan",v:400},{m:"Feb",v:440},{m:"Mar",v:420},{m:"Apr",v:510},{m:"May",v:480},{m:"Jun",v:560},{m:"Jul",v:610},{m:"Aug",v:630},{m:"Sep",v:600},{m:"Oct",v:680},{m:"Nov",v:720},{m:"Dec",v:800}];
+const SPEND = [{m:"J",v:600},{m:"F",v:800},{m:"M",v:750},{m:"A",v:900},{m:"M",v:850},{m:"J",v:960},{m:"J",v:880},{m:"A",v:940},{m:"S",v:870},{m:"O",v:1000}];
+const CASH  = [{m:"Jan",i:15,o:8},{m:"Feb",i:16,o:8.5},{m:"Mar",i:15.5,o:7.9},{m:"Apr",i:18,o:10}];
+const PIE   = [{name:"Equity",v:55,c:"#10b981"},{name:"Debt",v:25,c:"#60a5fa"},{name:"Gold",v:10,c:"#D4AF37"},{name:"Cash",v:10,c:"#34d399"}];
+const HEAT  = [{r:"Anim",d:[2,4,3,1,5,2]},{r:"Reacto",d:[1,2,4,3,2,1]},{r:"Rashly",d:[3,1,2,4,1,3]},{r:"April",d:[4,3,1,2,3,4]},{r:"May",d:[2,4,3,5,2,1]}];
+const INC   = [{m:"Income",v:7200,f:"#10b981"},{m:"Income2",v:6800,f:"#10b981"},{m:"Expense",v:3900,f:"#ef4444"},{m:"Variance",v:3200,f:"#60a5fa"}];
+
+const TT = { contentStyle: { display: "none" }, cursor: false as any };
+
+function Label({ text }: { text: string }) {
+  return <p className="text-[8px] font-bold text-zinc-300 mb-1.5">{text}</p>;
+}
+
+export default function AnalyticsWorkspace({ data }: { data: DashboardData }) {
+  const [tab, setTab] = useState("Portfolio");
+
+  const chart = () => {
+    switch (tab) {
+      case "Portfolio":
+        return <>
+          <Label text="Portfolio" />
+          <div className="h-[90px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={PORT}>
+                <XAxis dataKey="m" stroke="#3f3f46" fontSize={6} tickLine={false} axisLine={false} />
+                <Tooltip {...TT} />
+                <Line type="monotone" dataKey="v" stroke="#D4AF37" strokeWidth={1.5} dot={false} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          {/* Portfolio Allocation donut below */}
+          <Label text="Portfall Allocation" />
+          <div className="flex items-center gap-2">
+            <div style={{ width: 60, height: 60, position: "relative", flexShrink: 0 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={PIE} dataKey="v" innerRadius={16} outerRadius={28} paddingAngle={2}>
+                    {PIE.map((e,i)=><Cell key={i} fill={e.c}/>)}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="space-y-1 flex-1">
+              {PIE.map((e,i)=>(
+                <div key={i} className="flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    <span className="h-1 w-1 rounded-full" style={{background:e.c}}/>
+                    <span className="text-[6.5px] text-zinc-400">{e.name}</span>
+                  </div>
+                  <span className="text-[6.5px] font-semibold text-zinc-200">{e.v}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Monthly Spending */}
+          <Label text="Monthly Spending" />
+          <div className="h-[70px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={SPEND}>
+                <XAxis dataKey="m" stroke="#3f3f46" fontSize={5} tickLine={false} axisLine={false}/>
+                <Tooltip {...TT}/>
+                <Bar dataKey="v" radius={[2,2,0,0]}>
+                  {SPEND.map((_,i)=><Cell key={i} fill={["#60a5fa","#a78bfa","#f43f5e","#10b981","#D4AF37","#34d399","#fb923c","#e879f9","#38bdf8","#facc15"][i]}/>)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          {/* Performance Heatmap */}
+          <Label text="Performance Heatmap" />
+          <div className="space-y-0.5">
+            {HEAT.map((row,ri)=>(
+              <div key={ri} className="flex items-center gap-1">
+                <span className="text-[5.5px] text-zinc-600 w-6 shrink-0 text-right">{row.r}</span>
+                <div className="flex gap-0.5 flex-1">
+                  {row.d.map((v,vi)=>(
+                    <div key={vi} className="flex-1 h-3 rounded-sm" style={{
+                      background: v < 2 ? "rgba(239,68,68,0.55)"
+                        : v < 3 ? "rgba(234,179,8,0.45)"
+                        : v < 4 ? "rgba(34,197,94,0.40)"
+                        : "rgba(34,197,94,0.72)",
+                    }}/>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <div className="flex gap-0.5 pl-7 mt-0.5">
+              {[1,2,3,4,5].map(n=>(
+                <span key={n} className="flex-1 text-center text-[5px] text-zinc-700">{n}</span>
+              ))}
+            </div>
+          </div>
+          {/* Income vs Expenses */}
+          <Label text="Income vs. Expenses" />
+          <div className="h-[70px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={INC}>
+                <XAxis dataKey="m" stroke="#3f3f46" fontSize={5} tickLine={false} axisLine={false}/>
+                <Tooltip {...TT}/>
+                <Bar dataKey="v" radius={[2,2,0,0]}>
+                  {INC.map((e,i)=><Cell key={i} fill={e.f}/>)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </>;
+
+      case "Cash Flow":
+        return <>
+          <Label text="Inflow vs. Outflow" />
+          <div className="h-[100px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={CASH}>
+                <XAxis dataKey="m" stroke="#3f3f46" fontSize={6} tickLine={false} axisLine={false}/>
+                <Tooltip {...TT}/>
+                <Bar dataKey="i" fill="#10b981" radius={[2,2,0,0]}/>
+                <Bar dataKey="o" fill="#ef4444" radius={[2,2,0,0]}/>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </>;
+
+      case "Spending":
+        return <>
+          <Label text="Monthly Spending" />
+          <div className="h-[120px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={SPEND}>
+                <XAxis dataKey="m" stroke="#3f3f46" fontSize={6} tickLine={false} axisLine={false}/>
+                <Tooltip {...TT}/>
+                <Bar dataKey="v" radius={[2,2,0,0]}>
+                  {SPEND.map((_,i)=><Cell key={i} fill={["#60a5fa","#a78bfa","#f43f5e","#10b981","#D4AF37","#34d399","#fb923c","#e879f9","#38bdf8","#facc15"][i]}/>)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </>;
+
+      default:
+        return <>
+          <Label text="Income vs. Expenses" />
+          <div className="h-[120px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={INC}>
+                <XAxis dataKey="m" stroke="#3f3f46" fontSize={6} tickLine={false} axisLine={false}/>
+                <Tooltip {...TT}/>
+                <Bar dataKey="v" radius={[2,2,0,0]}>
+                  {INC.map((e,i)=><Cell key={i} fill={e.f}/>)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </>;
+    }
+  };
+
+  return (
+    <div
+      className="flex h-full w-full flex-col overflow-hidden"
+      style={{ background: "rgba(5,5,8,0.90)", borderLeft: "1px solid rgba(255,255,255,0.06)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}
+    >
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 scrollbar-none">
+
+        {/* ── Smart Notification ── */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <Bell size={10} className="text-zinc-300" />
+              <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-100">Smart notification</span>
+            </div>
+            <motion.div
+              animate={{ opacity: [0.4,1,0.4] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="h-1.5 w-1.5 rounded-full bg-[#D4AF37]"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            {NOTIFS.map((n, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity:0, x:8 }}
+                animate={{ opacity:1, x:0 }}
+                transition={{ delay: i * 0.07 }}
+                className="flex items-start gap-2 rounded-lg px-2 py-1.5"
+                style={{ background: n.bg, border: `1px solid ${n.dot}22` }}
+              >
+                <span className="mt-[5px] h-1.5 w-1.5 rounded-full shrink-0" style={{ background: n.dot }} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[8px] font-bold text-zinc-100 truncate">{n.title}</span>
+                    <span className="text-[7px] text-zinc-600 shrink-0 ml-1">{n.time}</span>
+                  </div>
+                  <p className="text-[7px] text-zinc-500 leading-tight truncate mt-0.5">{n.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Analytics Workspace ── */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-100">Analytics workspace</span>
+            <X size={9} className="text-zinc-600 cursor-pointer hover:text-zinc-400 transition-colors" />
+          </div>
+
+          {/* Tab strip */}
+          <div className="flex gap-0.5 overflow-x-auto pb-1.5 scrollbar-none mb-2">
+            {TABS.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className="shrink-0 rounded px-1.5 py-0.5 text-[6.5px] font-bold uppercase tracking-wider border transition-all"
+                style={
+                  tab === t
+                    ? { background:"rgba(212,175,55,0.1)", borderColor:"rgba(212,175,55,0.3)", color:"#D4AF37" }
+                    : { background:"rgba(255,255,255,0.03)", borderColor:"rgba(255,255,255,0.07)", color:"#71717a" }
+                }
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          {/* Charts */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={tab}
+              initial={{ opacity:0 }}
+              animate={{ opacity:1 }}
+              exit={{ opacity:0 }}
+              transition={{ duration: 0.15 }}
+              className="space-y-2"
+            >
+              {chart()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* ── Personalised AI ── */}
+        <div>
+          <div
+            className="flex items-center justify-between mb-2 cursor-pointer"
+          >
+            <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-100">Personalised AI</span>
+            <ChevronDown size={9} className="text-zinc-600" />
+          </div>
+
+          <div className="space-y-1.5">
+            {[
+              { t:"Recommendations",    b:"Give one-line concisely actionable insights, annotated insights." },
+              { t:"AI recommendations", b:"Balance risk-to-return ratio. ETF momentum in sector rebalancing." },
+              { t:"Fraud updates",      b:"Phishing mentions are visible and actionable in shield entries."   },
+            ].map((item,i) => (
+              <div
+                key={i}
+                className="rounded-lg p-2"
+                style={{ background:"rgba(255,255,255,0.025)", border:"1px solid rgba(255,255,255,0.05)" }}
+              >
+                <p className="text-[7.5px] font-bold uppercase tracking-wide text-zinc-300 mb-0.5">{item.t}</p>
+                <p className="text-[7px] leading-relaxed text-zinc-500">{item.b}</p>
+              </div>
+            ))}
+
+            <motion.button
+              whileHover={{ scale:1.01 }}
+              whileTap={{ scale:0.99 }}
+              className="flex w-full items-center justify-center gap-1 rounded-lg py-1.5 text-[7.5px] font-bold uppercase tracking-wider transition-colors"
+              style={{ background:"rgba(212,175,55,0.06)", border:"1px solid rgba(212,175,55,0.22)", color:"#D4AF37" }}
+            >
+              Actionable insights <ChevronRight size={8}/>
+            </motion.button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}

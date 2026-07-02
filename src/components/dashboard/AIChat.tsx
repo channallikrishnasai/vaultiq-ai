@@ -224,19 +224,18 @@ export default function AIChat({ userId }: AIChatProps) {
       animate={{ opacity: uiReady ? 1 : 0, y: uiReady ? 0 : 20 }}
       transition={{ duration: 0.7, delay: 0.7 }}
       style={{
-        position: "fixed",
-        bottom: "2%",
+        position: "absolute",
+        bottom: "14px",
         left: "50%",
         transform: "translateX(-50%)",
-        width: "min(520px, 88vw)",
+        width: "min(480px, 60vw)",
         zIndex: 20,
-        background: "rgba(3,3,6,0.95)",
-        border: "1px solid rgba(212,175,55,0.16)",
+        background: "rgba(4,4,8,0.95)",
+        border: "1px solid rgba(212,175,55,0.18)",
         borderRadius: 18,
         backdropFilter: "blur(22px)",
         WebkitBackdropFilter: "blur(22px)",
-        boxShadow:
-          "0 0 80px rgba(0,0,0,0.85), 0 0 40px rgba(212,175,55,0.03), inset 0 1px 0 rgba(255,255,255,0.04)",
+        boxShadow: "0 0 60px rgba(0,0,0,0.85), 0 0 30px rgba(212,175,55,0.04), inset 0 1px 0 rgba(255,255,255,0.04)",
       }}
     >
       {/* Orb state indicator */}

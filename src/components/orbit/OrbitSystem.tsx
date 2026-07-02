@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { useOrbitStore, ORBIT_CARDS, RING_RADII, RING_SPEEDS } from "@/store/useOrbitStore";
-import type { OrbitCardId, OrbitRing } from "@/store/useOrbitStore";
+import type { OrbitCardId, OrbitRing as OrbitRingType } from "@/store/useOrbitStore";
 import type { DashboardData } from "@/types/dashboard";
 import OrbitCard from "./OrbitCard";
 import OrbitRing from "./OrbitRing";
@@ -42,7 +42,7 @@ function depthFromAngle(angleDeg: number): number {
 
 // ─── Ring index helper ────────────────────────────────────────────────────────
 
-const RING_ORDER: OrbitRing[] = ["inner", "middle", "outer"];
+const RING_ORDER: OrbitRingType[] = ["inner", "middle", "outer"];
 
 // ─── OrbitSystem ──────────────────────────────────────────────────────────────
 
@@ -64,12 +64,12 @@ export default function OrbitSystem({ data }: OrbitSystemProps) {
   const rafRef = useRef<number>(0);
   // Simpler angle calculation — avoid store globalDelta complexity.
   // We track ring angles purely locally here:
-  const ringAnglesRef = useRef<Record<OrbitRing, number>>({
+  const ringAnglesRef = useRef<Record<OrbitRingType, number>>({
     inner: 0,
     middle: 120,
     outer: 240,
   });
-  const [renderAngles, setRenderAngles] = useState<Record<OrbitRing, number>>({
+  const [renderAngles, setRenderAngles] = useState<Record<OrbitRingType, number>>({
     inner: 0,
     middle: 120,
     outer: 240,
