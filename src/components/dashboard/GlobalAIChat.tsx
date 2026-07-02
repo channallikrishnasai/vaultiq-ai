@@ -4,6 +4,8 @@ import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { OrbProvider } from "@/contexts/OrbContext";
+import { motion } from "framer-motion";
+import { Send } from "lucide-react";
 
 // Dynamically import AIChat to avoid hydration issues
 const AIChat = dynamic(() => import("./AIChat"), {
@@ -38,19 +40,7 @@ function GlobalAIChatInner() {
   return (
     <div
       style={{
-        position: "fixed",
-        bottom: "14px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: isMinimized ? "auto" : "min(480px, 60vw)",
-        zIndex: 9999,
-        background: "rgba(4,4,8,0.95)",
-        border: "1px solid rgba(212,175,55,0.18)",
-        borderRadius: 18,
-        backdropFilter: "blur(22px)",
-        WebkitBackdropFilter: "blur(22px)",
-        boxShadow: "0 0 60px rgba(0,0,0,0.85), 0 0 30px rgba(212,175,55,0.04), inset 0 1px 0 rgba(255,255,255,0.04)",
-        overflow: "hidden",
+        // No positioning here - AIChat handles it
       }}
     >
       <AIChat userId={session.user.id} isGlobal isMinimized={isMinimized} setIsMinimized={setIsMinimized} />

@@ -132,6 +132,7 @@ export default function AIChat({ userId, isGlobal = false, isMinimized = false, 
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const [localMinimized, setLocalMinimized] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 }); // For dragging
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Handle minimize state
@@ -236,64 +237,48 @@ export default function AIChat({ userId, isGlobal = false, isMinimized = false, 
     [thinking, setOrbState]
   );
 
-  // For global chat on the left sidebar
+  // For global chat on the right sidebar
   if (isGlobal) {
-    // If minimized, show only the icon button on the left
+    // If minimized, completely disappear
     if (isCurrentlyMinimized) {
-      return (
-        <motion.button
-          onClick={() => handleMinimize(false)}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          style={{
-            position: "fixed",
-            left: "16px",
-            bottom: "50%",
-            transform: "translateY(50%)",
-            width: 50,
-            height: 50,
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, #F5D060, #C8922A)",
-            border: "2px solid rgba(212,175,55,0.3)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            zIndex: 9999,
-            boxShadow: "0 0 20px rgba(212,175,55,0.3)",
-          }}
-          title="Open VaultIQ AI Chat"
-        >
-          <Send size={20} color="#000" />
-        </motion.button>
-      );
+      return null;
     }
 
-    // Full chat panel on the left side when expanded
+    // Full chat panel on the right side when expanded
     return (
       <motion.div
-        initial={{ x: -400, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        exit={{ x: -400, opacity: 0 }}
+        drag
+        dragElastic={0.2}
+        dragMomentum={true}
+        onDragEnd={(event, info) => {
+          // Keep the panel within reasonable bounds
+          const newX = Math.min(info.offset.x, 300); // Don't drag too far right
+          const newY = Math.max(info.offset.y, -100); // Don't drag too far up
+          setPosition({ x: newX, y: newY });
+        }}
+        initial={{ x: 0, y: 0, opacity: 0 }}
+        animate={{ x: position.x, y: position.y, opacity: 1 }}
+        exit={{ x: 400, opacity: 0 }}
         transition={{ duration: 0.3 }}
         style={{
           position: "fixed",
-          left: 0,
+          right: 0,
           top: 0,
-          bottom: 0,
           width: 380,
           zIndex: 9999,
           background: "rgba(4,4,8,0.95)",
           border: "1px solid rgba(212,175,55,0.18)",
-          borderRight: "1px solid rgba(212,175,55,0.18)",
+          borderLeft: "1px solid rgba(212,175,55,0.18)",
           backdropFilter: "blur(22px)",
           WebkitBackdropFilter: "blur(22px)",
-          boxShadow: "2px 0 60px rgba(0,0,0,0.85), inset -1px 0 0 rgba(255,255,255,0.04)",
+          boxShadow: "-2px 0 60px rgba(0,0,0,0.85), inset 1px 0 0 rgba(255,255,255,0.04)",
           display: "flex",
           flexDirection: "column",
+          height: "100vh",
+          cursor: "grab",
         }}
       >
-        {/* Header with minimize button */}
+        {/* Header with minimize button - drag handle */}
         <div
           style={{
             display: "flex",
@@ -302,7 +287,11 @@ export default function AIChat({ userId, isGlobal = false, isMinimized = false, 
             gap: 8,
             padding: "14px 16px",
             borderBottom: "1px solid rgba(255,255,255,0.05)",
+            cursor: "grab",
+            userSelect: "none",
           }}
+          onMouseEnter={(e) => (e.currentTarget.style.cursor = "grab")}
+          onMouseLeave={(e) => (e.currentTarget.style.cursor = "grab")}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <motion.div
@@ -373,236 +362,214 @@ export default function AIChat({ userId, isGlobal = false, isMinimized = false, 
           </button>
         </div>
 
-        {/* Messages (hidden when minimized) */}
-        {!isCurrentlyMinimized && (
-          <>
-            <div
-              ref={scrollRef}
-              style={{
-                maxHeight: 160,
-                overflowY: "auto",
-                padding: "10px 16px 8px",
-                scrollbarWidth: "thin",
-                scrollbarColor: "rgba(255,255,255,0.08) transparent",
-              }}
-            >
-              <AnimatePresence initial={false}>
-                {messages.length === 0 && (
-                  <motion.div
-                    key="welcome"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.65 }}>
-                      Your financial intelligence is online. Ask me anything about your portfolio,
-                      goals, or financial health.
-                    </p>
-                  </motion.div>
-                )}
+        {/* Messages container */}
+        <div
+          ref={scrollRef}
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: "10px 16px",
+            scrollbarWidth: "thin",
+            scrollbarColor: "rgba(255,255,255,0.08) transparent",
+          }}
+        >
+          <AnimatePresence initial={false}>
+            {messages.length === 0 && (
+              <motion.div
+                key="welcome"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.65 }}>
+                  Your financial intelligence is online. Ask me anything about your portfolio,
+                  goals, or financial health.
+                </p>
+              </motion.div>
+            )}
 
-                {messages.map((m, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+            {messages.map((m, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 5 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                style={{
+                  display: "flex",
+                  justifyContent: m.role === "user" ? "flex-end" : "flex-start",
+                  marginTop: i > 0 ? 10 : 0,
+                }}
+              >
+                {m.role === "user" ? (
+                  <span
                     style={{
-                      display: "flex",
-                      justifyContent: m.role === "user" ? "flex-end" : "flex-start",
-                      marginTop: i > 0 ? 10 : 0,
+                      display: "inline-block",
+                      fontSize: 12,
+                      color: "rgba(236,253,245,0.88)",
+                      padding: "7px 12px",
+                      borderRadius: 10,
+                      background: "rgba(52,211,153,0.08)",
+                      border: "1px solid rgba(52,211,153,0.16)",
+                      maxWidth: "85%",
                     }}
                   >
-                    {m.role === "user" ? (
-                      <span
-                        style={{
-                          display: "inline-block",
-                          fontSize: 12,
-                          color: "rgba(236,253,245,0.88)",
-                          padding: "7px 12px",
-                          borderRadius: 10,
-                          background: "rgba(52,211,153,0.08)",
-                          border: "1px solid rgba(52,211,153,0.16)",
-                        }}
-                      >
-                        {m.content}
-                      </span>
-                    ) : (
-                      <div style={{ maxWidth: "88%" }}>
-                        <p
-                          style={{
-                            fontSize: 9,
-                            letterSpacing: "0.14em",
-                            textTransform: "uppercase",
-                            color: "rgba(212,175,55,0.45)",
-                            marginBottom: 4,
-                          }}
-                        >
-                          VaultIQ AI
-                        </p>
-                        <div
+                    {m.content}
+                  </span>
+                ) : (
+                  <div style={{ maxWidth: "85%" }}>
+                    <p
+                      style={{
+                        fontSize: 9,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: "rgba(212,175,55,0.45)",
+                        marginBottom: 4,
+                      }}
+                    >
+                      VaultIQ AI
+                    </p>
+                    <div
+                      style={{
+                        display: "inline-block",
+                        padding: "8px 12px",
+                        borderRadius: 10,
+                        background: "rgba(212,175,55,0.04)",
+                        border: "1px solid rgba(212,175,55,0.1)",
+                      }}
+                    >
+                      <MarkdownContent text={m.content} />
+                      {!m.streamed && (
+                        <motion.span
+                          animate={{ opacity: [1, 0] }}
+                          transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
                           style={{
                             display: "inline-block",
-                            padding: "8px 12px",
-                            borderRadius: 10,
-                            background: "rgba(212,175,55,0.04)",
-                            border: "1px solid rgba(212,175,55,0.1)",
+                            width: 2,
+                            height: 12,
+                            background: "rgba(212,175,55,0.8)",
+                            marginLeft: 2,
+                            verticalAlign: "middle",
                           }}
-                        >
-                          <MarkdownContent text={m.content} />
-                          {!m.streamed && (
-                            <motion.span
-                              animate={{ opacity: [1, 0] }}
-                              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-                              style={{
-                                display: "inline-block",
-                                width: 2,
-                                height: 12,
-                                background: "rgba(212,175,55,0.8)",
-                                marginLeft: 2,
-                                verticalAlign: "middle",
-                              }}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
-
-                {thinking && (
-                  <motion.div
-                    key="thinking"
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 10,
-                      padding: "8px 12px",
-                      borderRadius: 10,
-                      background: "rgba(255,255,255,0.02)",
-                      border: "1px solid rgba(255,255,255,0.05)",
-                      marginTop: 10,
-                    }}
-                  >
-                    <Waveform active />
-                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
-                      Analyzing your profile…
-                    </span>
-                  </motion.div>
+                        />
+                      )}
+                    </div>
+                  </div>
                 )}
-              </AnimatePresence>
-            </div>
+              </motion.div>
+            ))}
 
-            {/* Quick prompts */}
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "0 16px 8px" }}>
-              {PROMPTS.slice(0, 4).map(({ icon: Icon, label }) => (
-                <motion.button
-                  key={label}
-                  onClick={() => sendMessage(label)}
-                  whileHover={{ borderColor: "rgba(212,175,55,0.35)", background: "rgba(212,175,55,0.07)" }}
-                  whileTap={{ scale: 0.97 }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 4,
-                    fontSize: 10.5,
-                    padding: "5px 10px",
-                    borderRadius: 7,
-                    background: "rgba(255,255,255,0.025)",
-                    border: "1px solid rgba(255,255,255,0.07)",
-                    color: "rgba(255,255,255,0.4)",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  <Icon size={10} style={{ color: "rgba(212,175,55,0.6)" }} />
-                  {label}
-                </motion.button>
-              ))}
-            </div>
+            {thinking && (
+              <motion.div
+                key="thinking"
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                  marginTop: 10,
+                }}
+              >
+                <Waveform active />
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+                  Analyzing your profile…
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
 
-            {/* Input row */}
-            <div
+        {/* Quick prompts */}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "8px 14px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+          {PROMPTS.slice(0, 3).map(({ icon: Icon, label }) => (
+            <motion.button
+              key={label}
+              onClick={() => sendMessage(label)}
+              whileHover={{ borderColor: "rgba(212,175,55,0.35)", background: "rgba(212,175,55,0.07)" }}
+              whileTap={{ scale: 0.97 }}
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 8,
-                padding: "10px 14px 14px",
-                borderTop: "1px solid rgba(255,255,255,0.05)",
+                gap: 4,
+                fontSize: 10,
+                padding: "5px 10px",
+                borderRadius: 7,
+                background: "rgba(255,255,255,0.025)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                color: "rgba(255,255,255,0.4)",
+                cursor: "pointer",
+                transition: "all 0.15s",
               }}
             >
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
-                placeholder="Ask VaultIQ anything…"
-                style={{
-                  flex: 1,
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.09)",
-                  borderRadius: 10,
-                  padding: "8px 12px",
-                  fontSize: 12,
-                  color: "rgba(255,255,255,0.88)",
-                  outline: "none",
-                  transition: "border-color 0.15s",
-                }}
-                onFocus={(e) => {
-                  (e.target as HTMLInputElement).style.borderColor = "rgba(212,175,55,0.32)";
-                }}
-                onBlur={(e) => {
-                  (e.target as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.09)";
-                }}
-              />
+              <Icon size={10} style={{ color: "rgba(212,175,55,0.6)" }} />
+              {label}
+            </motion.button>
+          ))}
+        </div>
 
-              {/* Mic (future) */}
-              <button
-                disabled
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 9,
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.07)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "not-allowed",
-                  flexShrink: 0,
-                }}
-              >
-                <Mic size={13} style={{ color: "rgba(255,255,255,0.2)" }} />
-              </button>
+        {/* Input row */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "10px 14px",
+            borderTop: "1px solid rgba(255,255,255,0.05)",
+          }}
+        >
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
+            placeholder="Ask VaultIQ…"
+            style={{
+              flex: 1,
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: 8,
+              padding: "8px 10px",
+              fontSize: 12,
+              color: "rgba(255,255,255,0.88)",
+              outline: "none",
+              transition: "border-color 0.15s",
+            }}
+            onFocus={(e) => {
+              (e.target as HTMLInputElement).style.borderColor = "rgba(212,175,55,0.32)";
+            }}
+            onBlur={(e) => {
+              (e.target as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.09)";
+            }}
+          />
 
-              {/* Send */}
-              <motion.button
-                onClick={() => sendMessage(input)}
-                disabled={!input.trim() || thinking}
-                whileHover={{ y: -1, boxShadow: "0 0 18px rgba(212,175,55,0.45)" }}
-                whileTap={{ scale: 0.94 }}
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: 9,
-                  background: "linear-gradient(135deg, #F5D060, #C8922A)",
-                  border: "none",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: !input.trim() || thinking ? "not-allowed" : "pointer",
-                  opacity: !input.trim() || thinking ? 0.32 : 1,
-                  flexShrink: 0,
-                }}
-              >
-                <Send size={13} color="#000" />
-              </motion.button>
-            </div>
-          </>
-        )}
-      </>
+          {/* Send */}
+          <motion.button
+            onClick={() => sendMessage(input)}
+            disabled={!input.trim() || thinking}
+            whileHover={{ y: -1, boxShadow: "0 0 18px rgba(212,175,55,0.45)" }}
+            whileTap={{ scale: 0.94 }}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 8,
+              background: "linear-gradient(135deg, #F5D060, #C8922A)",
+              border: "none",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: !input.trim() || thinking ? "not-allowed" : "pointer",
+              opacity: !input.trim() || thinking ? 0.32 : 1,
+              flexShrink: 0,
+            }}
+          >
+            <Send size={13} color="#000" />
+          </motion.button>
+        </div>
+      </motion.div>
     );
   }
 
