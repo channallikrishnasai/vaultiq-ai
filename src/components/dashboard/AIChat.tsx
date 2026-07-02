@@ -18,6 +18,8 @@ import {
   Landmark,
   ChevronDown,
   ChevronUp,
+  X,
+  MessageSquare,
 } from "lucide-react";
 import { useOrb } from "@/contexts/OrbContext";
 
@@ -123,9 +125,18 @@ interface AIChatProps {
   isGlobal?: boolean;
   isMinimized?: boolean;
   setIsMinimized?: (value: boolean) => void;
+  isClosed?: boolean;
+  setIsClosed?: (value: boolean) => void;
 }
 
-export default function AIChat({ userId, isGlobal = false, isMinimized = false, setIsMinimized }: AIChatProps) {
+export default function AIChat({
+  userId,
+  isGlobal = false,
+  isMinimized = false,
+  setIsMinimized,
+  isClosed = false,
+  setIsClosed,
+}: AIChatProps) {
   const orbContext = useOrb && typeof useOrb === 'function' ? useOrb() : null;
   const { orbState, setOrbState, uiReady } = orbContext || { orbState: "idle", setOrbState: () => {}, uiReady: true };
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -239,9 +250,34 @@ export default function AIChat({ userId, isGlobal = false, isMinimized = false, 
 
   // For global chat on the right sidebar
   if (isGlobal) {
-    // If minimized, completely disappear
+    // If minimized, render a beautiful floating bubble
     if (isCurrentlyMinimized) {
-      return null;
+      return (
+        <motion.button
+          onClick={() => handleMinimize(false)}
+          whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(212,175,55,0.4)" }}
+          whileTap={{ scale: 0.9 }}
+          style={{
+            position: "fixed",
+            bottom: "24px",
+            right: "24px",
+            width: "48px",
+            height: "48px",
+            borderRadius: "50%",
+            background: "rgba(4,4,8,0.95)",
+            border: "1px solid rgba(212,175,55,0.25)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            zIndex: 9999,
+          }}
+          title="Open VaultIQ AI Assistant"
+        >
+          <MessageSquare size={20} style={{ color: "#D4AF37" }} />
+        </motion.button>
+      );
     }
 
     // Full chat panel on the right side when expanded
@@ -342,24 +378,47 @@ export default function AIChat({ userId, isGlobal = false, isMinimized = false, 
             </span>
           </div>
 
-          {/* Minimize/Close button */}
-          <button
-            onClick={() => handleMinimize(true)}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "rgba(255,255,255,0.4)",
-              cursor: "pointer",
-              padding: "4px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            className="hover:text-white transition-colors"
-            title="Minimize chat"
-          >
-            <ChevronUp size={18} />
-          </button>
+          {/* Controls */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {/* Minimize */}
+            <button
+              onClick={() => handleMinimize(true)}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "rgba(255,255,255,0.4)",
+                cursor: "pointer",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              className="hover:text-white transition-colors"
+              title="Minimize chat"
+            >
+              <ChevronDown size={16} />
+            </button>
+            {/* Close */}
+            {setIsClosed && (
+              <button
+                onClick={() => setIsClosed(true)}
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "rgba(255,255,255,0.4)",
+                  cursor: "pointer",
+                  padding: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                className="hover:text-rose-400 transition-colors"
+                title="Close assistant"
+              >
+                <X size={15} />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Messages container */}

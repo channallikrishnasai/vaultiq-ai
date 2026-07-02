@@ -7,6 +7,8 @@ import ThemeProvider from "@/components/providers/ThemeProvider";
 import LearningProgressProvider from "@/components/providers/learning-progress-provider";
 import LeftNav from "@/components/dashboard/LeftNav";
 import GlobalAIChat from "@/components/dashboard/GlobalAIChat";
+import ApiKeysWidget from "@/components/dashboard/ApiKeysWidget";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -26,19 +28,22 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex h-screen overflow-hidden bg-[#050505] text-foreground">
-        <ThemeProvider>
-          <AuthSessionProvider>
-            <LearningProgressProvider>
-              {/* Icon-only slim sidebar — always visible globally */}
-              <LeftNav activeItem="Dashboard" />
-              {/* Main content fills the rest */}
-              <main className="flex-1 overflow-hidden h-full">{children}</main>
-              {/* Global AI Chat — available on all pages */}
-              <GlobalAIChat />
-              <ToastProvider />
-            </LearningProgressProvider>
-          </AuthSessionProvider>
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <AuthSessionProvider>
+              <LearningProgressProvider>
+                {/* Icon-only slim sidebar — always visible globally */}
+                <LeftNav activeItem="Dashboard" />
+                {/* Main content fills the rest */}
+                <main className="flex-1 overflow-hidden h-full">{children}</main>
+                {/* Global AI Chat & API Keys — available on all pages */}
+                <GlobalAIChat />
+                <ApiKeysWidget />
+                <ToastProvider />
+              </LearningProgressProvider>
+            </AuthSessionProvider>
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

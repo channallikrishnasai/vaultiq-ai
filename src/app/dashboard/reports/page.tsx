@@ -36,6 +36,7 @@ const COLORS = ["#D4AF37", "#60A5FA", "#10B981", "#EC4899", "#8B5CF6", "#F59E0B"
 
 export default function ReportsPage() {
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [summary, setSummary] = useState<SummaryData>({
     totalExpenses: 0,
     totalBudgetLimit: 0,
@@ -65,8 +66,17 @@ export default function ReportsPage() {
   }, []);
 
   useEffect(() => {
+    setMounted(true);
     fetchReports();
   }, [fetchReports]);
+
+  if (!mounted) {
+    return (
+      <div className="h-full w-full bg-[#040407] text-zinc-100 flex items-center justify-center">
+        <div className="text-zinc-500 text-xs">Loading reports dashboard...</div>
+      </div>
+    );
+  }
 
   const handleDownload = (statement: Statement) => {
     toast.promise(
@@ -148,7 +158,7 @@ export default function ReportsPage() {
                 <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-4 flex items-center gap-1.5">
                   <PieChart size={14} className="text-[#D4AF37]" /> Spending Breakdown
                 </h4>
-                <div className="flex-1 min-h-0 relative">
+                <div className="flex-1 w-full min-w-0 min-h-0 relative">
                   {categorySummary.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-xs text-zinc-500">
                       No expense data found.
@@ -182,7 +192,7 @@ export default function ReportsPage() {
                 <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-4 flex items-center gap-1.5">
                   <Wallet size={14} className="text-emerald-400" /> Budget Utilization
                 </h4>
-                <div className="flex-1 min-h-0">
+                <div className="flex-1 w-full min-w-0 min-h-0 relative">
                   {categorySummary.length === 0 ? (
                     <div className="h-full flex items-center justify-center text-xs text-zinc-500">
                       No budget comparisons available.

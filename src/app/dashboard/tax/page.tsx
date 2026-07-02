@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Receipt, RefreshCw, BarChart2, ShieldAlert, Award, Info
@@ -10,6 +10,11 @@ import { ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, Tooltip } from 
 export default function TaxPage() {
   const [income, setIncome] = useState<string>("1200000");
   const [deductions, setDeductions] = useState<string>("150000");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const calcOldRegime = (inc: number, ded: number) => {
     const taxable = Math.max(0, inc - ded);
@@ -33,6 +38,14 @@ export default function TaxPage() {
     else tax = 150000 + (inc - 1500000) * 0.30;
     return tax;
   };
+
+  if (!mounted) {
+    return (
+      <div className="h-full w-full bg-[#040407] text-zinc-100 flex items-center justify-center">
+        <div className="text-zinc-500 text-xs">Loading Tax intelligence Planner...</div>
+      </div>
+    );
+  }
 
   const incVal = parseFloat(income) || 0;
   const dedVal = parseFloat(deductions) || 0;
@@ -122,7 +135,7 @@ export default function TaxPage() {
           </div>
 
           {/* Chart comparison */}
-          <div className="h-[120px] w-full mb-2">
+          <div className="h-[120px] w-full min-w-0 relative mb-2">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <XAxis dataKey="name" stroke="#52525b" fontSize={8} tickLine={false} />
@@ -142,3 +155,4 @@ export default function TaxPage() {
     </div>
   );
 }
+

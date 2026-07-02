@@ -8,7 +8,9 @@ import {
   Home, LayoutDashboard, Briefcase, LineChart, TrendingDown,
   TrendingUp, PiggyBank, Target, CreditCard, Percent,
   Bot, ShieldAlert, BarChart3, Receipt, FolderOpen, Settings,
+  Globe
 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const NAV_ITEMS = [
   { name: "Home",         href: "/",                    icon: Home          },
@@ -29,8 +31,15 @@ const NAV_ITEMS = [
   { name: "Settings",     href: "/dashboard/settings",   icon: Settings      },
 ];
 
+const keyMap: Record<string, string> = {
+  "ai twin": "twin",
+  "fraud shield": "fraud",
+  "tax planner": "tax"
+};
+
 export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: string }) {
   const pathname = usePathname();
+  const { language, setLanguage, t } = useLanguage();
 
   return (
     <div
@@ -59,11 +68,14 @@ export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: str
             pathname === item.href ||
             (item.href !== "/" && pathname?.startsWith(item.href));
 
+          const transKey = "nav." + (keyMap[item.name.toLowerCase()] || item.name.toLowerCase());
+          const translatedName = t(transKey);
+
           return (
             <Link
               key={item.name}
               href={item.href}
-              title={item.name}
+              title={translatedName}
               className="group relative flex h-9 w-full items-center justify-center rounded-lg transition-all"
               style={
                 isActive
@@ -90,15 +102,34 @@ export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: str
                 className="pointer-events-none absolute left-full ml-2 z-50 whitespace-nowrap rounded-md px-2 py-1 text-[10px] font-semibold opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
                 style={{ background:"rgba(10,10,14,0.95)", border:"1px solid rgba(255,255,255,0.08)", color:"#e4e4e7" }}
               >
-                {item.name}
+                {translatedName}
               </span>
             </Link>
           );
         })}
       </div>
 
+      {/* Language Selector */}
+      <div className="relative group/lang flex flex-col items-center justify-center h-9 w-8 rounded-lg border border-transparent hover:border-zinc-850 hover:bg-zinc-900/30 transition-all cursor-pointer mb-2">
+        <Globe size={14} className="text-zinc-500 group-hover/lang:text-[#D4AF37] transition-colors" />
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value as any)}
+          className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+          title="Change Language"
+        >
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="hi">हिन्दी</option>
+        </select>
+        <span className="text-[7px] text-zinc-500 group-hover/lang:text-zinc-300 font-bold uppercase mt-0.5 tracking-wider">
+          {language}
+        </span>
+      </div>
+
       {/* Version */}
-      <p className="text-[6px] text-zinc-700 uppercase tracking-widest mt-1" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
+      <p className="text-[6px] text-zinc-700 uppercase tracking-widest mt-1 shrink-0" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
         v0.1
       </p>
     </div>
