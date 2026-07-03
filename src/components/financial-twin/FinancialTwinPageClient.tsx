@@ -83,7 +83,7 @@ export function FinancialTwinPageClient({ user }: FinancialTwinPageClientProps) 
 
   const startEditTwin = () => {
     if (twin?.snapshot) {
-      setEditIncome(twin.snapshot.income);
+      setEditIncome(twin.snapshot.income / 12);
       setEditExpenses(twin.snapshot.expenses);
       setEditingTwin(true);
     }
@@ -92,11 +92,22 @@ export function FinancialTwinPageClient({ user }: FinancialTwinPageClientProps) 
   const handleTwinUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!twin) return;
-    const updatedSnapshot = { ...twin.snapshot, income: editIncome, expenses: editExpenses };
+    // editIncome is treated as monthly salary; convert to annual income
+    const annualIncome = editIncome * 12;
+    const updatedSnapshot = {
+      ...twin.snapshot,
+      income: annualIncome,
+      expenses: editExpenses,
+    };
+    // Update twin state with new snapshot
     setTwin({ ...twin, snapshot: updatedSnapshot });
     setEditingTwin(false);
     // Dispatch event for other components (budget & envelope planner)
-    window.dispatchEvent(new CustomEvent('twinSnapshotUpdated', { detail: { income: editIncome, expenses: editExpenses } }));
+    window.dispatchEvent(
+      new CustomEvent('twinSnapshotUpdated', {
+        detail: { income: annualIncome, expenses: editExpenses },
+      })
+    );
   };
 
   useEffect(() => {
@@ -107,6 +118,21 @@ export function FinancialTwinPageClient({ user }: FinancialTwinPageClientProps) 
   useEffect(() => {
     const handler = (e: CustomEvent) => {
       const { income, expenses } = e.detail;
+      // Update snapshot values (income, expenses, netWorth) in twin state
+      setTwin(prev => {
+        if (!prev) return prev;
+        const oldIncome = prev.snapshot.income;
+        const oldExpenses = prev.snapshot.expenses;
+        const netChange = (income - expenses) - (oldIncome - oldExpenses);
+        const updatedSnapshot = {
+          ...prev.snapshot,
+          income,
+          expenses,
+          netWorth: Math.max(0, prev.snapshot.netWorth + netChange),
+        };
+        return { ...prev, snapshot: updatedSnapshot };
+      });
+
       const leftover = income - expenses;
       const invest = Math.max(0, leftover * 0.3);
       const save = Math.max(0, leftover * 0.2);
@@ -240,6 +266,12 @@ export function FinancialTwinPageClient({ user }: FinancialTwinPageClientProps) 
                   <li>Save: {formatCurrency(advice.save)}</li>
                   <li>Discretionary: {formatCurrency(advice.discretionary)}</li>
                 </ul>
+                {/* Suggestion based on discretionary amount */}
+                <p className="mt-2 text-sm text-zinc-300">
+                  {advice.discretionary > 0
+                    ? `You have ${formatCurrency(advice.discretionary)} left. Consider allocating it to short‑term goals or a small emergency fund.`
+                    : 'No remaining funds after recommended invest/save allocations.'}
+                </p>
               </div>
             )}
           </div>
