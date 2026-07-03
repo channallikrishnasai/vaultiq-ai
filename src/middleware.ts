@@ -1,39 +1,22 @@
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+const { auth } = NextAuth(authConfig);
 
-  // Public routes that don't need auth
-  const publicRoutes = [
-    "/",
-    "/sign-in",
-    "/sign-up",
-    "/data-safe",
-    "/api/auth",
-    "/api/register",
-  ];
+export default auth((req) => {
+  const { pathname } = req.nextUrl;
 
-  const isPublic = publicRoutes.some(route => pathname.startsWith(route));
-
-  if (isPublic) {
-    return NextResponse.next();
-  }
-
-  // Check for session cookie (next-auth session token)
-  const sessionToken = request.cookies.get("next-auth.session-token")?.value
-    || request.cookies.get("__Secure-next-auth.session-token")?.value;
-
-  if (!sessionToken) {
-    // Redirect to data-safe page instead of sign-in
-    const url = request.nextUrl.clone();
+  // If user is not authenticated and trying to access protected route
+  if (!req.auth && !pathname.startsWith("/sign-in") && !pathname.startsWith("/sign-up") && !pathname.startsWith("/data-safe") && pathname !== "/") {
+    const url = req.nextUrl.clone();
     url.pathname = "/data-safe";
     url.searchParams.set("from", pathname);
     return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: [
