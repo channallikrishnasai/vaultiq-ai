@@ -27,6 +27,7 @@ interface Course {
   quiz: { id: string; question: string; options: string[]; correctIndex: number }[];
   completedLessons: number;
   totalLessons: number;
+  youtubeUrl?: string;
 }
 
 interface LearningHubClientProps {
@@ -162,18 +163,31 @@ export function LearningHubClient({ user }: LearningHubClientProps) {
                   key={course.id}
                   variants={fadeInUp}
                   whileHover={{ y: -4 }}
-                  className="group cursor-pointer rounded-2xl border border-zinc-800/60 bg-zinc-900/50 p-6 backdrop-blur-sm transition hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/5"
+                  className="group relative cursor-pointer rounded-2xl border border-zinc-800/60 bg-zinc-900/50 p-6 backdrop-blur-sm transition hover:border-cyan-500/30 hover:shadow-lg hover:shadow-cyan-500/5"
                   onClick={() => openCourse(course)}
                 >
                   <div className="mb-4 flex items-start justify-between">
                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/10">
                       <BookOpen className="h-5 w-5 text-cyan-400" />
                     </div>
-                    <span
-                      className={`rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${LEVEL_COLORS[course.level] ?? LEVEL_COLORS.beginner}`}
-                    >
-                      {course.level}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {course.youtubeUrl && (
+                        <a
+                          href={course.youtubeUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="rounded-full bg-red-600/10 border border-red-500/30 px-2.5 py-0.5 text-xs font-medium text-red-400 hover:bg-red-600/20 transition-all flex items-center gap-1"
+                        >
+                          <Play className="h-3 w-3 fill-current" /> Video
+                        </a>
+                      )}
+                      <span
+                        className={`rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${LEVEL_COLORS[course.level] ?? LEVEL_COLORS.beginner}`}
+                      >
+                        {course.level}
+                      </span>
+                    </div>
                   </div>
 
                   <h3 className="mb-2 text-lg font-semibold text-zinc-50">{course.title}</h3>
