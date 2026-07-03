@@ -69,7 +69,8 @@ export const ModelName = {
   Portfolio: 'Portfolio',
   Trade: 'Trade',
   Watchlist: 'Watchlist',
-  FinancialTwin: 'FinancialTwin'
+  FinancialTwin: 'FinancialTwin',
+  Bill: 'Bill'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -350,6 +351,21 @@ export const FinancialTwinScalarFieldEnum = {
 } as const
 
 export type FinancialTwinScalarFieldEnum = (typeof FinancialTwinScalarFieldEnum)[keyof typeof FinancialTwinScalarFieldEnum]
+
+
+export const BillScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  amount: 'amount',
+  dueDate: 'dueDate',
+  category: 'category',
+  paid: 'paid',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BillScalarFieldEnum = (typeof BillScalarFieldEnum)[keyof typeof BillScalarFieldEnum]
 
 
 export const SortOrder = {
