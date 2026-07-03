@@ -209,7 +209,7 @@ async function getDashboardData(userId: string) {
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/sign-in");
+  if (!session?.user?.id) redirect("/data-safe?from=/dashboard");
 
   const data = await getDashboardData(session.user.id);
 
