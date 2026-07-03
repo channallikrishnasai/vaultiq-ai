@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, Eye, Fingerprint, ArrowRight, AlertTriangle } from "lucide-react";
+import { Shield, Lock, Eye, Fingerprint, ArrowRight, AlertTriangle, Zap, Brain, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -79,46 +79,55 @@ function HexPattern() {
   );
 }
 
-function CursorSignIn({ visible }: { visible: boolean }) {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+function CursorSignIn() {
+  const [pos, setPos] = useState({ x: -100, y: -100 });
+  const [entered, setEntered] = useState(false);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
+    const onMove = (e: MouseEvent) => {
+      setPos({ x: e.clientX, y: e.clientY });
+      if (!entered) setEntered(true);
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+    const onLeave = () => setEntered(false);
+    const onEnter = () => setEntered(true);
+
+    window.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseleave", onLeave);
+    document.addEventListener("mouseenter", onEnter);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseleave", onLeave);
+      document.removeEventListener("mouseenter", onEnter);
+    };
+  }, [entered]);
 
   return (
-    <AnimatePresence>
-      {visible && (
+    <motion.div
+      className="fixed z-50 pointer-events-auto"
+      animate={{
+        x: pos.x + 24,
+        y: pos.y + 24,
+        opacity: entered ? 1 : 0,
+        scale: entered ? 1 : 0.5,
+      }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.5 }}
+    >
+      <Link href="/sign-in">
         <motion.div
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          className="fixed z-50 pointer-events-auto"
-          style={{ left: position.x + 20, top: position.y + 20 }}
+          whileHover={{ scale: 1.12, boxShadow: "0 0 50px rgba(212,175,55,0.6)" }}
+          whileTap={{ scale: 0.95 }}
+          className="flex items-center gap-2 px-5 py-3 rounded-full cursor-pointer select-none"
+          style={{
+            background: "linear-gradient(135deg, #D4AF37, #C8922A)",
+            boxShadow: "0 4px 25px rgba(212,175,55,0.45)",
+          }}
         >
-          <Link href="/sign-in">
-            <motion.div
-              whileHover={{ scale: 1.1, boxShadow: "0 0 40px rgba(212,175,55,0.5)" }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-5 py-3 rounded-full cursor-pointer"
-              style={{
-                background: "linear-gradient(135deg, #D4AF37, #C8922A)",
-                boxShadow: "0 4px 20px rgba(212,175,55,0.4)",
-              }}
-            >
-              <Lock size={14} className="text-black" />
-              <span className="text-black font-semibold text-sm">Sign In</span>
-              <ArrowRight size={16} className="text-black" />
-            </motion.div>
-          </Link>
+          <Lock size={14} className="text-black" />
+          <span className="text-black font-semibold text-sm">Sign In</span>
+          <ArrowRight size={16} className="text-black" />
         </motion.div>
-      )}
-    </AnimatePresence>
+      </Link>
+    </motion.div>
   );
 }
 
@@ -126,13 +135,7 @@ export default function DataSafePage() {
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
   const isUnauthorized = from?.startsWith("/dashboard");
-  const [showButton, setShowButton] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setShowButton(true), 1500);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -144,7 +147,7 @@ export default function DataSafePage() {
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
       <HexPattern />
-      <CursorSignIn visible={showButton} />
+      <CursorSignIn />
 
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6">
         <motion.div
@@ -258,44 +261,28 @@ export default function DataSafePage() {
           className="flex gap-8 mb-10"
         >
           {[
-            { label: "Active Users", value: "50K+" },
-            { label: "Data Breaches", value: "0" },
-            { label: "Uptime", value: "99.99%" },
+            { icon: Brain, label: "AI-Powered Insights", value: "24/7" },
+            { icon: Zap, label: "Real-time Alerts", value: "<1s" },
+            { icon: BarChart3, label: "Smart Analytics", value: "Auto" },
           ].map((stat, i) => (
-            <div key={i} className="text-center">
+            <div key={i} className="text-center flex flex-col items-center gap-1">
+              <stat.icon size={14} style={{ color: "#D4AF37" }} />
               <p className="text-xl font-bold" style={{ color: "#D4AF37" }}>{stat.value}</p>
-              <p className="text-zinc-600 text-[10px] mt-1">{stat.label}</p>
+              <p className="text-zinc-600 text-[10px]">{stat.label}</p>
             </div>
           ))}
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.9 }}
-        >
-          <Link href="/sign-in">
-            <motion.div
-              whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(212,175,55,0.4)" }}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-3 px-8 py-3.5 rounded-full cursor-pointer"
-              style={{ background: "linear-gradient(135deg, #D4AF37, #C8922A)", boxShadow: "0 4px 20px rgba(212,175,55,0.3)" }}
-            >
-              <Lock size={16} className="text-black" />
-              <span className="text-black font-semibold text-sm">Sign In to Continue</span>
-              <ArrowRight size={16} className="text-black" />
-            </motion.div>
-          </Link>
-        </motion.div>
-
-        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 1.2 }}
-          className="mt-6 text-zinc-700 text-[11px]"
+          transition={{ duration: 0.6, delay: 1 }}
+          className="text-center"
         >
-          Move your cursor — a sign-in button follows you
-        </motion.p>
+          <p className="text-zinc-700 text-[11px]">
+            Move your cursor — the sign-in button follows you
+          </p>
+        </motion.div>
       </div>
 
       <div className="absolute top-8 left-8 w-12 h-12 pointer-events-none">
