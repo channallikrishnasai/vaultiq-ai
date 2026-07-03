@@ -16,7 +16,7 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ data, userId, user }: DashboardLayoutProps) {
-  const { uiReady } = useOrb();
+  const { uiReady, orbState } = useOrb();
 
   return (
     <div className="relative flex h-full w-full overflow-hidden" style={{ background: "#020100" }}>
@@ -220,6 +220,7 @@ export default function DashboardLayout({ data, userId, user }: DashboardLayoutP
           twinStats={data.twinStats}
           user={user}
           profile={data.profile}
+          orbState={orbState}
         />
       )}
 

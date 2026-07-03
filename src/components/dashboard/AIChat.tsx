@@ -169,6 +169,7 @@ export default function AIChat({
       setMessages((p) => [...p, { role: "user", content: msg }]);
       if (setOrbState) setOrbState("thinking");
       setThinking(true);
+      const thinkStart = Date.now();
 
       try {
         const res = await fetch("/api/chat", {
@@ -178,9 +179,7 @@ export default function AIChat({
         });
         if (!res.ok) throw new Error("API error");
 
-        if (setOrbState) setOrbState("speaking");
-        setMessages((p) => [...p, { role: "assistant", content: "", streamed: false }]);
-
+        // Read the full SSE response
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
         let accumulatedContent = "";
@@ -199,27 +198,44 @@ export default function AIChat({
                   const parsed = JSON.parse(data);
                   if (parsed.content) {
                     accumulatedContent += parsed.content;
-                    setMessages((p) =>
-                      p.map((m, idx) =>
-                        idx === p.length - 1 ? { ...m, content: accumulatedContent } : m
-                      )
-                    );
                   }
-                } catch {
-                  // Ignore parse errors for incomplete chunks
-                }
+                } catch {}
               }
             }
           }
         }
 
-        setMessages((p) =>
-          p.map((m, idx) =>
-            idx === p.length - 1 ? { ...m, content: accumulatedContent, streamed: true } : m
-          )
-        );
-        if (setOrbState) setOrbState("idle");
-        setThinking(false);
+        // Ensure at least 2.5 seconds of thinking animation
+        const elapsed = Date.now() - thinkStart;
+        const minDelay = 2500;
+        if (elapsed < minDelay) {
+          await new Promise((resolve) => setTimeout(resolve, minDelay - elapsed));
+        }
+
+        // Now show the response and animate cards back
+        if (setOrbState) setOrbState("speaking");
+        setMessages((p) => [...p, { role: "assistant", content: accumulatedContent, streamed: false }]);
+
+        // Streaming text reveal effect
+        let i = 0;
+        const iv = setInterval(() => {
+          i += 6;
+          setMessages((p) =>
+            p.map((m, idx) =>
+              idx === p.length - 1 ? { ...m, content: accumulatedContent.slice(0, i), streamed: false } : m
+            )
+          );
+          if (i >= accumulatedContent.length) {
+            clearInterval(iv);
+            setMessages((p) =>
+              p.map((m, idx) =>
+                idx === p.length - 1 ? { ...m, content: accumulatedContent, streamed: true } : m
+              )
+            );
+            if (setOrbState) setOrbState("idle");
+            setThinking(false);
+          }
+        }, 18);
       } catch {
         setMessages((p) => [
           ...p,

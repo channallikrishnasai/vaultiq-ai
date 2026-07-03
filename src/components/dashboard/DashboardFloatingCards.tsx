@@ -38,6 +38,7 @@ function Card({
   floatDelay = 0,
   floatDuration = 4,
   floatAmount = 3,
+  isThinking = false,
 }: {
   children: React.ReactNode;
   style?: React.CSSProperties;
@@ -47,31 +48,71 @@ function Card({
   floatDelay?: number;
   floatDuration?: number;
   floatAmount?: number;
+  isThinking?: boolean;
 }) {
+  // Calculate offset to center (50%, 46%) when thinking
+  const getThinkingTransform = () => {
+    if (!isThinking || !style?.left || !style?.top) return {};
+    const leftStr = String(style.left);
+    const topStr = String(style.top);
+    const cardLeft = parseFloat(leftStr) || 50;
+    const cardTop = parseFloat(topStr) || 46;
+    // Center is at 50%, 46%
+    const dx = 50 - cardLeft;
+    const dy = 46 - cardTop;
+    return {
+      x: `${dx * 0.85}vw`,
+      y: `${dy * 0.85}vh`,
+      scale: 0.3,
+      opacity: 0,
+    };
+  };
+
+  const thinkingTransform = getThinkingTransform();
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.88, y: 8 }}
-      animate={{
-        opacity: 1,
-        scale: 1,
-        y: [0, -floatAmount, 0, floatAmount * 0.6, 0],
-      }}
-      transition={{
-        opacity: { delay, duration: 0.5 },
-        scale: { delay, type: "spring", stiffness: 180, damping: 20 },
-        y: {
-          delay: floatDelay,
-          duration: floatDuration,
-          repeat: Infinity,
-          ease: "easeInOut",
-        },
-      }}
-      whileHover={{
-        y: -6,
-        scale: 1.03,
-        boxShadow: `0 24px 64px rgba(0,0,0,0.92), 0 0 48px ${accent}22`,
-        borderColor: `${accent}66`,
-      }}
+      animate={
+        isThinking
+          ? {
+              opacity: thinkingTransform.opacity ?? 0,
+              scale: thinkingTransform.scale ?? 0.3,
+              x: thinkingTransform.x ?? 0,
+              y: thinkingTransform.y ?? 0,
+            }
+          : {
+              opacity: 1,
+              scale: 1,
+              x: 0,
+              y: [0, -floatAmount, 0, floatAmount * 0.6, 0],
+            }
+      }
+      transition={
+        isThinking
+          ? { duration: 1.8, ease: [0.4, 0, 0.2, 1], delay: delay * 0.3 }
+          : {
+              opacity: { delay, duration: 0.5 },
+              scale: { delay, type: "spring", stiffness: 180, damping: 20 },
+              x: { duration: 0 },
+              y: {
+                delay: floatDelay,
+                duration: floatDuration,
+                repeat: Infinity,
+                ease: "easeInOut",
+              },
+            }
+      }
+      whileHover={
+        !isThinking
+          ? {
+              y: -6,
+              scale: 1.03,
+              boxShadow: `0 24px 64px rgba(0,0,0,0.92), 0 0 48px ${accent}22`,
+              borderColor: `${accent}66`,
+            }
+          : undefined
+      }
       className={`absolute ${className}`}
       style={{
         background: "rgba(5,4,2,0.92)",
@@ -85,7 +126,7 @@ function Card({
         color: "#fff",
         zIndex: 5,
         transform: "translate(-50%, -50%)",
-        animation: `shimmerBorder 4s ease-in-out ${delay}s infinite`,
+        animation: isThinking ? "none" : `shimmerBorder 4s ease-in-out ${delay}s infinite`,
         ...style,
       }}
     >
@@ -185,6 +226,7 @@ interface Props {
   twinStats?: { hasTwin: boolean; healthScore: number; netWorth: number; twinName: string | null };
   user?: { name?: string | null; email?: string | null; image?: string | null };
   profile?: { income: number; currency: string | null; riskAppetite: string | null; xp: number; streak: number } | null;
+  orbState?: string;
 }
 
 export default function DashboardFloatingCards({
@@ -200,8 +242,10 @@ export default function DashboardFloatingCards({
   twinStats = { hasTwin: true, healthScore: 91, netWorth: 1250000, twinName: "Alex" },
   user,
   profile,
+  orbState = "idle",
 }: Props) {
   const [minimized, setMinimized] = useState<Record<string, boolean>>({});
+  const isThinking = orbState === "thinking";
 
   useEffect(() => {
     try {
@@ -244,6 +288,7 @@ export default function DashboardFloatingCards({
         floatDelay={0}
         floatDuration={5}
         floatAmount={2.5}
+        isThinking={isThinking}
         style={{ width: 175, left: "12.5%", top: "19.5%" }}
       >
         <CardHeader
@@ -289,6 +334,7 @@ export default function DashboardFloatingCards({
         floatDelay={0.5}
         floatDuration={4.5}
         floatAmount={2}
+        isThinking={isThinking}
         style={{ width: 175, left: "12.8%", top: "35.5%" }}
       >
         <CardHeader
@@ -327,6 +373,7 @@ export default function DashboardFloatingCards({
         floatDelay={1}
         floatDuration={5.5}
         floatAmount={3}
+        isThinking={isThinking}
         style={{ width: 175, left: "13.2%", top: "49.5%" }}
       >
         <div className="flex items-center justify-between mb-1.5">
@@ -380,6 +427,7 @@ export default function DashboardFloatingCards({
         floatDelay={1.5}
         floatDuration={4.8}
         floatAmount={2.2}
+        isThinking={isThinking}
         style={{ width: 175, left: "12.7%", top: "63.5%" }}
       >
         <CardHeader
@@ -416,6 +464,7 @@ export default function DashboardFloatingCards({
         floatDelay={2}
         floatDuration={5.2}
         floatAmount={2.8}
+        isThinking={isThinking}
         style={{ width: 175, left: "13.3%", top: "79.5%" }}
       >
         <CardHeader
@@ -461,6 +510,7 @@ export default function DashboardFloatingCards({
         floatDelay={0.3}
         floatDuration={4.8}
         floatAmount={2}
+        isThinking={isThinking}
         style={{ width: 190, left: "29.5%", top: "13.5%" }}
       >
         <CardHeader
@@ -509,6 +559,7 @@ export default function DashboardFloatingCards({
         floatDelay={0.7}
         floatDuration={5}
         floatAmount={2.5}
+        isThinking={isThinking}
         style={{ width: 195, left: "51.5%", top: "11.5%" }}
       >
         <CardHeader
@@ -559,6 +610,7 @@ export default function DashboardFloatingCards({
         floatDelay={0.5}
         floatDuration={4.5}
         floatAmount={2.2}
+        isThinking={isThinking}
         style={{ width: 185, left: "73.5%", top: "13.5%" }}
       >
         <CardHeader
@@ -601,6 +653,7 @@ export default function DashboardFloatingCards({
         floatDelay={1}
         floatDuration={5.5}
         floatAmount={3}
+        isThinking={isThinking}
         style={{ width: 185, left: "73.8%", top: "31.5%" }}
       >
         <CardHeader
@@ -642,6 +695,7 @@ export default function DashboardFloatingCards({
         floatDelay={1.5}
         floatDuration={4.8}
         floatAmount={2.5}
+        isThinking={isThinking}
         style={{ width: 185, left: "74.2%", top: "49.5%" }}
       >
         <CardHeader
@@ -686,6 +740,7 @@ export default function DashboardFloatingCards({
         floatDelay={2}
         floatDuration={5.2}
         floatAmount={2.8}
+        isThinking={isThinking}
         style={{ width: 185, left: "73.7%", top: "65.5%" }}
       >
         <CardHeader
@@ -745,6 +800,7 @@ export default function DashboardFloatingCards({
         floatDelay={2.5}
         floatDuration={4.6}
         floatAmount={2.3}
+        isThinking={isThinking}
         style={{ width: 185, left: "74.3%", top: "81.5%" }}
       >
         <CardHeader
@@ -793,6 +849,7 @@ export default function DashboardFloatingCards({
         floatDelay={1.8}
         floatDuration={5}
         floatAmount={2.5}
+        isThinking={isThinking}
         style={{ width: 175, left: "29.5%", top: "81.5%" }}
       >
         <CardHeader
@@ -864,6 +921,7 @@ export default function DashboardFloatingCards({
         floatDelay={2.2}
         floatDuration={4.8}
         floatAmount={2.2}
+        isThinking={isThinking}
         style={{ width: 185, left: "49.5%", top: "83.5%" }}
       >
         <CardHeader
@@ -928,6 +986,7 @@ export default function DashboardFloatingCards({
         floatDelay={2.7}
         floatDuration={5.2}
         floatAmount={2.8}
+        isThinking={isThinking}
         style={{ width: 175, left: "69.5%", top: "83.5%" }}
       >
         <CardHeader

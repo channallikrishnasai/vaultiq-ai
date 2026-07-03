@@ -431,6 +431,7 @@ export default function AIAdvisorCard({ profile }: AIAdvisorCardProps) {
     setMessages(p => [...p, { role: "user", content: msg }]);
     setOrbState("thinking");
     setThinking(true);
+    const thinkStart = Date.now();
 
     try {
       const res = await fetch("/api/chat", {
@@ -441,6 +442,14 @@ export default function AIAdvisorCard({ profile }: AIAdvisorCardProps) {
       if (!res.ok) throw new Error();
       const data = await res.json();
       const content = data?.data?.message || data?.message || data?.content || "Response unavailable.";
+
+      // Ensure at least 2.5 seconds of thinking animation
+      const elapsed = Date.now() - thinkStart;
+      const minDelay = 2500;
+      if (elapsed < minDelay) {
+        await new Promise(resolve => setTimeout(resolve, minDelay - elapsed));
+      }
+
       setOrbState("speaking");
       let i = 0;
       setMessages(p => [...p, { role: "assistant", content: "", streamed: false }]);
