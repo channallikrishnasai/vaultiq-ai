@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, ChevronUp, Shield, Zap, Target, TrendingUp,
   PieChart as PieIcon, Activity, Wallet, AlertTriangle, Star,
-  Trophy, Cpu, ArrowUpRight, ArrowDownRight, Flame,
+  Trophy, Cpu, ArrowUpRight, ArrowDownRight, Flame, Send,
 } from "lucide-react";
 import {
   LineChart, Line, ResponsiveContainer, PieChart, Pie, Cell,
@@ -352,7 +352,11 @@ export default function DashboardFloatingCards({
   orbState = "idle",
 }: Props) {
   const [minimized, setMinimized] = useState<Record<string, boolean>>({});
-  const { thinkingStage } = useOrb();
+  const { thinkingStage, setThinkingStage } = useOrb();
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [chatThinking, setChatThinking] = useState(false);
+  const chatScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
@@ -364,6 +368,81 @@ export default function DashboardFloatingCards({
   useEffect(() => {
     localStorage.setItem("kpi-minimized-state", JSON.stringify(minimized));
   }, [minimized]);
+
+  useEffect(() => {
+    chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [chatMessages, chatThinking]);
+
+  const sendChatMessage = useCallback(async (msg: string) => {
+    if (!msg.trim() || chatThinking) return;
+    setChatInput("");
+    setChatMessages(p => [...p, { role: "user", content: msg }]);
+    setChatThinking(true);
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg, sessionId: crypto.randomUUID() }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.error?.message || `HTTP ${res.status}`);
+      }
+
+      // Handle SSE stream response
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullContent = "";
+      let buffer = "";
+
+      setChatMessages(p => [...p, { role: "assistant", content: "" }]);
+
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const payload = line.slice(6).trim();
+              if (payload === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(payload);
+                if (parsed.content) {
+                  fullContent += parsed.content;
+                  setChatMessages(p => p.map((m, idx) =>
+                    idx === p.length - 1 ? { ...m, content: fullContent } : m
+                  ));
+                }
+              } catch {}
+            }
+          }
+        }
+      }
+
+      // If no content was streamed, try parsing as JSON (fallback)
+      if (!fullContent) {
+        const data = await res.json().catch(() => null);
+        fullContent = data?.data?.message || data?.message || data?.content || "Response unavailable.";
+        setChatMessages(p => p.map((m, idx) =>
+          idx === p.length - 1 ? { ...m, content: fullContent } : m
+        ));
+      }
+    } catch (err: any) {
+      const errorMsg = err?.message?.includes("401")
+        ? "Please sign in to use AI advisor."
+        : "Connection issue — please try again.";
+      setChatMessages(p => [...p, { role: "assistant", content: errorMsg }]);
+    } finally {
+      setChatThinking(false);
+    }
+  }, [chatThinking]);
 
   const toggleMinimize = (key: string) => {
     setMinimized((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -1163,7 +1242,7 @@ export default function DashboardFloatingCards({
       </Card>
 
       {/* ════════════════════════════════════════════════════════════════════════
-          AI ASSISTANT BAR — Bottom center
+          AI ASSISTANT BAR — Bottom center (functional chat)
           ════════════════════════════════════════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -1175,7 +1254,8 @@ export default function DashboardFloatingCards({
           bottom: "3%",
           transform: "translateX(-50%)",
           zIndex: 10,
-          width: 460,
+          width: 480,
+          maxHeight: chatMessages.length > 0 ? "60vh" : "auto",
         }}
       >
         <div
@@ -1186,89 +1266,252 @@ export default function DashboardFloatingCards({
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
             boxShadow: "0 12px 48px rgba(0,0,0,0.92), 0 0 30px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.04)",
-            padding: "12px 18px",
+            overflow: "hidden",
           }}
         >
           {/* Top accent line */}
-          <div style={{ position: "absolute", top: 0, left: "10%", right: "10%", height: 1, background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent)" }} />
+          <div style={{ position: "absolute", top: 0, left: "10%", right: "10%", height: 1, background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent)", zIndex: 1 }} />
 
-          <div className="flex items-center gap-3">
+          {/* Messages area (shown when there are messages) */}
+          {chatMessages.length > 0 && (
             <div
+              ref={chatScrollRef}
               style={{
-                width: 34,
-                height: 34,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.08))",
-                border: "1.5px solid rgba(212,175,55,0.45)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                boxShadow: "0 0 12px rgba(212,175,55,0.2)",
+                maxHeight: "40vh",
+                overflowY: "auto",
+                padding: "12px 16px 8px",
+                scrollbarWidth: "thin",
               }}
             >
-              <Zap size={15} style={{ color: "#D4AF37" }} />
-            </div>
-            <div className="flex-1">
-              <p style={{ fontSize: 9, color: "rgba(255,255,255,0.5)", marginBottom: 4, letterSpacing: "0.02em" }}>
-                Ask your AI Financial Advisor anything...
-              </p>
-              <div className="flex gap-2">
-                {["Analyze spending", "Investment tips"].map((p, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      fontSize: 6.5,
-                      padding: "2px 8px",
-                      borderRadius: 8,
-                      background: "rgba(212,175,55,0.08)",
-                      border: "1px solid rgba(212,175,55,0.15)",
-                      color: "rgba(212,175,55,0.6)",
-                      cursor: "pointer",
-                    }}
+              <AnimatePresence initial={false}>
+                {chatMessages.length === 0 && !chatThinking && (
+                  <motion.div
+                    key="welcome"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    style={{ padding: "4px 0" }}
                   >
-                    {p}
-                  </span>
+                    <p style={{ fontSize: 9, color: "rgba(212,175,55,0.5)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
+                      VaultIQ AI
+                    </p>
+                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
+                      Your financial intelligence is online. Ask me anything about investments, taxes, budgeting, or financial planning.
+                    </p>
+                  </motion.div>
+                )}
+                {chatMessages.map((m, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35 }}
+                    style={{ marginBottom: 10, display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}
+                  >
+                    {m.role === "user" ? (
+                      <span style={{
+                        fontSize: 11,
+                        color: "rgba(52,211,153,0.9)",
+                        padding: "7px 14px",
+                        borderRadius: 12,
+                        background: "rgba(52,211,153,0.07)",
+                        border: "1px solid rgba(52,211,153,0.14)",
+                        maxWidth: "80%",
+                        lineHeight: 1.5,
+                      }}>
+                        {m.content}
+                      </span>
+                    ) : (
+                      <div style={{ maxWidth: "85%" }}>
+                        <p style={{ fontSize: 9, letterSpacing: "0.1em", color: "rgba(212,175,55,0.5)", marginBottom: 4, textTransform: "uppercase" }}>
+                          VaultIQ AI
+                        </p>
+                        <div style={{
+                          fontSize: 11,
+                          color: "rgba(255,255,255,0.7)",
+                          lineHeight: 1.7,
+                          padding: "10px 14px",
+                          borderRadius: 12,
+                          background: "rgba(212,175,55,0.04)",
+                          border: "1px solid rgba(212,175,55,0.1)",
+                        }}>
+                          {m.content || (
+                            <span style={{ display: "inline-flex", gap: 3, alignItems: "center" }}>
+                              {[0,1,2].map(j => (
+                                <motion.span
+                                  key={j}
+                                  style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(212,175,55,0.5)" }}
+                                  animate={{ opacity: [0.3, 1, 0.3] }}
+                                  transition={{ duration: 0.8, repeat: Infinity, delay: j * 0.15 }}
+                                />
+                              ))}
+                            </span>
+                          )}
+                          {m.content && (
+                            <motion.span
+                              style={{ display: "inline-block", width: 2, height: 12, background: "rgba(212,175,55,0.7)", marginLeft: 1, verticalAlign: "text-bottom" }}
+                              animate={{ opacity: [1, 0] }}
+                              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
                 ))}
+                {chatThinking && chatMessages[chatMessages.length - 1]?.role === "user" && (
+                  <motion.div
+                    key="thinking"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 12, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 18 }}>
+                      {[4,8,14,12,6,10,16,14,8,5,10,14,12,6,4].map((h, i) => (
+                        <motion.div
+                          key={i}
+                          style={{ width: 2, height: h, borderRadius: 2, background: "linear-gradient(to top, rgba(212,175,55,0.2), rgba(212,175,55,0.7))" }}
+                          animate={{ scaleY: [0.3, 1, 0.3] }}
+                          transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.06, ease: "easeInOut" }}
+                        />
+                      ))}
+                    </div>
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>Analyzing your finances...</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* Input area */}
+          <div style={{ padding: chatMessages.length > 0 ? "8px 16px 12px" : "12px 18px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              {/* AI icon */}
+              <div
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: "50%",
+                  background: chatThinking
+                    ? "linear-gradient(135deg, rgba(212,175,55,0.4), rgba(212,175,55,0.15))"
+                    : "linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.08))",
+                  border: "1.5px solid rgba(212,175,55,0.45)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  boxShadow: chatThinking ? "0 0 16px rgba(212,175,55,0.4)" : "0 0 12px rgba(212,175,55,0.2)",
+                  transition: "all 0.3s",
+                }}
+              >
+                {chatThinking ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Zap size={15} style={{ color: "#D4AF37" }} />
+                  </motion.div>
+                ) : (
+                  <Zap size={15} style={{ color: "#D4AF37" }} />
+                )}
               </div>
-            </div>
 
-            {/* Voice waveform */}
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 1.5, height: 20, flexShrink: 0 }}>
-              {[4,8,14,12,6,10,16,14,8,5,10,14,12,6,4].map((h, i) => (
-                <motion.div
-                  key={i}
-                  style={{
-                    width: 2,
-                    height: h,
-                    borderRadius: 2,
-                    background: "linear-gradient(to top, rgba(212,175,55,0.2), rgba(212,175,55,0.7))",
-                  }}
-                  animate={{ scaleY: [0.3, 1, 0.3] }}
-                  transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.06, ease: "easeInOut" }}
-                />
-              ))}
-            </div>
+              {/* Input field */}
+              <input
+                value={chatInput}
+                onChange={e => setChatInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && sendChatMessage(chatInput)}
+                placeholder="Ask your AI Financial Advisor anything..."
+                disabled={chatThinking}
+                style={{
+                  flex: 1,
+                  fontSize: 11,
+                  color: "rgba(255,255,255,0.85)",
+                  background: "transparent",
+                  border: "none",
+                  outline: "none",
+                  padding: "8px 0",
+                  letterSpacing: "0.01em",
+                }}
+              />
 
-            {/* Send button */}
-            <motion.div
-              whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(212,175,55,0.5)" }}
-              whileTap={{ scale: 0.92 }}
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #F5D060, #C8922A)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                cursor: "pointer",
-                boxShadow: "0 2px 12px rgba(212,175,55,0.3)",
-              }}
-            >
-              <span style={{ fontSize: 11, color: "#000", fontWeight: 700 }}>&#9654;</span>
-            </motion.div>
+              {/* Quick action chips (only when no messages) */}
+              {chatMessages.length === 0 && !chatThinking && (
+                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                  {["Analyze spending", "Investment tips"].map((p, i) => (
+                    <span
+                      key={i}
+                      onClick={() => sendChatMessage(p)}
+                      style={{
+                        fontSize: 8,
+                        padding: "3px 10px",
+                        borderRadius: 8,
+                        background: "rgba(212,175,55,0.08)",
+                        border: "1px solid rgba(212,175,55,0.15)",
+                        color: "rgba(212,175,55,0.6)",
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.background = "rgba(212,175,55,0.15)";
+                        e.currentTarget.style.color = "rgba(212,175,55,0.9)";
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = "rgba(212,175,55,0.08)";
+                        e.currentTarget.style.color = "rgba(212,175,55,0.6)";
+                      }}
+                    >
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Voice waveform (shown when thinking) */}
+              {chatThinking && (
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 1.5, height: 20, flexShrink: 0 }}>
+                  {[4,8,14,12,6,10,16,14,8,5,10,14,12,6,4].map((h, i) => (
+                    <motion.div
+                      key={i}
+                      style={{
+                        width: 2,
+                        height: h,
+                        borderRadius: 2,
+                        background: "linear-gradient(to top, rgba(212,175,55,0.2), rgba(212,175,55,0.7))",
+                      }}
+                      animate={{ scaleY: [0.3, 1, 0.3] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.06, ease: "easeInOut" }}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Send button */}
+              <motion.div
+                whileHover={!chatThinking && chatInput.trim() ? { scale: 1.1, boxShadow: "0 0 20px rgba(212,175,55,0.5)" } : {}}
+                whileTap={!chatThinking && chatInput.trim() ? { scale: 0.92 } : {}}
+                onClick={() => sendChatMessage(chatInput)}
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: "50%",
+                  background: chatInput.trim() && !chatThinking
+                    ? "linear-gradient(135deg, #F5D060, #C8922A)"
+                    : "rgba(255,255,255,0.05)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  cursor: chatInput.trim() && !chatThinking ? "pointer" : "default",
+                  boxShadow: chatInput.trim() && !chatThinking ? "0 2px 12px rgba(212,175,55,0.3)" : "none",
+                  transition: "all 0.2s",
+                }}
+              >
+                <Send size={13} style={{ color: chatInput.trim() && !chatThinking ? "#000" : "rgba(255,255,255,0.2)" }} />
+              </motion.div>
+            </div>
           </div>
         </div>
       </motion.div>
