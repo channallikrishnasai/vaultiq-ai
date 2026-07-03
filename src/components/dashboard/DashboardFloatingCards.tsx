@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown, ChevronUp, Shield, Zap, Target, TrendingUp,
@@ -11,6 +11,8 @@ import {
   LineChart, Line, ResponsiveContainer, PieChart, Pie, Cell,
   BarChart, Bar, Tooltip, AreaChart, Area,
 } from "recharts";
+import { useOrb } from "@/contexts/OrbContext";
+import type { ThinkingStage } from "@/lib/thinking-stages";
 
 // ── Chart data ────────────────────────────────────────────────────────────────
 const SPARK = [{ v: 30 }, { v: 55 }, { v: 40 }, { v: 70 }, { v: 60 }, { v: 85 }, { v: 75 }, { v: 100 }];
@@ -28,6 +30,15 @@ const PORT_ALLOC = [
 
 const TT = { contentStyle: { display: "none" }, cursor: false as any };
 
+// ── Seeded random for deterministic jitter ─────────────────────────────────────
+function seededRandom(seed: number) {
+  let s = seed;
+  return () => {
+    s = (s * 16807 + 0) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+
 // ── Premium card wrapper ──────────────────────────────────────────────────────
 function Card({
   children,
@@ -38,7 +49,8 @@ function Card({
   floatDelay = 0,
   floatDuration = 4,
   floatAmount = 3,
-  isThinking = false,
+  thinkingStage = "idle",
+  cardIndex = 0,
 }: {
   children: React.ReactNode;
   style?: React.CSSProperties;
@@ -48,69 +60,130 @@ function Card({
   floatDelay?: number;
   floatDuration?: number;
   floatAmount?: number;
-  isThinking?: boolean;
+  thinkingStage?: ThinkingStage;
+  cardIndex?: number;
 }) {
-  // Calculate offset to center (50%, 46%) when thinking
-  const getThinkingTransform = () => {
-    if (!isThinking || !style?.left || !style?.top) return {};
-    const leftStr = String(style.left);
-    const topStr = String(style.top);
-    const cardLeft = parseFloat(leftStr) || 50;
-    const cardTop = parseFloat(topStr) || 46;
-    // Center is at 50%, 46%
-    const dx = 50 - cardLeft;
-    const dy = 46 - cardTop;
+  const rand = useMemo(() => seededRandom(cardIndex * 777 + 13), [cardIndex]);
+  const jitterX = useMemo(() => (rand() - 0.5) * 40, [rand]);
+  const jitterY = useMemo(() => (rand() - 0.5) * 30, [rand]);
+  const jitterRotate = useMemo(() => (rand() - 0.5) * 15, [rand]);
+
+  // Calculate offset to center (50%, 46%)
+  const leftStr = String(style?.left || "50%");
+  const topStr = String(style?.top || "46%");
+  const cardLeft = parseFloat(leftStr) || 50;
+  const cardTop = parseFloat(topStr) || 46;
+  const dx = 50 - cardLeft;
+  const dy = 46 - cardTop;
+
+  const isJitter = thinkingStage === "jitter";
+  const isConverge = thinkingStage === "converge";
+  const isSwallow = thinkingStage === "swallow";
+  const isHidden = thinkingStage === "swallow" || thinkingStage === "flash";
+  const isReveal = thinkingStage === "reveal";
+  const isActive = isJitter || isConverge || isSwallow;
+
+  const getAnimate = () => {
+    if (isJitter) {
+      return {
+        x: jitterX,
+        y: jitterY,
+        rotate: jitterRotate,
+        scale: 0.92,
+        opacity: 0.85,
+      };
+    }
+    if (isConverge) {
+      return {
+        x: `${dx * 0.9}vw`,
+        y: `${dy * 0.9}vh`,
+        rotate: 0,
+        scale: 0.4,
+        opacity: 0.3,
+      };
+    }
+    if (isSwallow || isHidden) {
+      return {
+        x: `${dx * 1.0}vw`,
+        y: `${dy * 1.0}vh`,
+        rotate: 0,
+        scale: 0,
+        opacity: 0,
+      };
+    }
+    if (isReveal) {
+      return {
+        x: 0,
+        y: 0,
+        rotate: 0,
+        scale: 1,
+        opacity: 1,
+      };
+    }
+    // idle
     return {
-      x: `${dx * 0.85}vw`,
-      y: `${dy * 0.85}vh`,
-      scale: 0.3,
-      opacity: 0,
+      x: 0,
+      y: [0, -floatAmount, 0, floatAmount * 0.6, 0],
+      rotate: 0,
+      scale: 1,
+      opacity: 1,
     };
   };
 
-  const thinkingTransform = getThinkingTransform();
+  const getTransition = () => {
+    if (isJitter) {
+      return {
+        x: { duration: 0.15, repeat: Infinity, repeatType: "mirror" as const, ease: "easeInOut" as const },
+        y: { duration: 0.12, repeat: Infinity, repeatType: "mirror" as const, ease: "easeInOut" as const },
+        rotate: { duration: 0.2, repeat: Infinity, repeatType: "mirror" as const, ease: "easeInOut" as const },
+        scale: { duration: 0.3 },
+        opacity: { duration: 0.3 },
+      };
+    }
+    if (isConverge) {
+      return {
+        x: { duration: 1.4, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
+        y: { duration: 1.4, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
+        rotate: { duration: 1.0, ease: "easeOut" as const },
+        scale: { duration: 1.2, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
+        opacity: { duration: 1.0 },
+      };
+    }
+    if (isSwallow) {
+      return {
+        x: { duration: 0.6, ease: [0.6, 0, 0.8, 1] as [number, number, number, number] },
+        y: { duration: 0.6, ease: [0.6, 0, 0.8, 1] as [number, number, number, number] },
+        scale: { duration: 0.5, ease: [0.6, 0, 0.8, 1] as [number, number, number, number] },
+        opacity: { duration: 0.4 },
+      };
+    }
+    if (isReveal) {
+      return {
+        x: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as [number, number, number, number], delay: delay * 0.15 },
+        y: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as [number, number, number, number], delay: delay * 0.15 },
+        scale: { duration: 0.7, type: "spring" as const, stiffness: 200, damping: 18, delay: delay * 0.15 },
+        opacity: { duration: 0.5, delay: delay * 0.15 },
+        rotate: { duration: 0.6 },
+      };
+    }
+    // idle float
+    return {
+      opacity: { delay, duration: 0.5 },
+      scale: { delay, type: "spring" as const, stiffness: 180, damping: 20 },
+      x: { duration: 0 },
+      y: { delay: floatDelay, duration: floatDuration, repeat: Infinity, ease: "easeInOut" as const },
+      rotate: { duration: 0 },
+    };
+  };
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.88, y: 8 }}
-      animate={
-        isThinking
-          ? {
-              opacity: thinkingTransform.opacity ?? 0,
-              scale: thinkingTransform.scale ?? 0.3,
-              x: thinkingTransform.x ?? 0,
-              y: thinkingTransform.y ?? 0,
-            }
-          : {
-              opacity: 1,
-              scale: 1,
-              x: 0,
-              y: [0, -floatAmount, 0, floatAmount * 0.6, 0],
-            }
-      }
-      transition={
-        isThinking
-          ? { duration: 1.8, ease: [0.4, 0, 0.2, 1], delay: delay * 0.3 }
-          : {
-              opacity: { delay, duration: 0.5 },
-              scale: { delay, type: "spring", stiffness: 180, damping: 20 },
-              x: { duration: 0 },
-              y: {
-                delay: floatDelay,
-                duration: floatDuration,
-                repeat: Infinity,
-                ease: "easeInOut",
-              },
-            }
-      }
+      animate={getAnimate()}
+      transition={getTransition()}
       whileHover={
-        !isThinking
-          ? {
-              y: -6,
-              scale: 1.03,
-              boxShadow: `0 24px 64px rgba(0,0,0,0.92), 0 0 48px ${accent}22`,
-              borderColor: `${accent}66`,
-            }
+        !isActive
+          ? { y: -6, scale: 1.03, boxShadow: `0 24px 64px rgba(0,0,0,0.92), 0 0 48px ${accent}22`, borderColor: `${accent}66` }
           : undefined
       }
       className={`absolute ${className}`}
@@ -120,17 +193,18 @@ function Card({
         borderRadius: 14,
         backdropFilter: "blur(28px)",
         WebkitBackdropFilter: "blur(28px)",
-        boxShadow: `0 14px 52px rgba(0,0,0,0.9), 0 0 24px ${accent}0c, inset 0 1px 0 rgba(255,255,255,0.05)`,
+        boxShadow: isJitter
+          ? `0 0 30px ${accent}44, 0 14px 52px rgba(0,0,0,0.9)`
+          : `0 14px 52px rgba(0,0,0,0.9), 0 0 24px ${accent}0c, inset 0 1px 0 rgba(255,255,255,0.05)`,
         overflow: "hidden",
         padding: "10px 12px",
         color: "#fff",
-        zIndex: 5,
+        zIndex: isJitter ? 20 : 5,
         transform: "translate(-50%, -50%)",
-        animation: isThinking ? "none" : `shimmerBorder 4s ease-in-out ${delay}s infinite`,
+        animation: isActive ? "none" : `shimmerBorder 4s ease-in-out ${delay}s infinite`,
         ...style,
       }}
     >
-      {/* Top accent glow line */}
       <div
         style={{
           position: "absolute",
@@ -245,7 +319,7 @@ export default function DashboardFloatingCards({
   orbState = "idle",
 }: Props) {
   const [minimized, setMinimized] = useState<Record<string, boolean>>({});
-  const isThinking = orbState === "thinking";
+  const { thinkingStage } = useOrb();
 
   useEffect(() => {
     try {
@@ -288,7 +362,8 @@ export default function DashboardFloatingCards({
         floatDelay={0}
         floatDuration={5}
         floatAmount={2.5}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={0}
         style={{ width: 175, left: "12.5%", top: "19.5%" }}
       >
         <CardHeader
@@ -334,7 +409,8 @@ export default function DashboardFloatingCards({
         floatDelay={0.5}
         floatDuration={4.5}
         floatAmount={2}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={1}
         style={{ width: 175, left: "12.8%", top: "35.5%" }}
       >
         <CardHeader
@@ -373,7 +449,8 @@ export default function DashboardFloatingCards({
         floatDelay={1}
         floatDuration={5.5}
         floatAmount={3}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={2}
         style={{ width: 175, left: "13.2%", top: "49.5%" }}
       >
         <div className="flex items-center justify-between mb-1.5">
@@ -427,7 +504,8 @@ export default function DashboardFloatingCards({
         floatDelay={1.5}
         floatDuration={4.8}
         floatAmount={2.2}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={3}
         style={{ width: 175, left: "12.7%", top: "63.5%" }}
       >
         <CardHeader
@@ -464,7 +542,8 @@ export default function DashboardFloatingCards({
         floatDelay={2}
         floatDuration={5.2}
         floatAmount={2.8}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={4}
         style={{ width: 175, left: "13.3%", top: "79.5%" }}
       >
         <CardHeader
@@ -510,7 +589,8 @@ export default function DashboardFloatingCards({
         floatDelay={0.3}
         floatDuration={4.8}
         floatAmount={2}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={5}
         style={{ width: 190, left: "29.5%", top: "13.5%" }}
       >
         <CardHeader
@@ -559,7 +639,8 @@ export default function DashboardFloatingCards({
         floatDelay={0.7}
         floatDuration={5}
         floatAmount={2.5}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={6}
         style={{ width: 195, left: "51.5%", top: "11.5%" }}
       >
         <CardHeader
@@ -610,7 +691,8 @@ export default function DashboardFloatingCards({
         floatDelay={0.5}
         floatDuration={4.5}
         floatAmount={2.2}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={7}
         style={{ width: 185, left: "73.5%", top: "13.5%" }}
       >
         <CardHeader
@@ -653,7 +735,8 @@ export default function DashboardFloatingCards({
         floatDelay={1}
         floatDuration={5.5}
         floatAmount={3}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={8}
         style={{ width: 185, left: "73.8%", top: "31.5%" }}
       >
         <CardHeader
@@ -695,7 +778,8 @@ export default function DashboardFloatingCards({
         floatDelay={1.5}
         floatDuration={4.8}
         floatAmount={2.5}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={9}
         style={{ width: 185, left: "74.2%", top: "49.5%" }}
       >
         <CardHeader
@@ -740,7 +824,8 @@ export default function DashboardFloatingCards({
         floatDelay={2}
         floatDuration={5.2}
         floatAmount={2.8}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={10}
         style={{ width: 185, left: "73.7%", top: "65.5%" }}
       >
         <CardHeader
@@ -800,7 +885,8 @@ export default function DashboardFloatingCards({
         floatDelay={2.5}
         floatDuration={4.6}
         floatAmount={2.3}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={11}
         style={{ width: 185, left: "74.3%", top: "81.5%" }}
       >
         <CardHeader
@@ -849,7 +935,8 @@ export default function DashboardFloatingCards({
         floatDelay={1.8}
         floatDuration={5}
         floatAmount={2.5}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={12}
         style={{ width: 175, left: "29.5%", top: "81.5%" }}
       >
         <CardHeader
@@ -921,7 +1008,8 @@ export default function DashboardFloatingCards({
         floatDelay={2.2}
         floatDuration={4.8}
         floatAmount={2.2}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={13}
         style={{ width: 185, left: "49.5%", top: "83.5%" }}
       >
         <CardHeader
@@ -986,7 +1074,8 @@ export default function DashboardFloatingCards({
         floatDelay={2.7}
         floatDuration={5.2}
         floatAmount={2.8}
-        isThinking={isThinking}
+        thinkingStage={thinkingStage}
+        cardIndex={14}
         style={{ width: 175, left: "69.5%", top: "83.5%" }}
       >
         <CardHeader

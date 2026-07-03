@@ -10,7 +10,7 @@ import { useOrb } from "@/contexts/OrbContext";
 import { useScene } from "@/contexts/SceneContext";
 
 export default function DashboardScene() {
-  const { orbState, uiReady, setUiReady } = useOrb();
+  const { orbState, uiReady, setUiReady, thinkingStage } = useOrb();
   const { mouse } = useScene();
 
   return (
@@ -51,7 +51,7 @@ export default function DashboardScene() {
           )}
 
           {/* The orb — JARVIS core */}
-          {uiReady && <AICore state={orbState} />}
+          {uiReady && <AICore state={orbState} thinkingStage={thinkingStage} />}
         </Suspense>
 
         <CameraRig mouse={mouse} />

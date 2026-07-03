@@ -4,6 +4,7 @@ import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { OrbState } from "@/contexts/OrbContext";
+import type { ThinkingStage } from "@/lib/thinking-stages";
 
 // ─── State config ─────────────────────────────────────────────────────────────
 
@@ -300,37 +301,56 @@ function EnergyPulse({ state }: { state: OrbState }) {
 
 // ─── Main Wireframe Globe ─────────────────────────────────────────────────────
 
-export default function AICore({ state }: { state: OrbState }) {
+export default function AICore({ state, thinkingStage = "idle" }: { state: OrbState; thinkingStage?: ThinkingStage }) {
   const groupRef = useRef<THREE.Group>(null);
   const lightRef = useRef<THREE.PointLight>(null);
   const innerLightRef = useRef<THREE.PointLight>(null);
 
   const cfg = CONFIGS[state];
   const isActive = state === "thinking" || state === "speaking" || state === "processing";
+  const isConverge = thinkingStage === "converge";
+  const isSwallow = thinkingStage === "swallow";
+  const isFlash = thinkingStage === "flash";
+  const isReveal = thinkingStage === "reveal";
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
 
     if (groupRef.current) {
-      groupRef.current.rotation.y += cfg.rotSpeed;
+      // Dramatic rotation speed based on stage
+      let rotSpeed = cfg.rotSpeed;
+      if (isConverge) rotSpeed = 0.025;
+      if (isSwallow) rotSpeed = 0.04;
+      if (isFlash) rotSpeed = 0.015;
+      groupRef.current.rotation.y += rotSpeed;
       groupRef.current.position.y = Math.sin(t * 0.25) * 0.015;
-      // Subtle scale pulse when active
-      if (isActive) {
-        const s = 3.0 + Math.sin(t * 2) * 0.03;
-        groupRef.current.scale.setScalar(s);
-      } else {
-        groupRef.current.scale.setScalar(3.0);
-      }
+
+      // Dramatic scale based on stage
+      let targetScale = 3.0;
+      if (isConverge) targetScale = 4.5 + Math.sin(t * 3) * 0.3;
+      if (isSwallow) targetScale = 6.0 + Math.sin(t * 5) * 0.5;
+      if (isFlash) targetScale = 3.5;
+      if (isReveal) targetScale = 3.0;
+
+      const currentScale = groupRef.current.scale.x;
+      const newScale = currentScale + (targetScale - currentScale) * 0.05;
+      groupRef.current.scale.setScalar(newScale);
     }
 
     if (lightRef.current) {
-      lightRef.current.intensity = cfg.lightIntensity + Math.sin(t * cfg.pulseSpeed * 0.5) * 1.2;
+      let intensity = cfg.lightIntensity;
+      if (isConverge) intensity = 6.0;
+      if (isSwallow) intensity = 8.0;
+      if (isFlash) intensity = 12.0;
+      lightRef.current.intensity = intensity + Math.sin(t * cfg.pulseSpeed * 0.5) * 1.5;
     }
 
     if (innerLightRef.current) {
-      innerLightRef.current.intensity = isActive
-        ? 2.0 + Math.sin(t * 4) * 1.5
-        : 0.5 + Math.sin(t * 0.8) * 0.3;
+      let intensity = 0.5;
+      if (isConverge) intensity = 4.0;
+      if (isSwallow) intensity = 6.0;
+      if (isFlash) intensity = 10.0;
+      innerLightRef.current.intensity = intensity + Math.sin(t * 4) * 2;
     }
   });
 

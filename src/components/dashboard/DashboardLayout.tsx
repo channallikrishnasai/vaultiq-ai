@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import DashboardScene from "./DashboardScene";
 import NeuralNetwork from "./NeuralNetwork";
 import DashboardFloatingCards from "./DashboardFloatingCards";
 import DashboardKPIRow from "./DashboardKPIRow";
+import FlashOverlay from "./FlashOverlay";
 import { DashboardData } from "@/types/dashboard";
 import { useOrb } from "@/contexts/OrbContext";
 
@@ -16,7 +17,39 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ data, userId, user }: DashboardLayoutProps) {
-  const { uiReady, orbState } = useOrb();
+  const { uiReady, orbState, thinkingStage, setThinkingStage } = useOrb();
+  const stageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Multi-stage thinking animation sequencer
+  useEffect(() => {
+    if (orbState === "thinking") {
+      // Start the dramatic sequence
+      setThinkingStage("jitter");
+      stageTimerRef.current = setTimeout(() => {
+        setThinkingStage("converge");
+        stageTimerRef.current = setTimeout(() => {
+          setThinkingStage("swallow");
+          stageTimerRef.current = setTimeout(() => {
+            setThinkingStage("flash");
+            stageTimerRef.current = setTimeout(() => {
+              // Flash stays until orbState changes to speaking/idle
+            }, 600);
+          }, 800);
+        }, 1500);
+      }, 1200);
+    } else if (orbState === "speaking" || orbState === "idle") {
+      // Response arriving — reveal cards
+      if (stageTimerRef.current) clearTimeout(stageTimerRef.current);
+      setThinkingStage("reveal");
+      // After reveal animation, go back to idle
+      const t = setTimeout(() => setThinkingStage("idle"), 1200);
+      return () => clearTimeout(t);
+    }
+
+    return () => {
+      if (stageTimerRef.current) clearTimeout(stageTimerRef.current);
+    };
+  }, [orbState, setThinkingStage]);
 
   return (
     <div className="relative flex h-full w-full overflow-hidden" style={{ background: "#020100" }}>
@@ -223,6 +256,9 @@ export default function DashboardLayout({ data, userId, user }: DashboardLayoutP
           orbState={orbState}
         />
       )}
+
+      {/* ── Flash overlay for AI thinking animation ── */}
+      <FlashOverlay />
 
       {/* ── Golden wireframe glow halo — rich gold, Saturn style ── */}
       {uiReady && (
