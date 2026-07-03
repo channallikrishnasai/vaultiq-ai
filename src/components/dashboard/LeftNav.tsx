@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import {
   Home, LayoutDashboard, Briefcase, LineChart, TrendingDown,
   TrendingUp, PiggyBank, Target, CreditCard, Percent,
@@ -39,7 +39,22 @@ const keyMap: Record<string, string> = {
 
 export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: string }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session } = useSession();
   const { language, setLanguage, t } = useLanguage();
+
+  const handleNavClick = (href: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (href === "/") {
+      router.push("/");
+      return;
+    }
+    if (session) {
+      router.push(href);
+    } else {
+      router.push("/data-safe");
+    }
+  };
 
   return (
     <div
@@ -72,9 +87,10 @@ export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: str
           const translatedName = t(transKey);
 
           return (
-            <Link
+            <a
               key={item.name}
               href={item.href}
+              onClick={handleNavClick(item.href)}
               title={translatedName}
               className="group relative flex h-9 w-full items-center justify-center rounded-lg transition-all"
               style={
@@ -104,7 +120,7 @@ export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: str
               >
                 {translatedName}
               </span>
-            </Link>
+            </a>
           );
         })}
       </div>

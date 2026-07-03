@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Lock, Eye, Fingerprint, ArrowRight } from "lucide-react";
+import { Shield, Lock, Eye, Fingerprint, ArrowRight, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 const TRUST_ITEMS = [
   { icon: Shield, text: "Bank-grade encryption", detail: "256-bit AES encryption for all data" },
@@ -122,6 +123,9 @@ function CursorSignIn({ visible }: { visible: boolean }) {
 }
 
 export default function DataSafePage() {
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
+  const isUnauthorized = from?.startsWith("/dashboard");
   const [showButton, setShowButton] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
 
@@ -178,8 +182,26 @@ export default function DataSafePage() {
             WebkitTextFillColor: "transparent",
           }}
         >
-          Your Data is Safe With Us
+          {isUnauthorized ? "Access Restricted" : "Your Data is Safe With Us"}
         </motion.h1>
+
+        {isUnauthorized && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="mb-6 px-5 py-3 rounded-xl flex items-center gap-3"
+            style={{
+              background: "rgba(239,68,68,0.08)",
+              border: "1px solid rgba(239,68,68,0.25)",
+            }}
+          >
+            <AlertTriangle size={18} className="text-red-400 shrink-0" />
+            <span className="text-red-300 text-sm font-medium">
+              You are not authorized to access the Dashboard. Please sign in first.
+            </span>
+          </motion.div>
+        )}
 
         <motion.div
           initial={{ opacity: 0 }}
