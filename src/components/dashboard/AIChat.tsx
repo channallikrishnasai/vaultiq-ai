@@ -1,27 +1,12 @@
 "use client";
 
-import {
-  useState,
-  useRef,
-  useCallback,
-  useEffect,
-} from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Send,
-  Mic,
-  TrendingUp,
-  PiggyBank,
-  Receipt,
-  GraduationCap,
-  ShieldCheck,
-  Landmark,
-  ChevronDown,
-  ChevronUp,
-  X,
-  MessageSquare,
+  Send, Mic, TrendingUp, PiggyBank, Receipt, GraduationCap,
+  ShieldCheck, Landmark, ChevronDown, ChevronUp, X, MessageSquare,
 } from "lucide-react";
-import { useOrb } from "@/contexts/OrbContext";
+import { globalOrb } from "@/lib/global-orb";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -139,14 +124,24 @@ export default function AIChat({
   isClosed = false,
   setIsClosed,
 }: AIChatProps) {
-  const orbContext = useOrb && typeof useOrb === 'function' ? useOrb() : null;
-  const { orbState, setOrbState, uiReady } = orbContext || { orbState: "idle", setOrbState: () => {}, uiReady: true };
+  const [orbState, setOrbStateRaw] = useState<"idle" | "thinking" | "speaking" | "listening" | "processing" | "celebrating" | "sleeping" | "error">("idle");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const [localMinimized, setLocalMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 }); // For dragging
+  const [position, setPosition] = useState({ x: 0, y: 0 });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const uiReady = true;
+
+  // Sync with global orb and set state
+  useEffect(() => {
+    return globalOrb.subscribe((state) => setOrbStateRaw(state));
+  }, []);
+
+  const setOrbState = useCallback((state: typeof orbState) => {
+    setOrbStateRaw(state);
+    globalOrb.setState(state);
+  }, []);
 
   // Handle minimize state
   const handleMinimize = (value: boolean) => {

@@ -3,11 +3,10 @@
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { OrbProvider } from "@/contexts/OrbContext";
+import { globalOrb } from "@/lib/global-orb";
 import { Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
-// Dynamically import AIChat to avoid hydration issues
 const AIChat = dynamic(() => import("./AIChat"), {
   ssr: false,
 });
@@ -18,7 +17,6 @@ function GlobalAIChatInner() {
   const [isClosed, setIsClosed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Load states from localStorage
   useEffect(() => {
     setMounted(true);
     try {
@@ -29,7 +27,6 @@ function GlobalAIChatInner() {
     } catch {}
   }, []);
 
-  // Save states to localStorage
   useEffect(() => {
     if (mounted) {
       localStorage.setItem("ai-chat-minimized", JSON.stringify(isMinimized));
@@ -46,7 +43,6 @@ function GlobalAIChatInner() {
     return null;
   }
 
-  // If closed completely, show a tiny floating spark orb so the user can always restore the assistant.
   if (isClosed) {
     return (
       <motion.button
@@ -97,9 +93,6 @@ export default function GlobalAIChat() {
     return null;
   }
 
-  return (
-    <OrbProvider>
-      <GlobalAIChatInner />
-    </OrbProvider>
-  );
+  // No OrbProvider here — uses global orb state instead
+  return <GlobalAIChatInner />;
 }

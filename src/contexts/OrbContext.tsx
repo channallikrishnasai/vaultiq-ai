@@ -5,10 +5,11 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
   ReactNode,
 } from "react";
+import { globalOrb } from "@/lib/global-orb";
 
-// All states defined in the VaultIQ AI spec
 export type OrbState =
   | "idle"
   | "thinking"
@@ -34,11 +35,19 @@ const OrbContext = createContext<OrbContextValue>({
 });
 
 export function OrbProvider({ children }: { children: ReactNode }) {
-  const [orbState, setOrbStateRaw] = useState<OrbState>("idle");
+  const [orbState, setOrbStateRaw] = useState<OrbState>(globalOrb.getState());
   const [uiReady, setUiReady] = useState(false);
+
+  // Sync with global orb state
+  useEffect(() => {
+    return globalOrb.subscribe((state) => {
+      setOrbStateRaw(state);
+    });
+  }, []);
 
   const setOrbState = useCallback((state: OrbState) => {
     setOrbStateRaw(state);
+    globalOrb.setState(state);
   }, []);
 
   return (
