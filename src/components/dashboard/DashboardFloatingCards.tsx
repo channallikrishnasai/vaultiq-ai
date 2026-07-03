@@ -51,6 +51,7 @@ function Card({
   floatAmount = 3,
   thinkingStage = "idle",
   cardIndex = 0,
+  cardWidth = 160,
 }: {
   children: React.ReactNode;
   style?: React.CSSProperties;
@@ -62,19 +63,19 @@ function Card({
   floatAmount?: number;
   thinkingStage?: ThinkingStage;
   cardIndex?: number;
+  cardWidth?: number;
 }) {
-  const rand = useMemo(() => seededRandom(cardIndex * 777 + 13), [cardIndex]);
-  const jitterX = useMemo(() => (rand() - 0.5) * 40, [rand]);
-  const jitterY = useMemo(() => (rand() - 0.5) * 30, [rand]);
-  const jitterRotate = useMemo(() => (rand() - 0.5) * 15, [rand]);
-
-  // Calculate offset to center (50%, 46%)
+  // Card's starting position (percentage of viewport)
   const leftStr = String(style?.left || "50%");
   const topStr = String(style?.top || "46%");
   const cardLeft = parseFloat(leftStr) || 50;
   const cardTop = parseFloat(topStr) || 46;
-  const dx = 50 - cardLeft;
-  const dy = 46 - cardTop;
+
+  // Offset from planet center (50%, 46%) in vw/vh units
+  const dxVW = 50 - cardLeft; // e.g., 37.5 if card is at 12.5%
+  const dyVH = 46 - cardTop;  // e.g., 26.5 if card is at 19.5%
+  const distFromCenter = Math.sqrt(dxVW * dxVW + dyVH * dyVH);
+  const baseAngle = Math.atan2(dyVH, dxVW);
 
   const isJitter = thinkingStage === "jitter";
   const isConverge = thinkingStage === "converge";
@@ -83,30 +84,59 @@ function Card({
   const isReveal = thinkingStage === "reveal";
   const isActive = isJitter || isConverge || isSwallow;
 
+  // Orbit keyframes: cards circle around planet in vw/vh
+  const orbitKeyframes = useMemo(() => {
+    const numSteps = 16;
+    const orbitRadius = distFromCenter * 0.85;
+    const angleOffset = (cardIndex / 15) * Math.PI * 2;
+    return Array.from({ length: numSteps + 1 }, (_, i) => {
+      const angle = angleOffset + (i / numSteps) * Math.PI * 2;
+      return {
+        x: `${Math.cos(angle) * orbitRadius}vw`,
+        y: `${Math.sin(angle) * orbitRadius * 0.8}vh`,
+      };
+    });
+  }, [cardIndex, distFromCenter]);
+
+  // Converge keyframes: spiral toward center
+  const convergeKeyframes = useMemo(() => {
+    const numSteps = 12;
+    return Array.from({ length: numSteps + 1 }, (_, i) => {
+      const t = i / numSteps;
+      const radius = distFromCenter * 0.85 * (1 - t * 0.95);
+      const angle = baseAngle + t * Math.PI * 3;
+      return {
+        x: `${Math.cos(angle) * radius}vw`,
+        y: `${Math.sin(angle) * radius * 0.8}vh`,
+      };
+    });
+  }, [baseAngle, distFromCenter]);
+
   const getAnimate = () => {
     if (isJitter) {
       return {
-        x: jitterX,
-        y: jitterY,
-        rotate: jitterRotate,
-        scale: 0.92,
-        opacity: 0.85,
+        x: orbitKeyframes.map((k) => k.x),
+        y: orbitKeyframes.map((k) => k.y),
+        rotate: [0, 5, -5, 3, -3, 0],
+        scale: 0.88,
+        opacity: 0.9,
       };
     }
     if (isConverge) {
       return {
-        x: `${dx * 0.9}vw`,
-        y: `${dy * 0.9}vh`,
-        rotate: 0,
-        scale: 0.4,
-        opacity: 0.3,
+        x: convergeKeyframes.map((k) => k.x),
+        y: convergeKeyframes.map((k) => k.y),
+        rotate: [0, 15, -15, 8, 0],
+        scale: [0.88, 0.65, 0.4, 0.2],
+        opacity: [0.9, 0.6, 0.3, 0.1],
       };
     }
     if (isSwallow || isHidden) {
+      // Final collapse: move exactly to center and shrink to nothing
       return {
-        x: `${dx * 1.0}vw`,
-        y: `${dy * 1.0}vh`,
-        rotate: 0,
+        x: `${dxVW}vw`,
+        y: `${dyVH}vh`,
+        rotate: 720,
         scale: 0,
         opacity: 0,
       };
@@ -133,40 +163,40 @@ function Card({
   const getTransition = () => {
     if (isJitter) {
       return {
-        x: { duration: 0.15, repeat: Infinity, repeatType: "mirror" as const, ease: "easeInOut" as const },
-        y: { duration: 0.12, repeat: Infinity, repeatType: "mirror" as const, ease: "easeInOut" as const },
-        rotate: { duration: 0.2, repeat: Infinity, repeatType: "mirror" as const, ease: "easeInOut" as const },
-        scale: { duration: 0.3 },
-        opacity: { duration: 0.3 },
+        x: { duration: 2.5, repeat: Infinity, ease: "linear" as const },
+        y: { duration: 2.5, repeat: Infinity, ease: "linear" as const },
+        rotate: { duration: 0.6, repeat: Infinity, repeatType: "mirror" as const, ease: "easeInOut" as const },
+        scale: { duration: 0.4 },
+        opacity: { duration: 0.4 },
       };
     }
     if (isConverge) {
       return {
-        x: { duration: 1.4, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
-        y: { duration: 1.4, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
-        rotate: { duration: 1.0, ease: "easeOut" as const },
-        scale: { duration: 1.2, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
-        opacity: { duration: 1.0 },
+        x: { duration: 1.8, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
+        y: { duration: 1.8, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
+        rotate: { duration: 1.5, ease: "easeOut" as const },
+        scale: { duration: 1.5, ease: [0.4, 0, 0.2, 1] as [number, number, number, number] },
+        opacity: { duration: 1.2 },
       };
     }
     if (isSwallow) {
       return {
         x: { duration: 0.6, ease: [0.6, 0, 0.8, 1] as [number, number, number, number] },
         y: { duration: 0.6, ease: [0.6, 0, 0.8, 1] as [number, number, number, number] },
+        rotate: { duration: 0.6, ease: "easeIn" as const },
         scale: { duration: 0.5, ease: [0.6, 0, 0.8, 1] as [number, number, number, number] },
         opacity: { duration: 0.4 },
       };
     }
     if (isReveal) {
       return {
-        x: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as [number, number, number, number], delay: delay * 0.15 },
-        y: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as [number, number, number, number], delay: delay * 0.15 },
-        scale: { duration: 0.7, type: "spring" as const, stiffness: 200, damping: 18, delay: delay * 0.15 },
-        opacity: { duration: 0.5, delay: delay * 0.15 },
+        x: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as [number, number, number, number], delay: delay * 0.1 },
+        y: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as [number, number, number, number], delay: delay * 0.1 },
+        scale: { duration: 0.7, type: "spring" as const, stiffness: 200, damping: 18, delay: delay * 0.1 },
+        opacity: { duration: 0.5, delay: delay * 0.1 },
         rotate: { duration: 0.6 },
       };
     }
-    // idle float
     return {
       opacity: { delay, duration: 0.5 },
       scale: { delay, type: "spring" as const, stiffness: 180, damping: 20 },
@@ -200,8 +230,11 @@ function Card({
         padding: "10px 12px",
         color: "#fff",
         zIndex: isJitter ? 20 : 5,
-        transform: "translate(-50%, -50%)",
         animation: isActive ? "none" : `shimmerBorder 4s ease-in-out ${delay}s infinite`,
+        // Center the card using negative margins so framer-motion can control transform
+        marginLeft: `-${cardWidth / 2}px`,
+        marginTop: "-40px",
+        width: `${cardWidth}px`,
         ...style,
       }}
     >
@@ -364,7 +397,8 @@ export default function DashboardFloatingCards({
         floatAmount={2.5}
         thinkingStage={thinkingStage}
         cardIndex={0}
-        style={{ width: 175, left: "12.5%", top: "19.5%" }}
+        cardWidth={175}
+        style={{ left: "12.5%", top: "19.5%" }}
       >
         <CardHeader
           label="Financial Level"
@@ -411,7 +445,8 @@ export default function DashboardFloatingCards({
         floatAmount={2}
         thinkingStage={thinkingStage}
         cardIndex={1}
-        style={{ width: 175, left: "12.8%", top: "35.5%" }}
+        cardWidth={175}
+        style={{ left: "12.8%", top: "35.5%" }}
       >
         <CardHeader
           label="Automation Badges"
@@ -451,7 +486,8 @@ export default function DashboardFloatingCards({
         floatAmount={3}
         thinkingStage={thinkingStage}
         cardIndex={2}
-        style={{ width: 175, left: "13.2%", top: "49.5%" }}
+        cardWidth={175}
+        style={{ left: "13.2%", top: "49.5%" }}
       >
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-1.5">
@@ -506,7 +542,8 @@ export default function DashboardFloatingCards({
         floatAmount={2.2}
         thinkingStage={thinkingStage}
         cardIndex={3}
-        style={{ width: 175, left: "12.7%", top: "63.5%" }}
+        cardWidth={175}
+        style={{ left: "12.7%", top: "63.5%" }}
       >
         <CardHeader
           label="Tax Planner"
@@ -544,7 +581,8 @@ export default function DashboardFloatingCards({
         floatAmount={2.8}
         thinkingStage={thinkingStage}
         cardIndex={4}
-        style={{ width: 175, left: "13.3%", top: "79.5%" }}
+        cardWidth={175}
+        style={{ left: "13.3%", top: "79.5%" }}
       >
         <CardHeader
           label="Portfolio"
@@ -591,7 +629,8 @@ export default function DashboardFloatingCards({
         floatAmount={2}
         thinkingStage={thinkingStage}
         cardIndex={5}
-        style={{ width: 190, left: "29.5%", top: "13.5%" }}
+        cardWidth={190}
+        style={{ left: "29.5%", top: "13.5%" }}
       >
         <CardHeader
           label="Net Worth"
@@ -641,7 +680,8 @@ export default function DashboardFloatingCards({
         floatAmount={2.5}
         thinkingStage={thinkingStage}
         cardIndex={6}
-        style={{ width: 195, left: "51.5%", top: "11.5%" }}
+        cardWidth={195}
+        style={{ left: "51.5%", top: "11.5%" }}
       >
         <CardHeader
           label="Portfolio Performance"
@@ -693,7 +733,8 @@ export default function DashboardFloatingCards({
         floatAmount={2.2}
         thinkingStage={thinkingStage}
         cardIndex={7}
-        style={{ width: 185, left: "73.5%", top: "13.5%" }}
+        cardWidth={185}
+        style={{ left: "73.5%", top: "13.5%" }}
       >
         <CardHeader
           label="Monthly Income"
@@ -737,7 +778,8 @@ export default function DashboardFloatingCards({
         floatAmount={3}
         thinkingStage={thinkingStage}
         cardIndex={8}
-        style={{ width: 185, left: "73.8%", top: "31.5%" }}
+        cardWidth={185}
+        style={{ left: "73.8%", top: "31.5%" }}
       >
         <CardHeader
           label="Cash Flow Tracker"
@@ -780,7 +822,8 @@ export default function DashboardFloatingCards({
         floatAmount={2.5}
         thinkingStage={thinkingStage}
         cardIndex={9}
-        style={{ width: 185, left: "74.2%", top: "49.5%" }}
+        cardWidth={185}
+        style={{ left: "74.2%", top: "49.5%" }}
       >
         <CardHeader
           label="Savings Rate"
@@ -826,7 +869,8 @@ export default function DashboardFloatingCards({
         floatAmount={2.8}
         thinkingStage={thinkingStage}
         cardIndex={10}
-        style={{ width: 185, left: "73.7%", top: "65.5%" }}
+        cardWidth={185}
+        style={{ left: "73.7%", top: "65.5%" }}
       >
         <CardHeader
           label="Emergency Fund"
@@ -887,7 +931,8 @@ export default function DashboardFloatingCards({
         floatAmount={2.3}
         thinkingStage={thinkingStage}
         cardIndex={11}
-        style={{ width: 185, left: "74.3%", top: "81.5%" }}
+        cardWidth={185}
+        style={{ left: "74.3%", top: "81.5%" }}
       >
         <CardHeader
           label="Expense Analytics"
@@ -937,7 +982,8 @@ export default function DashboardFloatingCards({
         floatAmount={2.5}
         thinkingStage={thinkingStage}
         cardIndex={12}
-        style={{ width: 175, left: "29.5%", top: "81.5%" }}
+        cardWidth={175}
+        style={{ left: "29.5%", top: "81.5%" }}
       >
         <CardHeader
           label="Goal Progress"
@@ -1010,7 +1056,8 @@ export default function DashboardFloatingCards({
         floatAmount={2.2}
         thinkingStage={thinkingStage}
         cardIndex={13}
-        style={{ width: 185, left: "49.5%", top: "83.5%" }}
+        cardWidth={185}
+        style={{ left: "49.5%", top: "83.5%" }}
       >
         <CardHeader
           label="Financial Health Score"
@@ -1076,7 +1123,8 @@ export default function DashboardFloatingCards({
         floatAmount={2.8}
         thinkingStage={thinkingStage}
         cardIndex={14}
-        style={{ width: 175, left: "69.5%", top: "83.5%" }}
+        cardWidth={175}
+        style={{ left: "69.5%", top: "83.5%" }}
       >
         <CardHeader
           label="Investment Returns"

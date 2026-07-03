@@ -305,9 +305,11 @@ export default function AICore({ state, thinkingStage = "idle" }: { state: OrbSt
   const groupRef = useRef<THREE.Group>(null);
   const lightRef = useRef<THREE.PointLight>(null);
   const innerLightRef = useRef<THREE.PointLight>(null);
+  const rotationAccum = useRef(0);
 
   const cfg = CONFIGS[state];
   const isActive = state === "thinking" || state === "speaking" || state === "processing";
+  const isJitter = thinkingStage === "jitter";
   const isConverge = thinkingStage === "converge";
   const isSwallow = thinkingStage === "swallow";
   const isFlash = thinkingStage === "flash";
@@ -317,19 +319,27 @@ export default function AICore({ state, thinkingStage = "idle" }: { state: OrbSt
     const t = clock.getElapsedTime();
 
     if (groupRef.current) {
-      // Dramatic rotation speed based on stage
+      // Progressive rotation: slow → fast → slow
       let rotSpeed = cfg.rotSpeed;
-      if (isConverge) rotSpeed = 0.025;
-      if (isSwallow) rotSpeed = 0.04;
-      if (isFlash) rotSpeed = 0.015;
-      groupRef.current.rotation.y += rotSpeed;
+      if (isJitter) rotSpeed = 0.012;
+      if (isConverge) rotSpeed = 0.035;
+      if (isSwallow) rotSpeed = 0.06;
+      if (isFlash) rotSpeed = 0.02;
+      if (isReveal) rotSpeed = 0.01;
+
+      // Smoothly ramp rotation speed
+      rotationAccum.current += (rotSpeed - rotationAccum.current) * 0.1;
+      groupRef.current.rotation.y += rotationAccum.current;
+
+      // Gentle float
       groupRef.current.position.y = Math.sin(t * 0.25) * 0.015;
 
-      // Dramatic scale based on stage
+      // Dramatic scale based on stage — planet expands to "eat" cards
       let targetScale = 3.0;
-      if (isConverge) targetScale = 4.5 + Math.sin(t * 3) * 0.3;
-      if (isSwallow) targetScale = 6.0 + Math.sin(t * 5) * 0.5;
-      if (isFlash) targetScale = 3.5;
+      if (isJitter) targetScale = 3.3 + Math.sin(t * 2) * 0.2;
+      if (isConverge) targetScale = 4.0 + Math.sin(t * 3) * 0.3;
+      if (isSwallow) targetScale = 5.5 + Math.sin(t * 5) * 0.5;
+      if (isFlash) targetScale = 3.8;
       if (isReveal) targetScale = 3.0;
 
       const currentScale = groupRef.current.scale.x;
@@ -339,6 +349,7 @@ export default function AICore({ state, thinkingStage = "idle" }: { state: OrbSt
 
     if (lightRef.current) {
       let intensity = cfg.lightIntensity;
+      if (isJitter) intensity = 3.5;
       if (isConverge) intensity = 6.0;
       if (isSwallow) intensity = 8.0;
       if (isFlash) intensity = 12.0;
@@ -347,6 +358,7 @@ export default function AICore({ state, thinkingStage = "idle" }: { state: OrbSt
 
     if (innerLightRef.current) {
       let intensity = 0.5;
+      if (isJitter) intensity = 2.0;
       if (isConverge) intensity = 4.0;
       if (isSwallow) intensity = 6.0;
       if (isFlash) intensity = 10.0;

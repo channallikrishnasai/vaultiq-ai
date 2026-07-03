@@ -35,8 +35,8 @@ export default function DashboardLayout({ data, userId, user }: DashboardLayoutP
               // Flash stays until orbState changes to speaking/idle
             }, 600);
           }, 800);
-        }, 1500);
-      }, 1200);
+        }, 2000);
+      }, 3000);
     } else if (orbState === "speaking" || orbState === "idle") {
       // Response arriving — reveal cards
       if (stageTimerRef.current) clearTimeout(stageTimerRef.current);
