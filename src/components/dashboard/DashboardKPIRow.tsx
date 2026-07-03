@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Info, ChevronUp, BarChart3, TrendingUp, TrendingDown, ChevronDown } from "lucide-react";
+import { Info, ChevronUp, BarChart3, TrendingUp, TrendingDown, ChevronDown, LogOut, Mail } from "lucide-react";
+import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 interface KPIItem {
   label: string;
@@ -24,6 +26,7 @@ interface DashboardKPIRowProps {
   portfolioReturn?: number;
   creditScore?: number;
   emergencyFund?: number;
+  user?: { name?: string | null; email?: string | null; image?: string | null };
 }
 
 function currency(n: number) {
@@ -42,8 +45,11 @@ export default function DashboardKPIRow({
   portfolioReturn = 14.5,
   creditScore = 812,
   emergencyFund = 25000,
+  user,
 }: DashboardKPIRowProps) {
   const [minimized, setMinimized] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const router = useRouter();
 
   const items: KPIItem[] = [
     {
@@ -230,12 +236,94 @@ export default function DashboardKPIRow({
               ))}
             </div>
 
-            {/* Minimize toggle */}
-            <motion.button
+            {/* Profile + Minimize */}
+            <div className="absolute top-1 right-2 z-30 flex items-center gap-1.5">
+              {/* Profile button */}
+              {user && (
+                <div className="relative">
+                  <motion.button
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.94 }}
+                    className="flex items-center gap-1.5 rounded-full px-2 py-1 cursor-pointer"
+                    style={{
+                      background: "rgba(5,4,2,0.98)",
+                      border: "1px solid rgba(212,175,55,0.25)",
+                      boxShadow: "0 2px 10px rgba(0,0,0,0.6), 0 0 8px rgba(212,175,55,0.1)",
+                    }}
+                  >
+                    {user.image ? (
+                      <img src={user.image} alt="" style={{ width: 14, height: 14, borderRadius: "50%" }} />
+                    ) : (
+                      <div style={{
+                        width: 14, height: 14, borderRadius: "50%",
+                        background: "linear-gradient(135deg, #D4AF37, #8B6914)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 7, fontWeight: 700, color: "#000",
+                      }}>
+                        {(user.name ?? "U")[0].toUpperCase()}
+                      </div>
+                    )}
+                    <span style={{ fontSize: 7, color: "#D4AF37", fontWeight: 700, letterSpacing: "0.06em" }}>
+                      {(user.name ?? "User").split(" ")[0].toUpperCase()}
+                    </span>
+                  </motion.button>
+
+                  <AnimatePresence>
+                    {profileOpen && (
+                      <>
+                        <div style={{ position: "fixed", inset: 0, zIndex: 40 }} onClick={() => setProfileOpen(false)} />
+                        <motion.div
+                          initial={{ opacity: 0, y: -6, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6, scale: 0.95 }}
+                          transition={{ duration: 0.12 }}
+                          style={{
+                            position: "absolute", right: 0, top: "100%", marginTop: 6,
+                            width: 220, borderRadius: 10,
+                            background: "rgba(10,10,14,0.97)",
+                            border: "1px solid rgba(212,175,55,0.15)",
+                            backdropFilter: "blur(12px)", zIndex: 50, overflow: "hidden",
+                          }}
+                        >
+                          <div style={{ padding: "12px 14px 10px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.85)", marginBottom: 4 }}>
+                              {user.name ?? "User"}
+                            </p>
+                            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                              <Mail size={10} style={{ color: "rgba(212,175,55,0.5)" }} />
+                              <p style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {user.email}
+                              </p>
+                            </div>
+                          </div>
+                          <div style={{ padding: 4 }}>
+                            <button
+                              onClick={async () => { await signOut({ redirect: false }); router.push("/"); }}
+                              style={{
+                                display: "flex", alignItems: "center", gap: 6, width: "100%",
+                                padding: "8px 10px", borderRadius: 6, background: "transparent",
+                                border: "none", cursor: "pointer", color: "rgba(255,255,255,0.5)", fontSize: 11,
+                              }}
+                              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; e.currentTarget.style.color = "#ef4444"; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
+                            >
+                              <LogOut size={12} />
+                              Log Out
+                            </button>
+                          </div>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
+
+              <motion.button
               onClick={() => setMinimized(true)}
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.94 }}
-              className="absolute top-1 right-2 z-30 flex items-center gap-1 rounded-full px-2.5 py-1"
+              className="flex items-center gap-1 rounded-full px-2.5 py-1"
               style={{
                 background: "rgba(5,4,2,0.98)",
                 border: "1px solid rgba(212,175,55,0.25)",
@@ -247,6 +335,7 @@ export default function DashboardKPIRow({
                 MINIMIZE
               </span>
             </motion.button>
+            </div>
           </motion.div>
         ) : (
           <motion.div
