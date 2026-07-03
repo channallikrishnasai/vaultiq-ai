@@ -123,6 +123,26 @@ export default function FinancePage() {
       localStorage.setItem("vaultiq_mock_expenses", JSON.stringify(updated));
       setExpenses(updated);
       toast.success("Expense logged successfully");
+      // Update related goal's current amount (deduct expense)
+      (async () => {
+        try {
+          const resGoals = await fetch("/api/goals");
+          const jsonGoals = await resGoals.json();
+          if (jsonGoals.success && jsonGoals.data && jsonGoals.data.length > 0) {
+            const goal = jsonGoals.data.find((g: any) => g.type === "SAVINGS");
+            if (goal) {
+              const newCurrent = Math.max(0, (goal.currentAmount || 0) - amt);
+              await fetch(`/api/goals/${goal.id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ currentAmount: newCurrent }),
+              });
+            }
+          }
+        } catch (e) {
+          console.error("Failed to update goal after expense", e);
+        }
+      })();
     }
 
     setAmount("");
@@ -328,8 +348,7 @@ export default function FinancePage() {
                   <Legend wrapperStyle={{ fontSize: 9 }} />
                   <Bar dataKey="income" name="Income" fill="#10b981" radius={[3, 3, 0, 0]} />
                   <Bar dataKey="expense" name="Expense" fill="#f43f5e" radius={[3, 3, 0, 0]} />
-</BarChart>
-                
+                </BarChart>
               </ResponsiveContainer>
             )}
           </div>

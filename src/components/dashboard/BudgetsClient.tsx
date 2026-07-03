@@ -68,6 +68,19 @@ export function BudgetsClient({ user }: BudgetsClientProps) {
     fetchData();
   }, [fetchData]);
 
+  // Listen for changes to expenses in localStorage to keep budgets in sync
+  useEffect(() => {
+    const handler = (e: StorageEvent) => {
+      if (e.key === 'vaultiq_mock_expenses') {
+        fetchData();
+      }
+    };
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener('storage', handler);
+    };
+  }, [fetchData]);
+
   const handleAddBudget = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsedLimit = parseFloat(limit);
