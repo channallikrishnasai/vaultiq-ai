@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, Bot, Loader2 } from "lucide-react";
+import { ArrowLeft, Bot, Loader2, Edit2 } from "lucide-react";
+import { formatCurrency } from "@/utils/formatCurrency";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { GenerateTwinPanel, RegenerateButton } from "@/components/financial-twin/GenerateTwinPanel";
 import { TwinSnapshotCard } from "@/components/financial-twin/TwinSnapshotCard";
@@ -73,9 +74,49 @@ export function FinancialTwinPageClient({ user }: FinancialTwinPageClientProps) 
     }
   }, []);
 
+  // ----- Edit Twin Snapshot (Income / Expenses) -----
+  const [editingTwin, setEditingTwin] = useState(false);
+  const [editIncome, setEditIncome] = useState(0);
+  const [editExpenses, setEditExpenses] = useState(0);
+  // Advice state for leftover money recommendations
+  const [advice, setAdvice] = useState<null | { invest: number; save: number; discretionary: number }>(null);
+
+  const startEditTwin = () => {
+    if (twin?.snapshot) {
+      setEditIncome(twin.snapshot.income);
+      setEditExpenses(twin.snapshot.expenses);
+      setEditingTwin(true);
+    }
+  };
+
+  const handleTwinUpdate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!twin) return;
+    const updatedSnapshot = { ...twin.snapshot, income: editIncome, expenses: editExpenses };
+    setTwin({ ...twin, snapshot: updatedSnapshot });
+    setEditingTwin(false);
+    // Dispatch event for other components (budget & envelope planner)
+    window.dispatchEvent(new CustomEvent('twinSnapshotUpdated', { detail: { income: editIncome, expenses: editExpenses } }));
+  };
+
   useEffect(() => {
     fetchTwin();
   }, [fetchTwin]);
+
+  // Listen for updates to income/expenses and compute advice
+  useEffect(() => {
+    const handler = (e: CustomEvent) => {
+      const { income, expenses } = e.detail;
+      const leftover = income - expenses;
+      const invest = Math.max(0, leftover * 0.3);
+      const save = Math.max(0, leftover * 0.2);
+      const discretionary = Math.max(0, leftover - invest - save);
+      setAdvice({ invest, save, discretionary });
+    };
+    window.addEventListener('twinSnapshotUpdated', handler as EventListener);
+    return () => window.removeEventListener('twinSnapshotUpdated', handler as EventListener);
+  }, []);
+
 
   const recommendations = twin?.recommendations?.items ?? [];
   const summary = twin?.recommendations?.summary;
@@ -134,6 +175,55 @@ export function FinancialTwinPageClient({ user }: FinancialTwinPageClientProps) 
             </div>
 
             <TwinSnapshotCard snapshot={twin.snapshot} />
+            {/* Edit Income / Expenses button */}
+            <div className="mt-4 flex items-center gap-4">
+              <button
+                onClick={startEditTwin}
+                className="flex items-center gap-2 rounded-md bg-violet-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-violet-500"
+              >
+                <Edit2 className="h-4 w-4" /> Edit Income/Expense
+              </button>
+            </div>
+            {/* Edit form */}
+            {editingTwin && (
+              <form onSubmit={handleTwinUpdate} className="mt-4 space-y-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+                <div className="flex flex-col">
+                  <label className="text-xs text-zinc-400">Income</label>
+                  <input
+                    type="number"
+                    value={editIncome}
+                    onChange={(e) => setEditIncome(parseFloat(e.target.value))}
+                    className="mt-1 rounded bg-zinc-900 px-2 py-1 text-sm text-zinc-200"
+                    required
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-xs text-zinc-400">Expenses</label>
+                  <input
+                    type="number"
+                    value={editExpenses}
+                    onChange={(e) => setEditExpenses(parseFloat(e.target.value))}
+                    className="mt-1 rounded bg-zinc-900 px-2 py-1 text-sm text-zinc-200"
+                    required
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    className="rounded bg-emerald-600 px-3 py-1 text-sm font-medium text-white hover:bg-emerald-500"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditingTwin(false)}
+                    className="rounded bg-zinc-600 px-3 py-1 text-sm font-medium text-white hover:bg-zinc-500"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
 
             <TwinProjectionsChart
               projections={twin.projections}
@@ -141,6 +231,17 @@ export function FinancialTwinPageClient({ user }: FinancialTwinPageClientProps) 
             />
 
             <TwinRecommendations recommendations={recommendations} summary={summary} />
+            {/* Leftover Money Advice */}
+            {advice && (
+              <div className="mt-6 rounded-xl border border-zinc-800 bg-zinc-950/50 p-4">
+                <h3 className="mb-2 text-lg font-semibold text-zinc-50">How to Use Your Leftover Money</h3>
+                <ul className="list-disc space-y-1 pl-5 text-sm text-zinc-200">
+                  <li>Invest: {formatCurrency(advice.invest)}</li>
+                  <li>Save: {formatCurrency(advice.save)}</li>
+                  <li>Discretionary: {formatCurrency(advice.discretionary)}</li>
+                </ul>
+              </div>
+            )}
           </div>
         ) : (
           <div className="mx-auto max-w-lg">
