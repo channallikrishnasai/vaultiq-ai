@@ -403,7 +403,18 @@ interface AIAdvisorCardProps {
   suggestions?: { icon?: "loan" | "portfolio" | "savings" | "tax" | "education" | "health"; label: string }[];
 }
 
-export default function AIAdvisorCard({ profile }: AIAdvisorCardProps) {
+export default function AIAdvisorCard({
+  userId,
+  profile = {
+    income: 0,
+    goal: null,
+    riskAppetite: "Moderate",
+    portfolioValue: 0,
+    healthScore: 80,
+    healthLabel: "Good"
+  },
+  suggestions = []
+}: AIAdvisorCardProps) {
   const [uiReady, setUiReady] = useState(false);
   const [orbState, setOrbState] = useState<OrbState>("idle");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -436,7 +447,7 @@ export default function AIAdvisorCard({ profile }: AIAdvisorCardProps) {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: msg, sessionId: crypto.randomUUID() }),
+        body: JSON.stringify({ message: msg, sessionId: Math.random().toString(36).substring(2) + Date.now().toString(36) }),
       });
       if (!res.ok) throw new Error();
       const data = await res.json();
@@ -461,7 +472,7 @@ export default function AIAdvisorCard({ profile }: AIAdvisorCardProps) {
     }
   }, [thinking]);
 
-  const goalPct = profile.portfolioValue && profile.goal?.targetAmount
+  const goalPct = profile?.portfolioValue && profile?.goal?.targetAmount
     ? Math.min(100, Math.round((profile.portfolioValue / profile.goal.targetAmount) * 100))
     : 41;
 

@@ -35,7 +35,16 @@ export default function RootLayout({
                 {/* Icon-only slim sidebar — always visible globally */}
                 <LeftNav activeItem="Dashboard" />
                 {/* Main content fills the rest */}
-                <main className="flex-1 overflow-hidden h-full">{children}</main>
+                <main
+                  className="flex-1 overflow-hidden h-full relative"
+                  style={{
+                    backgroundImage: "linear-gradient(rgba(4, 4, 7, 0.72), rgba(4, 4, 7, 0.86)), url('/vaultiq-background.png')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
+                >
+                  {children}
+                </main>
                 {/* Global AI Chat & API Keys — available on all pages */}
                 <GlobalAIChat />
                 <ApiKeysWidget />

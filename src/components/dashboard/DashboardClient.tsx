@@ -17,7 +17,7 @@ function DashboardInner({ data, userId }: { data: DashboardData; userId: string 
   return (
     <div
       className="relative flex h-full w-full flex-col overflow-hidden"
-      style={{ background: "#040407" }}
+      style={{ background: "transparent" }}
     >
       {/* ── TOP STRIP: KPI bar (minimizable) ── */}
       <div className="relative z-20 shrink-0 px-3 pt-2.5 pb-4">

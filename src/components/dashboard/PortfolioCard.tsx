@@ -46,7 +46,7 @@ export default function PortfolioCard({ portfolio }: PortfolioCardProps) {
         </div>
 
         <div className="flex flex-col items-center justify-center py-10 text-center">
-          <p className="text-sm text-zinc-500">You haven't created a portfolio.</p>
+          <p className="text-sm text-zinc-500">You have not created a portfolio.</p>
           <p className="mt-1 text-xs text-zinc-600">
             Start tracking your investments today.
           </p>

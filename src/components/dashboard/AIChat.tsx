@@ -137,8 +137,7 @@ export default function AIChat({
   isClosed = false,
   setIsClosed,
 }: AIChatProps) {
-  const orbContext = useOrb && typeof useOrb === 'function' ? useOrb() : null;
-  const { orbState, setOrbState, uiReady } = orbContext || { orbState: "idle", setOrbState: () => {}, uiReady: true };
+  const { orbState, setOrbState, uiReady } = useOrb();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);

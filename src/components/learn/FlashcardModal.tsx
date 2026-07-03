@@ -22,7 +22,7 @@ export default function FlashcardModal({ onClose, onComplete }: FlashcardModalPr
       <div className="bg-glass p-6 rounded-xl shadow-xl max-w-md w-full">
         <h2 className="text-xl font-semibold mb-4 text-gold">Flashcard Challenge</h2>
         <p className="text-white mb-6">
-          This is a placeholder flashcard modal. In a real implementation, you'd display a question and answer options.
+          This is a placeholder flashcard modal. In a real implementation, you would display a question and answer options.
         </p>
         <button
           onClick={() => {

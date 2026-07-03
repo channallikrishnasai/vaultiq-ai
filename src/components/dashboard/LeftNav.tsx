@@ -17,8 +17,7 @@ const NAV_ITEMS = [
   { name: "Dashboard",    href: "/dashboard",            icon: LayoutDashboard},
   { name: "Portfolio",    href: "/dashboard/portfolio",  icon: Briefcase     },
   { name: "Learning",     href: "/dashboard/learning",   icon: LineChart     },
-  { name: "Expenses",     href: "/dashboard/expenses",   icon: TrendingDown  },
-  { name: "Income",       href: "/dashboard/income",     icon: TrendingUp    },
+  { name: "Cash Flow",    href: "/dashboard/expenses",   icon: TrendingDown  },
   { name: "Budgets",      href: "/dashboard/budgets",    icon: PiggyBank     },
   { name: "Goals",        href: "/dashboard/goals",      icon: Target        },
   { name: "Bills",        href: "/dashboard/bills",      icon: CreditCard    },
@@ -27,7 +26,6 @@ const NAV_ITEMS = [
   { name: "Fraud Shield", href: "/dashboard/fraud",      icon: ShieldAlert   },
   { name: "Reports",      href: "/dashboard/reports",    icon: BarChart3     },
   { name: "Tax Planner",  href: "/dashboard/tax",        icon: Receipt       },
-  { name: "Documents",    href: "/dashboard/documents",  icon: FolderOpen    },
   { name: "Settings",     href: "/dashboard/settings",   icon: Settings      },
 ];
 
@@ -65,8 +63,10 @@ export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: str
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive =
-            pathname === item.href ||
-            (item.href !== "/" && pathname?.startsWith(item.href));
+            item.href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname === item.href ||
+                (item.href !== "/" && item.href !== "/dashboard" && pathname?.startsWith(item.href));
 
           const transKey = "nav." + (keyMap[item.name.toLowerCase()] || item.name.toLowerCase());
           const translatedName = t(transKey);

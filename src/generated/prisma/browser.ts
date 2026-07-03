@@ -48,6 +48,11 @@ export type Profile = Prisma.ProfileModel
  */
 export type Expense = Prisma.ExpenseModel
 /**
+ * Model Income
+ * 
+ */
+export type Income = Prisma.IncomeModel
+/**
  * Model Budget
  * 
  */
