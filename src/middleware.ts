@@ -1,8 +1,5 @@
-import NextAuth from "next-auth";
-import { authConfig } from "@/lib/auth.config";
+import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
-
-const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
@@ -14,17 +11,13 @@ export default auth((req) => {
     pathname.startsWith("/sign-up") ||
     pathname.startsWith("/data-safe") ||
     pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/register") ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon")
+    pathname.startsWith("/api/register")
   ) {
     return NextResponse.next();
   }
 
-  // Check if user is authenticated
   const isLoggedIn = !!req.auth;
 
-  // Protected dashboard routes
   if (pathname.startsWith("/dashboard")) {
     if (!isLoggedIn) {
       const url = req.nextUrl.clone();
@@ -32,15 +25,6 @@ export default auth((req) => {
       url.searchParams.set("from", pathname);
       return NextResponse.redirect(url);
     }
-    return NextResponse.next();
-  }
-
-  // All other routes require auth
-  if (!isLoggedIn) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/data-safe";
-    url.searchParams.set("from", pathname);
-    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
