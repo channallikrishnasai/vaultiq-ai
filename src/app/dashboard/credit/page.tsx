@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Percent, ArrowUpRight, ShieldCheck, AlertCircle, TrendingUp, Info
@@ -18,6 +18,11 @@ const SCORE_HISTORY = [
 
 export default function CreditPage() {
   const [score, setScore] = useState<number>(812);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Credit Factors
   const factors = [
@@ -90,20 +95,22 @@ export default function CreditPage() {
               <TrendingUp size={12} className="text-[#f59e0b]" /> Historical Score Progression
             </h3>
             <div className="h-[140px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={SCORE_HISTORY}>
-                  <defs>
-                    <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#fb923c" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="#fb923c" stopOpacity={0.0}/>
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="m" stroke="#52525b" fontSize={8} tickLine={false} />
-                  <YAxis domain={[700, 850]} stroke="#52525b" fontSize={8} tickLine={false} />
-                  <Tooltip contentStyle={{ background: "#09090b", border: "1px solid #27272a", fontSize: 9 }} />
-                  <Area type="monotone" dataKey="s" stroke="#fb923c" strokeWidth={1.5} fillOpacity={1} fill="url(#scoreGrad)" />
-                </AreaChart>
-              </ResponsiveContainer>
+              {mounted && (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={SCORE_HISTORY}>
+                    <defs>
+                      <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#fb923c" stopOpacity={0.2}/>
+                        <stop offset="95%" stopColor="#fb923c" stopOpacity={0.0}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="m" stroke="#52525b" fontSize={8} tickLine={false} />
+                    <YAxis domain={[700, 850]} stroke="#52525b" fontSize={8} tickLine={false} />
+                    <Tooltip contentStyle={{ background: "#09090b", border: "1px solid #27272a", fontSize: 9 }} />
+                    <Area type="monotone" dataKey="s" stroke="#fb923c" strokeWidth={1.5} fillOpacity={1} fill="url(#scoreGrad)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>

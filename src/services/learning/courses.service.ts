@@ -10,6 +10,7 @@ export interface Lesson {
   title: string;
   duration: string;
   content: string;
+  youtubeId?: string;
 }
 
 export interface Course {
@@ -28,9 +29,9 @@ const COURSES: Course[] = [
     description: "Master budgeting, saving, and money management fundamentals.",
     level: "beginner",
     lessons: [
-      { id: "fb-1", title: "Understanding Income & Expenses", duration: "10 min", content: "Learn to track your cash flow and identify spending patterns." },
-      { id: "fb-2", title: "Building a Budget", duration: "12 min", content: "Create a 50/30/20 budget tailored to Indian households." },
-      { id: "fb-3", title: "Emergency Fund Essentials", duration: "8 min", content: "Why and how to build 3-6 months of expenses as safety net." },
+      { id: "fb-1", title: "Understanding Income & Expenses", duration: "10 min", content: "Learn to track your cash flow and identify spending patterns.", youtubeId: "3-M9h5XwN-M" },
+      { id: "fb-2", title: "Building a Budget", duration: "12 min", content: "Create a 50/30/20 budget tailored to Indian households.", youtubeId: "HQzoZfc3GwQ" },
+      { id: "fb-3", title: "Emergency Fund Essentials", duration: "8 min", content: "Why and how to build 3-6 months of expenses as safety net.", youtubeId: "sS_j3tCoP3w" },
     ],
     quiz: [
       { id: "fb-q1", question: "What is the recommended emergency fund size?", options: ["1 month", "3-6 months expenses", "1 year income", "No fund needed"], correctIndex: 1 },
@@ -43,9 +44,9 @@ const COURSES: Course[] = [
     description: "Introduction to stocks, mutual funds, and SIP investing.",
     level: "beginner",
     lessons: [
-      { id: "inv-1", title: "What is Investing?", duration: "10 min", content: "Difference between saving and investing, power of compounding." },
-      { id: "inv-2", title: "Mutual Funds & SIPs", duration: "15 min", content: "How SIPs work, types of mutual funds, expense ratios." },
-      { id: "inv-3", title: "Stock Market Basics", duration: "12 min", content: "NSE, BSE, demat accounts, and basic stock terminology." },
+      { id: "inv-1", title: "What is Investing?", duration: "10 min", content: "Difference between saving and investing, power of compounding.", youtubeId: "sS_j3tCoP3w" },
+      { id: "inv-2", title: "Mutual Funds & SIPs", duration: "15 min", content: "How SIPs work, types of mutual funds, expense ratios.", youtubeId: "HQzoZfc3GwQ" },
+      { id: "inv-3", title: "Stock Market Basics", duration: "12 min", content: "NSE, BSE, demat accounts, and basic stock terminology.", youtubeId: "3-M9h5XwN-M" },
     ],
     quiz: [
       { id: "inv-q1", question: "SIP stands for:", options: ["Stock Investment Plan", "Systematic Investment Plan", "Savings Interest Program", "Secure Income Portfolio"], correctIndex: 1 },
@@ -58,9 +59,9 @@ const COURSES: Course[] = [
     description: "Protect yourself from financial fraud, phishing, and scams.",
     level: "beginner",
     lessons: [
-      { id: "fr-1", title: "Common Scam Types", duration: "10 min", content: "OTP fraud, phishing, investment scams, and social engineering." },
-      { id: "fr-2", title: "Red Flags to Watch", duration: "8 min", content: "Urgency tactics, guaranteed returns, and suspicious links." },
-      { id: "fr-3", title: "Reporting & Recovery", duration: "7 min", content: "How to report fraud and steps for damage control." },
+      { id: "fr-1", title: "Common Scam Types", duration: "10 min", content: "OTP fraud, phishing, investment scams, and social engineering.", youtubeId: "sS_j3tCoP3w" },
+      { id: "fr-2", title: "Red Flags to Watch", duration: "8 min", content: "Urgency tactics, guaranteed returns, and suspicious links.", youtubeId: "HQzoZfc3GwQ" },
+      { id: "fr-3", title: "Reporting & Recovery", duration: "7 min", content: "How to report fraud and steps for damage control.", youtubeId: "3-M9h5XwN-M" },
     ],
     quiz: [
       { id: "fr-q1", question: "You should NEVER share:", options: ["Your name", "OTP/PIN/passwords", "Email address", "City name"], correctIndex: 1 },
@@ -73,9 +74,9 @@ const COURSES: Course[] = [
     description: "Understand income tax, deductions, and tax-saving investments.",
     level: "intermediate",
     lessons: [
-      { id: "tx-1", title: "Income Tax Slabs", duration: "12 min", content: "Old vs new tax regime, applicable slabs for FY 2025-26." },
-      { id: "tx-2", title: "Section 80C Deductions", duration: "10 min", content: "PPF, ELSS, LIC, and other 80C instruments up to ₹1.5L." },
-      { id: "tx-3", title: "Capital Gains Tax", duration: "10 min", content: "STCG vs LTCG on equity, debt, and property." },
+      { id: "tx-1", title: "Income Tax Slabs", duration: "12 min", content: "Old vs new tax regime, applicable slabs for FY 2025-26.", youtubeId: "sS_j3tCoP3w" },
+      { id: "tx-2", title: "Section 80C Deductions", duration: "10 min", content: "PPF, ELSS, LIC, and other 80C instruments up to ₹1.5L.", youtubeId: "HQzoZfc3GwQ" },
+      { id: "tx-3", title: "Capital Gains Tax", duration: "10 min", content: "STCG vs LTCG on equity, debt, and property.", youtubeId: "3-M9h5XwN-M" },
     ],
     quiz: [
       { id: "tx-q1", question: "Section 80C maximum deduction is:", options: ["₹50,000", "₹1,00,000", "₹1,50,000", "₹2,00,000"], correctIndex: 2 },

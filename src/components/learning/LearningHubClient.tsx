@@ -23,7 +23,7 @@ interface Course {
   title: string;
   description: string;
   level: string;
-  lessons: { id: string; title: string; duration: string; content: string }[];
+  lessons: { id: string; title: string; duration: string; content: string; youtubeId?: string }[];
   quiz: { id: string; question: string; options: string[]; correctIndex: number }[];
   completedLessons: number;
   totalLessons: number;
@@ -258,6 +258,17 @@ export function LearningHubClient({ user }: LearningHubClientProps) {
 
                     {activeCourse.lessons[activeLesson] && (
                       <div>
+                        {activeCourse.lessons[activeLesson].youtubeId && (
+                          <div className="mb-4 aspect-video w-full overflow-hidden rounded-xl border border-zinc-800 bg-black">
+                            <iframe
+                              className="h-full w-full"
+                              src={`https://www.youtube.com/embed/${activeCourse.lessons[activeLesson].youtubeId}`}
+                              title={activeCourse.lessons[activeLesson].title}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                        )}
                         <div className="mb-3 flex items-center gap-2">
                           <Play className="h-4 w-4 text-cyan-400" />
                           <h3 className="font-semibold text-zinc-100">

@@ -29,6 +29,7 @@ interface Portfolio {
 
 export default function PortfolioPage() {
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [activePortfolio, setActivePortfolio] = useState<Portfolio | null>(null);
   const [market, setMarket] = useState<Stock[]>([]);
@@ -74,6 +75,7 @@ export default function PortfolioPage() {
   }, []);
 
   useEffect(() => {
+    setMounted(true);
     fetchData();
   }, [fetchData]);
 
@@ -263,24 +265,26 @@ export default function PortfolioPage() {
             </div>
 
             <div className="h-[220px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.25}/>
-                      <stop offset="95%" stopColor="#D4AF37" stopOpacity={0.0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                  <XAxis dataKey="time" stroke="#52525b" fontSize={8} tickLine={false} />
-                  <YAxis domain={['auto', 'auto']} stroke="#52525b" fontSize={8} tickLine={false} />
-                  <Tooltip contentStyle={{ background: "#09090b", border: "1px solid #27272a", fontSize: 9 }} />
-                  <Area type="monotone" dataKey="Price" stroke="#D4AF37" strokeWidth={1.5} fillOpacity={1} fill="url(#goldGrad)" />
-                  {chartIndicator === "EMA" && (
-                    <Line type="monotone" dataKey="EMA" stroke="#60a5fa" strokeWidth={1.2} dot={false} />
-                  )}
-                </AreaChart>
-              </ResponsiveContainer>
+              {mounted && (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData}>
+                    <defs>
+                      <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.25}/>
+                        <stop offset="95%" stopColor="#D4AF37" stopOpacity={0.0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                    <XAxis dataKey="time" stroke="#52525b" fontSize={8} tickLine={false} />
+                    <YAxis domain={['auto', 'auto']} stroke="#52525b" fontSize={8} tickLine={false} />
+                    <Tooltip contentStyle={{ background: "#09090b", border: "1px solid #27272a", fontSize: 9 }} />
+                    <Area type="monotone" dataKey="Price" stroke="#D4AF37" strokeWidth={1.5} fillOpacity={1} fill="url(#goldGrad)" />
+                    {chartIndicator === "EMA" && (
+                      <Line type="monotone" dataKey="EMA" stroke="#60a5fa" strokeWidth={1.2} dot={false} />
+                    )}
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
 
