@@ -1,9 +1,39 @@
-import NextAuth from "next-auth";
-import { authConfig } from "@/lib/auth.config";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const { auth } = NextAuth(authConfig);
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
 
-export default auth;
+  // Public routes that don't need auth
+  const publicRoutes = [
+    "/",
+    "/sign-in",
+    "/sign-up",
+    "/data-safe",
+    "/api/auth",
+    "/api/register",
+  ];
+
+  const isPublic = publicRoutes.some(route => pathname.startsWith(route));
+
+  if (isPublic) {
+    return NextResponse.next();
+  }
+
+  // Check for session cookie (next-auth session token)
+  const sessionToken = request.cookies.get("next-auth.session-token")?.value
+    || request.cookies.get("__Secure-next-auth.session-token")?.value;
+
+  if (!sessionToken) {
+    // Redirect to data-safe page instead of sign-in
+    const url = request.nextUrl.clone();
+    url.pathname = "/data-safe";
+    url.searchParams.set("from", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [
