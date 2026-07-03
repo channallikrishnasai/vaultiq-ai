@@ -122,6 +122,8 @@ export default function FinancePage() {
       const updated = [newItem, ...expenses];
       localStorage.setItem("vaultiq_mock_expenses", JSON.stringify(updated));
       setExpenses(updated);
+      // Notify other components of expense change
+      window.dispatchEvent(new Event('expensesUpdated'));
       toast.success("Expense logged successfully");
       // Update related goal's current amount (deduct expense)
       (async () => {
@@ -160,8 +162,10 @@ export default function FinancePage() {
   const handleDeleteExpense = (id: string) => {
     const updated = expenses.filter(e => e.id !== id);
     localStorage.setItem("vaultiq_mock_expenses", JSON.stringify(updated));
-    setExpenses(updated);
-    toast.success("Expense deleted");
+      setExpenses(updated);
+      // Notify other components of expense deletion
+      window.dispatchEvent(new Event('expensesUpdated'));
+      toast.success("Expense deleted");
   };
 
   // Combine Income and Expense into a unified comparison chart grouped by date

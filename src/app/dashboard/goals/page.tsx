@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
-  Target, Plus, Trash2, Calendar, Award, Info, RefreshCw
+  Target, Plus, Trash2, Calendar, Award, Info, RefreshCw, X
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,6 +19,10 @@ interface Goal {
 export default function GoalsPage() {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // State for adding money to a goal
+  const [addingGoalId, setAddingGoalId] = useState<string | null>(null);
+  const [addAmount, setAddAmount] = useState<string>('');
 
   // Form fields
   const [name, setName] = useState<string>("");
@@ -254,6 +258,62 @@ export default function GoalsPage() {
                         >
                           <Trash2 size={12} />
                         </button>
+
+                        {/* Add Money Button */}
+                        {addingGoalId === g.id ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="number"
+                              placeholder="Amount"
+                              value={addAmount}
+                              onChange={e => setAddAmount(e.target.value)}
+                              className="bg-zinc-950 border border-zinc-800 text-xs rounded px-1.5 py-0.5 w-16 text-white"
+                            />
+                            <button
+                              onClick={async () => {
+                                const amt = parseFloat(addAmount);
+                                if (isNaN(amt) || amt <= 0) return toast.error('Enter valid amount');
+                                try {
+                                  const res = await fetch(`/api/goals/${g.id}`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ currentAmount: (g.currentAmount || 0) + amt }),
+                                  });
+                                  const json = await res.json();
+                                  if (json.success) {
+                                    toast.success('Added money to goal');
+                                    setAddAmount('');
+                                    setAddingGoalId(null);
+                                    fetchGoals();
+                                  } else {
+                                    toast.error(json.message || 'Failed to add money');
+                                  }
+                                } catch {
+                                  toast.error('Network error adding money');
+                                }
+                              }}
+                              className="text-emerald-400 hover:text-emerald-300 p-1"
+                            >
+                              <Plus size={12} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                setAddingGoalId(null);
+                                setAddAmount('');
+                              }}
+                              className="text-zinc-500 hover:text-zinc-300 p-1"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setAddingGoalId(g.id)}
+                            className="text-zinc-500 hover:text-white p-1"
+                          >
+                            <Plus size={12} />
+                          </button>
+                        )}
                       </div>
                     </div>
 

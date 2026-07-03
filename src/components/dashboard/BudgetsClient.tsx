@@ -68,7 +68,7 @@ export function BudgetsClient({ user }: BudgetsClientProps) {
     fetchData();
   }, [fetchData]);
 
-  // Listen for changes to expenses in localStorage to keep budgets in sync
+  // Listen for changes to expenses in localStorage (cross‑window)
   useEffect(() => {
     const handler = (e: StorageEvent) => {
       if (e.key === 'vaultiq_mock_expenses') {
@@ -78,6 +78,17 @@ export function BudgetsClient({ user }: BudgetsClientProps) {
     window.addEventListener('storage', handler);
     return () => {
       window.removeEventListener('storage', handler);
+    };
+  }, [fetchData]);
+
+  // Listen for custom 'expensesUpdated' events triggered within the same tab
+  useEffect(() => {
+    const customHandler = () => {
+      fetchData();
+    };
+    window.addEventListener('expensesUpdated', customHandler);
+    return () => {
+      window.removeEventListener('expensesUpdated', customHandler);
     };
   }, [fetchData]);
 
