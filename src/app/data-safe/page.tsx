@@ -12,99 +12,79 @@ const TRUST_ITEMS = [
   { icon: Fingerprint, text: "Biometric authentication", detail: "Only you can access your account" },
 ];
 
-// Animated grid pattern
-function GridPattern() {
+const QUOTES = [
+  "Your financial freedom starts with trust.",
+  "Security isn't a feature — it's our foundation.",
+  "We protect what matters most: your future.",
+  "Built by people who care about your privacy.",
+];
+
+function HexPattern() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Animated grid lines */}
-      <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+      <svg className="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(212,175,55,0.03)" strokeWidth="1"/>
+          <pattern id="hexagons" width="56" height="100" patternUnits="userSpaceOnUse" patternTransform="scale(0.5)">
+            <path d="M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100" fill="none" stroke="rgba(212,175,55,0.08)" strokeWidth="1"/>
+            <path d="M28 0L28 66M0 16L56 50M56 16L0 50" fill="none" stroke="rgba(212,175,55,0.04)" strokeWidth="1"/>
           </pattern>
-          <radialGradient id="gridFade" cx="50%" cy="50%" r="50%">
+          <radialGradient id="hexFade" cx="50%" cy="50%" r="60%">
             <stop offset="0%" stopColor="white" stopOpacity="1"/>
             <stop offset="100%" stopColor="white" stopOpacity="0"/>
           </radialGradient>
-          <mask id="gridMask">
-            <rect width="100%" height="100%" fill="url(#gridFade)"/>
+          <mask id="hexMask">
+            <rect width="100%" height="100%" fill="url(#hexFade)"/>
           </mask>
         </defs>
-        <rect width="100%" height="100%" fill="url(#grid)" mask="url(#gridMask)" />
+        <rect width="100%" height="100%" fill="url(#hexagons)" mask="url(#hexMask)" />
       </svg>
 
-      {/* Floating particles */}
-      {Array.from({ length: 30 }).map((_, i) => (
+      <motion.div
+        className="absolute left-0 right-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent)" }}
+        animate={{ top: ["0%", "100%"] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+      />
+
+      {Array.from({ length: 25 }).map((_, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full"
           style={{
-            width: Math.random() * 3 + 1,
-            height: Math.random() * 3 + 1,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            background: `rgba(212,175,55,${Math.random() * 0.3 + 0.1})`,
+            width: 1 + (i % 3),
+            height: 1 + (i % 3),
+            left: `${(i * 37) % 100}%`,
+            top: `${(i * 53) % 100}%`,
+            background: `rgba(212,175,55,${0.1 + (i % 4) * 0.08})`,
           }}
-          animate={{
-            y: [0, -30, 0],
-            opacity: [0.2, 0.6, 0.2],
-          }}
-          transition={{
-            duration: Math.random() * 4 + 3,
-            repeat: Infinity,
-            delay: Math.random() * 3,
-            ease: "easeInOut",
-          }}
+          animate={{ y: [0, -20, 0], opacity: [0.2, 0.5, 0.2] }}
+          transition={{ duration: 3 + (i % 4), repeat: Infinity, delay: (i % 5) * 0.6, ease: "easeInOut" }}
         />
       ))}
 
-      {/* Glowing orbs */}
       <motion.div
         className="absolute"
         style={{
-          width: 400,
-          height: 400,
-          left: "20%",
-          top: "30%",
-          background: "radial-gradient(circle, rgba(212,175,55,0.05) 0%, transparent 70%)",
+          width: 500, height: 500,
+          left: "50%", top: "50%",
+          transform: "translate(-50%, -50%)",
+          background: "radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 60%)",
           borderRadius: "50%",
         }}
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute"
-        style={{
-          width: 300,
-          height: 300,
-          right: "15%",
-          bottom: "20%",
-          background: "radial-gradient(circle, rgba(96,165,250,0.04) 0%, transparent 70%)",
-          borderRadius: "50%",
-        }}
-        animate={{
-          scale: [1, 1.3, 1],
-          opacity: [0.2, 0.4, 0.2],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.6, 0.4] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       />
     </div>
   );
 }
 
-// Cursor following sign-in button
 function CursorSignIn({ visible }: { visible: boolean }) {
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const buttonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY });
     };
-
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
@@ -113,16 +93,12 @@ function CursorSignIn({ visible }: { visible: boolean }) {
     <AnimatePresence>
       {visible && (
         <motion.div
-          ref={buttonRef}
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0 }}
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           className="fixed z-50 pointer-events-auto"
-          style={{
-            left: position.x + 20,
-            top: position.y + 20,
-          }}
+          style={{ left: position.x + 20, top: position.y + 20 }}
         >
           <Link href="/sign-in">
             <motion.div
@@ -134,6 +110,7 @@ function CursorSignIn({ visible }: { visible: boolean }) {
                 boxShadow: "0 4px 20px rgba(212,175,55,0.4)",
               }}
             >
+              <Lock size={14} className="text-black" />
               <span className="text-black font-semibold text-sm">Sign In</span>
               <ArrowRight size={16} className="text-black" />
             </motion.div>
@@ -145,170 +122,178 @@ function CursorSignIn({ visible }: { visible: boolean }) {
 }
 
 export default function DataSafePage() {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [showButton, setShowButton] = useState(false);
+  const [quoteIndex, setQuoteIndex] = useState(0);
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
+    const timer = setTimeout(() => setShowButton(true), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
-    // Show button after 2 seconds
-    const timer = setTimeout(() => setShowButton(true), 2000);
-
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      clearTimeout(timer);
-    };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQuoteIndex((prev) => (prev + 1) % QUOTES.length);
+    }, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="relative min-h-screen bg-black overflow-hidden">
-      <GridPattern />
+      <HexPattern />
       <CursorSignIn visible={showButton} />
 
-      {/* Main content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6">
-        {/* Shield icon with glow */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="mb-8"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="mb-6"
         >
           <div
-            className="relative w-24 h-24 rounded-full flex items-center justify-center"
+            className="relative w-20 h-20 rounded-full flex items-center justify-center"
             style={{
-              background: "linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05))",
-              border: "2px solid rgba(212,175,55,0.3)",
-              boxShadow: "0 0 60px rgba(212,175,55,0.2)",
+              background: "linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.05))",
+              border: "2px solid rgba(212,175,55,0.4)",
+              boxShadow: "0 0 40px rgba(212,175,55,0.3)",
             }}
           >
-            <Shield size={40} className="text-amber-400" />
+            <Shield size={32} className="text-amber-400" />
             <motion.div
               className="absolute inset-0 rounded-full"
-              style={{ border: "1px solid rgba(212,175,55,0.4)" }}
-              animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+              style={{ border: "1px solid rgba(212,175,55,0.5)" }}
+              animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0, 0.6] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
           </div>
         </motion.div>
 
-        {/* Main text */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+        <motion.h1
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-center mb-12"
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="text-3xl md:text-4xl font-bold mb-3 text-center"
+          style={{
+            background: "linear-gradient(135deg, #D4AF37, #F5D060, #D4AF37)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
         >
-          <h1
-            className="text-4xl md:text-5xl font-bold mb-4"
-            style={{
-              background: "linear-gradient(135deg, #D4AF37, #F5D060, #D4AF37)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Your Data is Safe
-          </h1>
-          <p className="text-lg text-zinc-400 max-w-md mx-auto">
-            We keep your financial data protected with military-grade security.
-            Your privacy is our priority.
-          </p>
+          Your Data is Safe With Us
+        </motion.h1>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="h-8 mb-8 flex items-center justify-center"
+        >
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={quoteIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
+              className="text-zinc-500 text-sm italic text-center"
+            >
+              &ldquo;{QUOTES[quoteIndex]}&rdquo;
+            </motion.p>
+          </AnimatePresence>
         </motion.div>
 
-        {/* Trust items grid */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mb-12"
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto mb-10"
         >
           {TRUST_ITEMS.map((item, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.8 + i * 0.1 }}
-              whileHover={{ y: -4, borderColor: "rgba(212,175,55,0.4)" }}
-              className="p-5 rounded-xl"
-              style={{
-                background: "rgba(212,175,55,0.03)",
-                border: "1px solid rgba(212,175,55,0.1)",
-              }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.5 + i * 0.08 }}
+              whileHover={{ y: -3, borderColor: "rgba(212,175,55,0.4)" }}
+              className="p-4 rounded-xl text-center"
+              style={{ background: "rgba(212,175,55,0.02)", border: "1px solid rgba(212,175,55,0.08)" }}
             >
-              <div className="flex items-start gap-4">
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: "rgba(212,175,55,0.1)",
-                    border: "1px solid rgba(212,175,55,0.2)",
-                  }}
-                >
-                  <item.icon size={18} className="text-amber-400" />
-                </div>
-                <div>
-                  <h3 className="text-white font-medium text-sm mb-1">{item.text}</h3>
-                  <p className="text-zinc-500 text-xs">{item.detail}</p>
-                </div>
+              <div
+                className="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-3"
+                style={{ background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.15)" }}
+              >
+                <item.icon size={18} className="text-amber-400" />
               </div>
+              <h3 className="text-white font-medium text-xs mb-1">{item.text}</h3>
+              <p className="text-zinc-600 text-[10px]">{item.detail}</p>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Sign in button (center) */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.2 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="flex gap-8 mb-10"
+        >
+          {[
+            { label: "Active Users", value: "50K+" },
+            { label: "Data Breaches", value: "0" },
+            { label: "Uptime", value: "99.99%" },
+          ].map((stat, i) => (
+            <div key={i} className="text-center">
+              <p className="text-xl font-bold" style={{ color: "#D4AF37" }}>{stat.value}</p>
+              <p className="text-zinc-600 text-[10px] mt-1">{stat.label}</p>
+            </div>
+          ))}
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
         >
           <Link href="/sign-in">
             <motion.div
               whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(212,175,55,0.4)" }}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-3 px-8 py-4 rounded-full cursor-pointer"
-              style={{
-                background: "linear-gradient(135deg, #D4AF37, #C8922A)",
-                boxShadow: "0 4px 20px rgba(212,175,55,0.3)",
-              }}
+              className="flex items-center gap-3 px-8 py-3.5 rounded-full cursor-pointer"
+              style={{ background: "linear-gradient(135deg, #D4AF37, #C8922A)", boxShadow: "0 4px 20px rgba(212,175,55,0.3)" }}
             >
-              <span className="text-black font-semibold">Sign In to Continue</span>
-              <ArrowRight size={18} className="text-black" />
+              <Lock size={16} className="text-black" />
+              <span className="text-black font-semibold text-sm">Sign In to Continue</span>
+              <ArrowRight size={16} className="text-black" />
             </motion.div>
           </Link>
         </motion.div>
 
-        {/* Subtle hint */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 1.5 }}
-          className="mt-8 text-zinc-600 text-xs"
+          transition={{ duration: 0.6, delay: 1.2 }}
+          className="mt-6 text-zinc-700 text-[11px]"
         >
-          Or move your cursor anywhere and click the floating button
+          Move your cursor — a sign-in button follows you
         </motion.p>
       </div>
 
-      {/* Corner decorations */}
-      <div className="absolute top-0 left-0 w-32 h-32 pointer-events-none">
-        <svg viewBox="0 0 100 100" className="w-full h-full opacity-20">
-          <path d="M0 0 L50 0 L50 5 L5 5 L5 50 L0 50 Z" fill="rgba(212,175,55,0.5)" />
+      <div className="absolute top-8 left-8 w-12 h-12 pointer-events-none">
+        <svg viewBox="0 0 48 48" className="w-full h-full opacity-30">
+          <path d="M0 16 L0 0 L16 0" fill="none" stroke="rgba(212,175,55,0.6)" strokeWidth="2"/>
         </svg>
       </div>
-      <div className="absolute top-0 right-0 w-32 h-32 pointer-events-none">
-        <svg viewBox="0 0 100 100" className="w-full h-full opacity-20">
-          <path d="M100 0 L50 0 L50 5 L95 5 L95 50 L100 50 Z" fill="rgba(212,175,55,0.5)" />
+      <div className="absolute top-8 right-8 w-12 h-12 pointer-events-none">
+        <svg viewBox="0 0 48 48" className="w-full h-full opacity-30">
+          <path d="M48 16 L48 0 L32 0" fill="none" stroke="rgba(212,175,55,0.6)" strokeWidth="2"/>
         </svg>
       </div>
-      <div className="absolute bottom-0 left-0 w-32 h-32 pointer-events-none">
-        <svg viewBox="0 0 100 100" className="w-full h-full opacity-20">
-          <path d="M0 100 L50 100 L50 95 L5 95 L5 50 L0 50 Z" fill="rgba(212,175,55,0.5)" />
+      <div className="absolute bottom-8 left-8 w-12 h-12 pointer-events-none">
+        <svg viewBox="0 0 48 48" className="w-full h-full opacity-30">
+          <path d="M0 32 L0 48 L16 48" fill="none" stroke="rgba(212,175,55,0.6)" strokeWidth="2"/>
         </svg>
       </div>
-      <div className="absolute bottom-0 right-0 w-32 h-32 pointer-events-none">
-        <svg viewBox="0 0 100 100" className="w-full h-full opacity-20">
-          <path d="M100 100 L50 100 L50 95 L95 95 L95 50 L100 50 Z" fill="rgba(212,175,55,0.5)" />
+      <div className="absolute bottom-8 right-8 w-12 h-12 pointer-events-none">
+        <svg viewBox="0 0 48 48" className="w-full h-full opacity-30">
+          <path d="M48 32 L48 48 L32 48" fill="none" stroke="rgba(212,175,55,0.6)" strokeWidth="2"/>
         </svg>
       </div>
     </div>
