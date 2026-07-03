@@ -260,7 +260,7 @@ export default function FinancePage() {
           </h1>
           <p className="text-xs text-zinc-400 mt-0.5">Manage and compare cash flow</p>
         </div>
-        <button onClick={() => { fetchIncomes(); fetchExpenses(); }} className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white transition">
+        <button onClick={fetchData} className="flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 hover:text-white transition">
           <RefreshCw size={12} className={incomeLoading && expenseLoading ? "animate-spin" : ""} /> Refresh
         </button>
       </div>

@@ -18,6 +18,12 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { fadeInUp, staggerContainer } from "@/lib/motion";
 
+const extractYouTubeId = (url: string) => {
+  const regExp = /(?:youtube\.com\/(?:[^/]+\/.+|(?:v|embed)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url.match(regExp);
+  return match ? match[1] : "";
+};
+
 interface Course {
   id: string;
   title: string;
@@ -172,15 +178,15 @@ export function LearningHubClient({ user }: LearningHubClientProps) {
                     </div>
                     <div className="flex items-center gap-2">
                       {course.youtubeUrl && (
-                        <a
-                          href={course.youtubeUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setVideoId(extractYouTubeId(course.youtubeUrl!));
+                          }}
                           className="rounded-full bg-red-600/10 border border-red-500/30 px-2.5 py-0.5 text-xs font-medium text-red-400 hover:bg-red-600/20 transition-all flex items-center gap-1"
                         >
                           <Play className="h-3 w-3 fill-current" /> Video
-                        </a>
+                        </button>
                       )}
                       <span
                         className={`rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${LEVEL_COLORS[course.level] ?? LEVEL_COLORS.beginner}`}
@@ -249,6 +255,34 @@ export function LearningHubClient({ user }: LearningHubClientProps) {
                 {!showQuiz ? (
                   <>
                     <div className="mb-4 flex gap-2 overflow-x-auto pb-2">
+                      {videoId && (
+                        <AnimatePresence>
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+                            onClick={() => setVideoId(null)}
+                          >
+                            <div className="relative w-full max-w-3xl p-4" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={() => setVideoId(null)}
+                                className="absolute top-2 right-2 rounded-full bg-zinc-800 p-1 text-zinc-200 hover:bg-zinc-700"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                              <iframe
+                                src={`https://www.youtube.com/embed/${videoId}`}
+                                title="YouTube video"
+                                className="aspect-video w-full rounded-lg"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            </div>
+                          </motion.div>
+                        </AnimatePresence>
+                      )}
+
                       {activeCourse.lessons.map((lesson, i) => (
                         <button
                           key={lesson.id}
