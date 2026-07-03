@@ -352,7 +352,7 @@ export default function DashboardFloatingCards({
   orbState = "idle",
 }: Props) {
   const [minimized, setMinimized] = useState<Record<string, boolean>>({});
-  const { thinkingStage, setThinkingStage } = useOrb();
+  const { thinkingStage, setThinkingStage, setOrbState } = useOrb();
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [chatThinking, setChatThinking] = useState(false);
@@ -378,6 +378,10 @@ export default function DashboardFloatingCards({
     setChatInput("");
     setChatMessages(p => [...p, { role: "user", content: msg }]);
     setChatThinking(true);
+
+    // Trigger orb thinking animation
+    setOrbState("thinking");
+    const thinkStartTime = Date.now();
 
     try {
       const res = await fetch("/api/chat", {
@@ -434,15 +438,33 @@ export default function DashboardFloatingCards({
           idx === p.length - 1 ? { ...m, content: fullContent } : m
         ));
       }
+
+      // Ensure minimum 2.5 seconds of thinking animation
+      const elapsed = Date.now() - thinkStartTime;
+      const minDelay = 2500;
+      if (elapsed < minDelay) {
+        await new Promise(resolve => setTimeout(resolve, minDelay - elapsed));
+      }
+
+      // Switch to speaking state
+      setOrbState("speaking");
+
+      // Stream the response text character by character for dramatic effect
+      const streamDelay = Math.min(fullContent.length * 8, 2000);
+      await new Promise(resolve => setTimeout(resolve, streamDelay));
+
+      // Back to idle
+      setOrbState("idle");
     } catch (err: any) {
       const errorMsg = err?.message?.includes("401")
         ? "Please sign in to use AI advisor."
         : "Connection issue — please try again.";
       setChatMessages(p => [...p, { role: "assistant", content: errorMsg }]);
+      setOrbState("idle");
     } finally {
       setChatThinking(false);
     }
-  }, [chatThinking]);
+  }, [chatThinking, setOrbState]);
 
   const toggleMinimize = (key: string) => {
     setMinimized((prev) => ({ ...prev, [key]: !prev[key] }));
