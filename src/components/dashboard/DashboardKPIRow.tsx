@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Info, ChevronUp, BarChart3, TrendingUp, TrendingDown, ChevronDown, LogOut, Mail } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
 interface KPIItem {
   label: string;
@@ -49,7 +48,6 @@ export default function DashboardKPIRow({
 }: DashboardKPIRowProps) {
   const [minimized, setMinimized] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const router = useRouter();
 
   const items: KPIItem[] = [
     {
@@ -299,7 +297,7 @@ export default function DashboardKPIRow({
                           </div>
                           <div style={{ padding: 4 }}>
                             <button
-                              onClick={async () => { await signOut({ redirect: false }); router.push("/"); }}
+                              onClick={async () => { await signOut({ callbackUrl: "/" }); }}
                               style={{
                                 display: "flex", alignItems: "center", gap: 6, width: "100%",
                                 padding: "8px 10px", borderRadius: 6, background: "transparent",
