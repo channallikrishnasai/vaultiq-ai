@@ -403,7 +403,7 @@ export default function FinancePage() {
         </div>
 
         {/* Right Side: Account of what was added and removed (Unified Ledger) */}
-        <div className="md:col-span-6 p-4 rounded-xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-md flex flex-col overflow-hidden h-fit max-h-[500px]">
+        <div className="md:col-span-6 p-4 rounded-xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-md flex flex-col overflow-hidden h-fit max-h-125">
           <div className="flex items-center justify-between mb-3 border-b border-zinc-800/30 pb-2">
             <div>
               <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-300">Account Ledger</h3>

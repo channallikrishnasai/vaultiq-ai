@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  PiggyBank, Plus, Trash2, PieChart, Info, RefreshCw, AlertTriangle, Edit2, Check, X
+  PiggyBank, Plus, Trash2, Info, RefreshCw, AlertTriangle, Edit2, Check, X
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,7 +29,9 @@ interface BudgetsClientProps {
   };
 }
 
-export function BudgetsClient({ user }: BudgetsClientProps) {
+export function BudgetsClient({ user: _user }: BudgetsClientProps) {
+  void _user;
+
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,7 +67,11 @@ export function BudgetsClient({ user }: BudgetsClientProps) {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const timer = setTimeout(() => {
+      void fetchData();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [fetchData]);
 
   // Listen for changes to expenses in localStorage (cross‑window)
@@ -305,7 +311,7 @@ export function BudgetsClient({ user }: BudgetsClientProps) {
               <p className="text-xs text-zinc-500">No active budgets set for this timeline.</p>
             </div>
           ) : (
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1 max-h-[500px] scrollbar-thin">
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1 max-h-125 scrollbar-thin">
               {budgets.map((b) => {
                 const spent = getCategorySpent(b.category);
                 const isEditing = editingId === b.id;

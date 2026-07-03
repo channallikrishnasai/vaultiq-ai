@@ -54,6 +54,7 @@ export function LearningHubClient({ user }: LearningHubClientProps) {
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
   const [quizResult, setQuizResult] = useState<{ score: number; total: number; passed: boolean } | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [videoId, setVideoId] = useState<string | null>(null);
 
   const fetchCourses = useCallback(async () => {
     setLoading(true);
@@ -69,7 +70,11 @@ export function LearningHubClient({ user }: LearningHubClientProps) {
   }, []);
 
   useEffect(() => {
-    fetchCourses();
+    const timer = setTimeout(() => {
+      void fetchCourses();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [fetchCourses]);
 
   const markLessonComplete = async (courseId: string, lessonId: string) => {
@@ -180,10 +185,18 @@ export function LearningHubClient({ user }: LearningHubClientProps) {
                       {course.youtubeUrl && (
                         <button
                           onClick={(e) => {
-                            e.stopPropagation();
-                            setVideoId(extractYouTubeId(course.youtubeUrl!));
-                          }}
-                          className="rounded-full bg-red-600/10 border border-red-500/30 px-2.5 py-0.5 text-xs font-medium text-red-400 hover:bg-red-600/20 transition-all flex items-center gap-1"
+                              e.stopPropagation();
+                              const id = extractYouTubeId(course.youtubeUrl!);
+                              if (!id) {
+                                // Use fallback video if the course URL is missing or invalid
+                                const fallbackId = extractYouTubeId('https://youtu.be/WxXCPmKkfUI?si=N1tIrp9GwchmSELp');
+                                setVideoId(fallbackId);
+                                toast.info('Using fallback video');
+                                return;
+                              }
+                              setVideoId(id);
+                            }}
+                            className="rounded-full bg-red-600/10 border border-red-500/30 px-2.5 py-0.5 text-xs font-medium text-red-400 hover:bg-red-600/20 transition-all flex items-center gap-1"
                         >
                           <Play className="h-3 w-3 fill-current" /> Video
                         </button>
