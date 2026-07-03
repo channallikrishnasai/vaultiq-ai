@@ -4,16 +4,25 @@ import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-const COUNT = 180;
+const COUNT = 400;
 
 const DUST = Array.from({ length: COUNT }, (_, i) => {
   const seed = i * 1234;
+  const dist = ((seed * 17) % 1000) / 1000;
+  // More particles closer to center (orb halo area)
+  const radius = dist < 0.5
+    ? dist * 4 // inner cluster: 0-2
+    : 2 + dist * 5; // outer spread: 2-7
+  const angle = ((seed * 31) % 1000) / 1000 * Math.PI * 2;
+  const yOff = (((seed * 47) % 1000) / 1000 - 0.5) * 8;
   return {
-    x: (((seed * 17) % 1000) / 1000 - 0.5) * 12,
-    y: (((seed * 31) % 1000) / 1000 - 0.5) * 8,
-    z: (((seed * 47) % 1000) / 1000 - 0.5) * 6 - 3,
-    vy: (((seed * 13) % 1000) / 1000) * 0.004 + 0.001,
+    x: Math.cos(angle) * radius,
+    y: yOff,
+    z: Math.sin(angle) * radius - 2,
+    vy: (((seed * 13) % 1000) / 1000) * 0.002 + 0.0005,
+    vx: Math.sin(angle) * 0.0003,
     phase: (i * 0.618) % (Math.PI * 2),
+    brightness: 0.4 + ((seed * 23) % 1000) / 1000 * 0.6,
   };
 });
 
@@ -33,22 +42,21 @@ export default function FloatingParticles() {
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
     const t = clock.getElapsedTime();
-    const arr = meshRef.current.geometry.attributes.position
-      .array as Float32Array;
+    const arr = meshRef.current.geometry.attributes.position.array as Float32Array;
 
     for (let i = 0; i < COUNT; i++) {
       arr[i * 3 + 1] += DUST[i].vy;
-      arr[i * 3] += Math.sin(t * 0.2 + DUST[i].phase) * 0.001;
+      arr[i * 3] += Math.sin(t * 0.15 + DUST[i].phase) * 0.0006 + DUST[i].vx;
+      arr[i * 3 + 2] += Math.cos(t * 0.12 + DUST[i].phase) * 0.0004;
 
-      // Wrap around when drifting too far up
-      if (arr[i * 3 + 1] > 5) {
-        arr[i * 3 + 1] = -4;
+      if (arr[i * 3 + 1] > 6) {
+        arr[i * 3 + 1] = -5;
       }
     }
 
     meshRef.current.geometry.attributes.position.needsUpdate = true;
     const mat = meshRef.current.material as THREE.PointsMaterial;
-    mat.opacity = 0.12 + Math.sin(t * 0.15) * 0.04;
+    mat.opacity = 0.18 + Math.sin(t * 0.12) * 0.06;
   });
 
   return (
@@ -58,9 +66,9 @@ export default function FloatingParticles() {
       </bufferGeometry>
       <pointsMaterial
         color={0xD4AF37}
-        size={0.008}
+        size={0.012}
         transparent
-        opacity={0.14}
+        opacity={0.2}
         sizeAttenuation
       />
     </points>

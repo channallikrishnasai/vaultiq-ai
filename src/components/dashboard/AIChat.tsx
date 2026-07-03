@@ -41,9 +41,9 @@ const PROMPTS = [
 // ─── Waveform ─────────────────────────────────────────────────────────────────
 
 function Waveform({ active }: { active: boolean }) {
-  const heights = [4, 8, 14, 14, 8, 4];
+  const heights = [4, 8, 14, 14, 8, 4, 10, 16, 16, 10, 6, 12];
   return (
-    <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 16 }}>
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 18 }}>
       {heights.map((h, i) => (
         <motion.div
           key={i}
@@ -51,13 +51,15 @@ function Waveform({ active }: { active: boolean }) {
             width: 2,
             height: h,
             borderRadius: 2,
-            background: "rgba(212,175,55,0.65)",
+            background: active
+              ? "linear-gradient(to top, rgba(212,175,55,0.3), rgba(212,175,55,0.8))"
+              : "rgba(212,175,55,0.3)",
           }}
-          animate={active ? { scaleY: [0.25, 1, 0.25] } : { scaleY: 0.25 }}
+          animate={active ? { scaleY: [0.2, 1, 0.2] } : { scaleY: 0.2 }}
           transition={{
-            duration: 0.75,
+            duration: 0.65,
             repeat: active ? Infinity : 0,
-            delay: i * 0.08,
+            delay: i * 0.06,
             ease: "easeInOut",
           }}
         />
@@ -157,18 +159,6 @@ export default function AIChat({
 
   const isCurrentlyMinimized = isGlobal ? isMinimized : localMinimized;
 
-  // Track interval so it can be cleared on unmount or new message
-  const streamIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // Cleanup on unmount — prevents memory leak mid-stream
-  useEffect(() => {
-    return () => {
-      if (streamIntervalRef.current !== null) {
-        clearInterval(streamIntervalRef.current);
-      }
-    };
-  }, []);
-
   useEffect(() => {
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
@@ -179,12 +169,6 @@ export default function AIChat({
   const sendMessage = useCallback(
     async (msg: string) => {
       if (!msg.trim() || thinking) return;
-
-      // Clear any in-flight stream before starting a new one
-      if (streamIntervalRef.current !== null) {
-        clearInterval(streamIntervalRef.current);
-        streamIntervalRef.current = null;
-      }
 
       setInput("");
       setMessages((p) => [...p, { role: "user", content: msg }]);
@@ -198,38 +182,49 @@ export default function AIChat({
           body: JSON.stringify({ message: msg, sessionId: crypto.randomUUID() }),
         });
         if (!res.ok) throw new Error("API error");
-        const data = await res.json();
-        const content =
-          data?.data?.message ||
-          data?.message ||
-          data?.content ||
-          "Response unavailable.";
 
         if (setOrbState) setOrbState("speaking");
-        let i = 0;
         setMessages((p) => [...p, { role: "assistant", content: "", streamed: false }]);
 
-        streamIntervalRef.current = setInterval(() => {
-          i += 5;
-          setMessages((p) =>
-            p.map((m, idx) =>
-              idx === p.length - 1 ? { ...m, content: content.slice(0, i) } : m
-            )
-          );
-          if (i >= content.length) {
-            if (streamIntervalRef.current !== null) {
-              clearInterval(streamIntervalRef.current);
-              streamIntervalRef.current = null;
+        const reader = res.body?.getReader();
+        const decoder = new TextDecoder();
+        let accumulatedContent = "";
+
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split("\n");
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                const data = line.slice(6).trim();
+                if (data === "[DONE]") continue;
+                try {
+                  const parsed = JSON.parse(data);
+                  if (parsed.content) {
+                    accumulatedContent += parsed.content;
+                    setMessages((p) =>
+                      p.map((m, idx) =>
+                        idx === p.length - 1 ? { ...m, content: accumulatedContent } : m
+                      )
+                    );
+                  }
+                } catch {
+                  // Ignore parse errors for incomplete chunks
+                }
+              }
             }
-            setMessages((p) =>
-              p.map((m, idx) =>
-                idx === p.length - 1 ? { ...m, content, streamed: true } : m
-              )
-            );
-            if (setOrbState) setOrbState("idle");
-            setThinking(false);
           }
-        }, 12);
+        }
+
+        setMessages((p) =>
+          p.map((m, idx) =>
+            idx === p.length - 1 ? { ...m, content: accumulatedContent, streamed: true } : m
+          )
+        );
+        if (setOrbState) setOrbState("idle");
+        setThinking(false);
       } catch {
         setMessages((p) => [
           ...p,
@@ -240,7 +235,6 @@ export default function AIChat({
           },
         ]);
         if (setOrbState) setOrbState("error");
-        // Brief error state then back to idle
         setTimeout(() => setOrbState && setOrbState("idle"), 2000);
         setThinking(false);
       }
@@ -645,12 +639,13 @@ export default function AIChat({
         transform: "translateX(-50%)",
         width: "min(480px, 60vw)",
         zIndex: 20,
-        background: "rgba(4,4,8,0.95)",
-        border: "1px solid rgba(212,175,55,0.18)",
-        borderRadius: 18,
+        background: "rgba(7,5,2,0.93)",
+        border: "1px solid rgba(212,175,55,0.28)",
+        borderRadius: 14,
         backdropFilter: "blur(22px)",
         WebkitBackdropFilter: "blur(22px)",
-        boxShadow: "0 0 60px rgba(0,0,0,0.85), 0 0 30px rgba(212,175,55,0.04), inset 0 1px 0 rgba(255,255,255,0.04)",
+        boxShadow: "0 10px 40px rgba(0,0,0,0.85), 0 0 20px rgba(212,175,55,0.06), inset 0 1px 0 rgba(255,255,255,0.05)",
+        overflow: "hidden",
       }}
     >
       {/* Orb state indicator */}
@@ -873,7 +868,7 @@ export default function AIChat({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
-          placeholder="Ask VaultIQ anything…"
+          placeholder="Ask your AI Financial Advisor anything..."
           style={{
             flex: 1,
             background: "rgba(255,255,255,0.03)",
@@ -893,15 +888,16 @@ export default function AIChat({
           }}
         />
 
-        {/* Mic (future) */}
-        <button
+        {/* Voice button */}
+        <motion.button
           disabled
+          whileHover={{ scale: 1.05 }}
           style={{
-            width: 34,
-            height: 34,
-            borderRadius: 9,
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            width: 36,
+            height: 36,
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.06))",
+            border: "1px solid rgba(212,175,55,0.2)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -909,19 +905,19 @@ export default function AIChat({
             flexShrink: 0,
           }}
         >
-          <Mic size={13} style={{ color: "rgba(255,255,255,0.2)" }} />
-        </button>
+          <Mic size={14} style={{ color: "rgba(212,175,55,0.5)" }} />
+        </motion.button>
 
         {/* Send */}
         <motion.button
           onClick={() => sendMessage(input)}
           disabled={!input.trim() || thinking}
-          whileHover={{ y: -1, boxShadow: "0 0 18px rgba(212,175,55,0.45)" }}
-          whileTap={{ scale: 0.94 }}
+          whileHover={{ y: -1, boxShadow: "0 0 20px rgba(212,175,55,0.5)" }}
+          whileTap={{ scale: 0.92 }}
           style={{
-            width: 34,
-            height: 34,
-            borderRadius: 9,
+            width: 38,
+            height: 38,
+            borderRadius: "50%",
             background: "linear-gradient(135deg, #F5D060, #C8922A)",
             border: "none",
             display: "flex",
@@ -930,9 +926,10 @@ export default function AIChat({
             cursor: !input.trim() || thinking ? "not-allowed" : "pointer",
             opacity: !input.trim() || thinking ? 0.32 : 1,
             flexShrink: 0,
+            boxShadow: "0 2px 12px rgba(212,175,55,0.3)",
           }}
         >
-          <Send size={13} color="#000" />
+          <Send size={14} color="#000" />
         </motion.button>
       </div>
     </motion.div>

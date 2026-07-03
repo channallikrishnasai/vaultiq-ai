@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Shield, AlertTriangle, CheckCircle2, ShieldAlert, Sparkles, HelpCircle, Eye } from "lucide-react";
+import { ArrowLeft, Shield, AlertTriangle, CheckCircle2, ShieldAlert, Sparkles, HelpCircle, Eye, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { FraudAnalyzer } from "@/components/fraud/FraudAnalyzer";

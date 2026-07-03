@@ -21,14 +21,12 @@ function GlobalAIChatInner() {
   // Load states from localStorage
   useEffect(() => {
     setMounted(true);
-    const savedMin = localStorage.getItem("ai-chat-minimized");
-    if (savedMin) {
-      setIsMinimized(JSON.parse(savedMin));
-    }
-    const savedClosed = localStorage.getItem("ai-chat-closed");
-    if (savedClosed) {
-      setIsClosed(JSON.parse(savedClosed));
-    }
+    try {
+      const savedMin = localStorage.getItem("ai-chat-minimized");
+      if (savedMin) setIsMinimized(JSON.parse(savedMin));
+      const savedClosed = localStorage.getItem("ai-chat-closed");
+      if (savedClosed) setIsClosed(JSON.parse(savedClosed));
+    } catch {}
   }, []);
 
   // Save states to localStorage
