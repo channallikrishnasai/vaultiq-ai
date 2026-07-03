@@ -18,36 +18,54 @@ interface OrbConfig {
   lightIntensity: number;
 }
 
+// Rich bright gold — NOT yellow. Think molten gold, not lemon.
+const GOLD = 0xe8b830;
+const GOLD_BRIGHT = 0xf5c842;
+const GOLD_LIGHT = 0xffd666;
+const GOLD_NODE = 0xffdf5c;
+
 const CONFIGS: Record<OrbState, OrbConfig> = {
-  idle:       { rotSpeed: 0.003, pulseSpeed: 0.6, lineColor: 0xd4af37, nodeColor: 0xf5d060, ringColor: 0xd4af37, glowColor: 0xd4af37, particleColor: 0xf5d060, lightIntensity: 2.8 },
-  thinking:   { rotSpeed: 0.007, pulseSpeed: 1.5, lineColor: 0xf5d060, nodeColor: 0xffd700, ringColor: 0xf5d060, glowColor: 0xf5d060, particleColor: 0xffd700, lightIntensity: 3.5 },
-  speaking:   { rotSpeed: 0.01,  pulseSpeed: 2.2, lineColor: 0xffd700, nodeColor: 0xffe44d, ringColor: 0xffd700, glowColor: 0xffd700, particleColor: 0xffe44d, lightIntensity: 4.0 },
-  listening:  { rotSpeed: 0.004, pulseSpeed: 0.9, lineColor: 0x6699cc, nodeColor: 0x88aadd, ringColor: 0x5588bb, glowColor: 0x4477aa, particleColor: 0x88aadd, lightIntensity: 2.5 },
-  processing: { rotSpeed: 0.012, pulseSpeed: 2.5, lineColor: 0x8855cc, nodeColor: 0xaa77ee, ringColor: 0x7744bb, glowColor: 0x6633aa, particleColor: 0xaa77ee, lightIntensity: 3.2 },
-  celebrating:{ rotSpeed: 0.013, pulseSpeed: 1.8, lineColor: 0x44cc77, nodeColor: 0x66eebb, ringColor: 0x33bb66, glowColor: 0x22aa55, particleColor: 0x66eebb, lightIntensity: 3.5 },
-  sleeping:   { rotSpeed: 0.001, pulseSpeed: 0.2, lineColor: 0x223344, nodeColor: 0x334455, ringColor: 0x1a2a3a, glowColor: 0x112233, particleColor: 0x334455, lightIntensity: 0.8 },
-  error:      { rotSpeed: 0.003, pulseSpeed: 3.0, lineColor: 0xaa3333, nodeColor: 0xdd4444, ringColor: 0x993333, glowColor: 0x882222, particleColor: 0xdd4444, lightIntensity: 2.8 },
+  idle:       { rotSpeed: 0.003, pulseSpeed: 0.6, lineColor: GOLD, nodeColor: GOLD_NODE, ringColor: GOLD, glowColor: GOLD, particleColor: GOLD_NODE, lightIntensity: 3.0 },
+  thinking:   { rotSpeed: 0.007, pulseSpeed: 1.5, lineColor: GOLD_BRIGHT, nodeColor: GOLD_LIGHT, ringColor: GOLD_BRIGHT, glowColor: GOLD_BRIGHT, particleColor: GOLD_LIGHT, lightIntensity: 3.8 },
+  speaking:   { rotSpeed: 0.01,  pulseSpeed: 2.2, lineColor: GOLD_LIGHT, nodeColor: GOLD_NODE, ringColor: GOLD_LIGHT, glowColor: GOLD_LIGHT, particleColor: GOLD_NODE, lightIntensity: 4.2 },
+  listening:  { rotSpeed: 0.004, pulseSpeed: 0.9, lineColor: 0x7aaccf, nodeColor: 0x99c4e2, ringColor: 0x6a9cc2, glowColor: 0x5a8cb5, particleColor: 0x99c4e2, lightIntensity: 2.8 },
+  processing: { rotSpeed: 0.012, pulseSpeed: 2.5, lineColor: 0x9570d0, nodeColor: 0xb490ea, ringColor: 0x8560c2, glowColor: 0x7550b5, particleColor: 0xb490ea, lightIntensity: 3.5 },
+  celebrating:{ rotSpeed: 0.013, pulseSpeed: 1.8, lineColor: 0x50d88a, nodeColor: 0x70f0aa, ringColor: 0x40c87a, glowColor: 0x30b86a, particleColor: 0x70f0aa, lightIntensity: 4.0 },
+  sleeping:   { rotSpeed: 0.001, pulseSpeed: 0.2, lineColor: 0x2a3a4a, nodeColor: 0x3a4a5a, ringColor: 0x253545, glowColor: 0x1a2a3a, particleColor: 0x3a4a5a, lightIntensity: 1.0 },
+  error:      { rotSpeed: 0.003, pulseSpeed: 3.0, lineColor: 0xb84040, nodeColor: 0xd86060, ringColor: 0xa83535, glowColor: 0x982a2a, particleColor: 0xd86060, lightIntensity: 3.2 },
 };
 
 // ─── Globe radius ─────────────────────────────────────────────────────────────
 
-const GLOBE_RADIUS = 0.38;
+const GLOBE_RADIUS = 0.4;
 
-// ─── Latitude lines (horizontal rings at different heights) ────────────────────
+// ─── Seeded random ────────────────────────────────────────────────────────────
 
-function LatitudeLines({ cfg }: { cfg: OrbConfig }) {
+function seededRandom(seed: number) {
+  let s = seed;
+  return () => {
+    s = (s * 16807 + 0) % 2147483647;
+    return (s - 1) / 2147483646;
+  };
+}
+
+// ─── Random wireframe curves — hair-thin, organic ─────────────────────────────
+
+function RandomCurves({ cfg }: { cfg: OrbConfig }) {
   const groupRef = useRef<THREE.Group>(null);
 
-  const lines = useMemo(() => {
-    const result: { radius: number; y: number }[] = [];
-    const latCount = 9;
-    for (let i = 1; i < latCount; i++) {
-      const lat = (i / latCount) * Math.PI - Math.PI / 2;
-      const r = Math.cos(lat) * GLOBE_RADIUS;
-      const y = Math.sin(lat) * GLOBE_RADIUS;
-      result.push({ radius: r, y });
-    }
-    return result;
+  const curves = useMemo(() => {
+    const rand = seededRandom(42);
+    const count = 22;
+    return Array.from({ length: count }, () => {
+      const rx = (rand() - 0.5) * Math.PI * 2;
+      const ry = (rand() - 0.5) * Math.PI * 2;
+      const rz = (rand() - 0.5) * Math.PI * 2;
+      const rOff = 0.2 + rand() * 0.25;
+      const tube = 0.001 + rand() * 0.0015; // hair-thin
+      const opacity = 0.35 + rand() * 0.45;
+      return { rx, ry, rz, rOff, tube, opacity };
+    });
   }, []);
 
   useFrame(() => {
@@ -59,30 +77,33 @@ function LatitudeLines({ cfg }: { cfg: OrbConfig }) {
 
   return (
     <group ref={groupRef}>
-      {lines.map((line, i) => (
-        <mesh key={i} position={[0, line.y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[line.radius, 0.003, 8, 80]} />
-          <meshBasicMaterial
-            color={cfg.lineColor}
-            transparent
-            opacity={0.35 + (i % 3) * 0.08}
-          />
+      {curves.map((c, i) => (
+        <mesh key={i} rotation={[c.rx, c.ry, c.rz]}>
+          <torusGeometry args={[GLOBE_RADIUS * c.rOff, c.tube, 8, 80]} />
+          <meshBasicMaterial color={cfg.lineColor} transparent opacity={c.opacity} />
         </mesh>
       ))}
     </group>
   );
 }
 
-// ─── Longitude lines (vertical meridian arcs) ─────────────────────────────────
+// ─── Random arc segments — partial thin curves ────────────────────────────────
 
-function LongitudeLines({ cfg }: { cfg: OrbConfig }) {
+function RandomArcs({ cfg }: { cfg: OrbConfig }) {
   const groupRef = useRef<THREE.Group>(null);
 
-  const lines = useMemo(() => {
-    const count = 12;
-    return Array.from({ length: count }, (_, i) => ({
-      rotY: (i / count) * Math.PI,
-    }));
+  const arcs = useMemo(() => {
+    const rand = seededRandom(137);
+    const count = 25;
+    return Array.from({ length: count }, () => {
+      const rx = (rand() - 0.5) * Math.PI * 2;
+      const ry = (rand() - 0.5) * Math.PI * 2;
+      const rz = (rand() - 0.5) * Math.PI * 2;
+      const tube = 0.0008 + rand() * 0.0015; // hair-thin
+      const opacity = 0.25 + rand() * 0.4;
+      const arc = 0.3 + rand() * 0.7;
+      return { rx, ry, rz, tube, opacity, arc };
+    });
   }, []);
 
   useFrame(() => {
@@ -94,72 +115,34 @@ function LongitudeLines({ cfg }: { cfg: OrbConfig }) {
 
   return (
     <group ref={groupRef}>
-      {lines.map((line, i) => (
-        <mesh key={i} rotation={[0, line.rotY, 0]}>
-          <torusGeometry args={[GLOBE_RADIUS, 0.003, 8, 80]} />
-          <meshBasicMaterial
-            color={cfg.lineColor}
-            transparent
-            opacity={0.3 + (i % 3) * 0.06}
-          />
+      {arcs.map((a, i) => (
+        <mesh key={i} rotation={[a.rx, a.ry, a.rz]}>
+          <torusGeometry args={[GLOBE_RADIUS, a.tube, 8, 80, Math.PI * a.arc]} />
+          <meshBasicMaterial color={cfg.lineColor} transparent opacity={a.opacity} />
         </mesh>
       ))}
     </group>
   );
 }
 
-// ─── Equator + tropic highlight lines (brighter) ──────────────────────────────
+// ─── Scattered bright nodes ───────────────────────────────────────────────────
 
-function HighlightLines({ cfg }: { cfg: OrbConfig }) {
-  const groupRef = useRef<THREE.Group>(null);
-
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += 0.003;
-      groupRef.current.rotation.x += 0.001;
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      {/* Equator */}
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[GLOBE_RADIUS, 0.005, 12, 100]} />
-        <meshBasicMaterial color={cfg.nodeColor} transparent opacity={0.7} />
-      </mesh>
-      {/* Tropic of Cancer */}
-      <mesh position={[0, GLOBE_RADIUS * 0.38, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[GLOBE_RADIUS * 0.92, 0.004, 10, 90]} />
-        <meshBasicMaterial color={cfg.lineColor} transparent opacity={0.45} />
-      </mesh>
-      {/* Tropic of Capricorn */}
-      <mesh position={[0, -GLOBE_RADIUS * 0.38, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[GLOBE_RADIUS * 0.92, 0.004, 10, 90]} />
-        <meshBasicMaterial color={cfg.lineColor} transparent opacity={0.45} />
-      </mesh>
-    </group>
-  );
-}
-
-// ─── Bright light nodes at intersections ──────────────────────────────────────
-
-function GlobeNodes({ cfg }: { cfg: OrbConfig }) {
+function ScatteredNodes({ cfg }: { cfg: OrbConfig }) {
   const refs = useRef<THREE.Mesh[]>([]);
 
   const nodes = useMemo(() => {
-    const result: [number, number, number][] = [];
-    // Place nodes at lat/lon intersections
-    const lats = [-0.6, -0.3, 0, 0.3, 0.6];
-    const lons = 12;
-    lats.forEach((lat) => {
-      const r = Math.cos(lat) * GLOBE_RADIUS;
-      const y = Math.sin(lat) * GLOBE_RADIUS;
-      for (let i = 0; i < lons; i++) {
-        const angle = (i / lons) * Math.PI * 2;
-        result.push([Math.cos(angle) * r, y, Math.sin(angle) * r]);
-      }
+    const rand = seededRandom(256);
+    const count = 30;
+    return Array.from({ length: count }, () => {
+      const theta = rand() * Math.PI * 2;
+      const phi = Math.acos(2 * rand() - 1);
+      const r = GLOBE_RADIUS * (0.85 + rand() * 0.15);
+      return [
+        r * Math.sin(phi) * Math.cos(theta),
+        r * Math.sin(phi) * Math.sin(theta),
+        r * Math.cos(phi),
+      ] as [number, number, number];
     });
-    return result;
   }, []);
 
   useFrame(({ clock }) => {
@@ -167,8 +150,8 @@ function GlobeNodes({ cfg }: { cfg: OrbConfig }) {
     refs.current.forEach((mesh, i) => {
       if (!mesh) return;
       const mat = mesh.material as THREE.MeshBasicMaterial;
-      mat.opacity = 0.5 + Math.sin(t * 2.0 + i * 0.3) * 0.3;
-      const s = 0.8 + Math.sin(t * 1.5 + i * 0.5) * 0.2;
+      mat.opacity = 0.5 + Math.sin(t * 1.8 + i * 0.4) * 0.35;
+      const s = 0.7 + Math.sin(t * 1.2 + i * 0.6) * 0.3;
       mesh.scale.setScalar(s);
     });
   });
@@ -177,7 +160,7 @@ function GlobeNodes({ cfg }: { cfg: OrbConfig }) {
     <group>
       {nodes.map((v, i) => (
         <mesh key={i} ref={(el) => { if (el) refs.current[i] = el; }} position={v}>
-          <sphereGeometry args={[0.008, 6, 6]} />
+          <sphereGeometry args={[0.006, 6, 6]} />
           <meshBasicMaterial color={cfg.nodeColor} transparent opacity={0.6} />
         </mesh>
       ))}
@@ -185,48 +168,66 @@ function GlobeNodes({ cfg }: { cfg: OrbConfig }) {
   );
 }
 
-// ─── 6 glowing orbit rings ────────────────────────────────────────────────────
+// ─── Saturn rings — thick, bright, dramatic angles ────────────────────────────
 
-function OrbitRings({ cfg }: { cfg: OrbConfig }) {
+function SaturnRings({ cfg }: { cfg: OrbConfig }) {
   const r1 = useRef<THREE.Mesh>(null);
   const r2 = useRef<THREE.Mesh>(null);
   const r3 = useRef<THREE.Mesh>(null);
   const r4 = useRef<THREE.Mesh>(null);
+  const r5 = useRef<THREE.Mesh>(null);
+  const r6 = useRef<THREE.Mesh>(null);
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
     const rings = [
-      { ref: r1, speed: 0.007, base: 0.6 },
-      { ref: r2, speed: -0.005, base: 0.45 },
-      { ref: r3, speed: 0.004, base: 0.3 },
-      { ref: r4, speed: -0.003, base: 0.18 },
+      { ref: r1, speed: 0.006, base: 0.8 },
+      { ref: r2, speed: -0.004, base: 0.65 },
+      { ref: r3, speed: 0.003, base: 0.5 },
+      { ref: r4, speed: -0.0025, base: 0.38 },
+      { ref: r5, speed: 0.002, base: 0.28 },
+      { ref: r6, speed: -0.0015, base: 0.18 },
     ];
     rings.forEach((ring, i) => {
       if (ring.ref.current) {
         ring.ref.current.rotation.z += ring.speed;
         const mat = ring.ref.current.material as THREE.MeshBasicMaterial;
-        mat.opacity = ring.base * (0.85 + Math.sin(t * 1.2 + i * 0.8) * 0.15);
+        mat.opacity = ring.base * (0.85 + Math.sin(t * 1.0 + i * 0.7) * 0.15);
       }
     });
   });
 
   return (
     <>
-      <mesh ref={r1} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.42, 0.012, 10, 100]} />
-        <meshBasicMaterial color={cfg.ringColor} transparent opacity={0.65} />
+      {/* Innermost — tight, bright */}
+      <mesh ref={r1} rotation={[1.35, 0.2, 0.4]}>
+        <torusGeometry args={[0.48, 0.008, 10, 120]} />
+        <meshBasicMaterial color={cfg.ringColor} transparent opacity={0.8} />
       </mesh>
-      <mesh ref={r2} rotation={[0.5, 0.6, Math.PI / 3]}>
-        <torusGeometry args={[0.5, 0.01, 10, 100]} />
-        <meshBasicMaterial color={cfg.lineColor} transparent opacity={0.5} />
+      {/* Second ring */}
+      <mesh ref={r2} rotation={[0.5, 1.2, -0.6]}>
+        <torusGeometry args={[0.56, 0.007, 10, 110]} />
+        <meshBasicMaterial color={cfg.lineColor} transparent opacity={0.65} />
       </mesh>
-      <mesh ref={r3} rotation={[Math.PI / 3, -0.3, 0.4]}>
-        <torusGeometry args={[0.58, 0.009, 8, 100]} />
-        <meshBasicMaterial color={cfg.ringColor} transparent opacity={0.35} />
+      {/* Third ring */}
+      <mesh ref={r3} rotation={[0.9, -0.4, 1.1]}>
+        <torusGeometry args={[0.64, 0.006, 10, 110]} />
+        <meshBasicMaterial color={cfg.ringColor} transparent opacity={0.5} />
       </mesh>
-      <mesh ref={r4} rotation={[0.3, -0.5, Math.PI / 5]}>
-        <torusGeometry args={[0.66, 0.007, 8, 100]} />
-        <meshBasicMaterial color={cfg.nodeColor} transparent opacity={0.22} />
+      {/* Fourth ring */}
+      <mesh ref={r4} rotation={[-0.3, 0.8, -1.2]}>
+        <torusGeometry args={[0.72, 0.005, 8, 100]} />
+        <meshBasicMaterial color={cfg.nodeColor} transparent opacity={0.4} />
+      </mesh>
+      {/* Fifth ring */}
+      <mesh ref={r5} rotation={[1.1, -0.7, 0.3]}>
+        <torusGeometry args={[0.8, 0.004, 8, 100]} />
+        <meshBasicMaterial color={cfg.lineColor} transparent opacity={0.3} />
+      </mesh>
+      {/* Outermost — wide, faint */}
+      <mesh ref={r6} rotation={[-0.6, 1.0, 0.9]}>
+        <torusGeometry args={[0.88, 0.004, 8, 100]} />
+        <meshBasicMaterial color={cfg.ringColor} transparent opacity={0.2} />
       </mesh>
     </>
   );
@@ -235,13 +236,16 @@ function OrbitRings({ cfg }: { cfg: OrbConfig }) {
 // ─── Orbiting particles ───────────────────────────────────────────────────────
 
 const PARTICLE_COUNT = 30;
-const PARTICLE_DATA = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
-  angle: (i / PARTICLE_COUNT) * Math.PI * 2,
-  radius: 0.4 + (i % 5) * 0.06,
-  speed: 0.025 + (i % 4) * 0.01,
-  y: (((i * 7919) % 100) / 100 - 0.5) * 0.5,
-  size: 0.008 + (i % 3) * 0.003,
-}));
+const PARTICLE_DATA = Array.from({ length: PARTICLE_COUNT }, (_, i) => {
+  const rand = seededRandom(i * 100 + 7);
+  return {
+    angle: rand() * Math.PI * 2,
+    radius: 0.44 + rand() * 0.18,
+    speed: 0.012 + rand() * 0.018,
+    y: (rand() - 0.5) * 0.7,
+    size: 0.005 + rand() * 0.005,
+  };
+});
 
 function Particles({ cfg }: { cfg: OrbConfig }) {
   const refs = useRef<THREE.Mesh[]>([]);
@@ -254,9 +258,9 @@ function Particles({ cfg }: { cfg: OrbConfig }) {
       const a = p.angle + t * p.speed;
       mesh.position.x = Math.cos(a) * p.radius;
       mesh.position.z = Math.sin(a) * p.radius;
-      mesh.position.y = p.y + Math.sin(t * 0.5 + i) * 0.04;
+      mesh.position.y = p.y + Math.sin(t * 0.4 + i) * 0.05;
       const mat = mesh.material as THREE.MeshBasicMaterial;
-      mat.opacity = 0.5 + Math.sin(t * 2.0 + i * 0.7) * 0.3;
+      mat.opacity = 0.4 + Math.sin(t * 1.8 + i * 0.7) * 0.3;
     });
   });
 
@@ -265,7 +269,7 @@ function Particles({ cfg }: { cfg: OrbConfig }) {
       {PARTICLE_DATA.map((p, i) => (
         <mesh key={i} ref={(el) => { if (el) refs.current[i] = el; }}>
           <sphereGeometry args={[p.size, 6, 6]} />
-          <meshBasicMaterial color={cfg.particleColor} transparent opacity={0.6} />
+          <meshBasicMaterial color={cfg.particleColor} transparent opacity={0.5} />
         </mesh>
       ))}
     </>
@@ -289,32 +293,29 @@ export default function AICore({ state }: { state: OrbState }) {
     }
 
     if (lightRef.current) {
-      lightRef.current.intensity = cfg.lightIntensity + Math.sin(t * cfg.pulseSpeed * 0.5) * 0.8;
+      lightRef.current.intensity = cfg.lightIntensity + Math.sin(t * cfg.pulseSpeed * 0.5) * 1.0;
     }
   });
 
   return (
-    <group ref={groupRef} scale={2.7}>
-      {/* Warm light */}
-      <pointLight ref={lightRef} color={cfg.glowColor} intensity={cfg.lightIntensity} distance={18} decay={2} />
-      <ambientLight intensity={0.06} />
+    <group ref={groupRef} scale={3.0}>
+      {/* Warm gold light */}
+      <pointLight ref={lightRef} color={cfg.glowColor} intensity={cfg.lightIntensity} distance={22} decay={2} />
+      <ambientLight intensity={0.08} />
 
-      {/* Latitude lines — horizontal rings */}
-      <LatitudeLines cfg={cfg} />
+      {/* Hair-thin random wireframe curves */}
+      <RandomCurves cfg={cfg} />
 
-      {/* Longitude lines — vertical meridians */}
-      <LongitudeLines cfg={cfg} />
+      {/* Hair-thin random arc segments */}
+      <RandomArcs cfg={cfg} />
 
-      {/* Highlight lines — equator + tropics (brighter) */}
-      <HighlightLines cfg={cfg} />
+      {/* Scattered bright nodes */}
+      <ScatteredNodes cfg={cfg} />
 
-      {/* Bright nodes at intersections */}
-      <GlobeNodes cfg={cfg} />
+      {/* Saturn rings — thick, bright, dramatic */}
+      <SaturnRings cfg={cfg} />
 
-      {/* 6 glowing orbit rings */}
-      <OrbitRings cfg={cfg} />
-
-      {/* Orbiting particles */}
+      {/* Particles */}
       <Particles cfg={cfg} />
     </group>
   );

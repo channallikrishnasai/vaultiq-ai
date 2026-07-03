@@ -88,8 +88,8 @@ export default function DashboardLayout({ data, userId, user }: DashboardLayoutP
           className="absolute inset-0"
           style={{
             background: `
-              radial-gradient(ellipse 65% 55% at 50% 46%, rgba(212,175,55,0.14) 0%, transparent 50%),
-              radial-gradient(ellipse 80% 60% at 50% 44%, rgba(180,130,20,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse 65% 55% at 50% 46%, rgba(232,184,48,0.14) 0%, transparent 50%),
+              radial-gradient(ellipse 80% 60% at 50% 44%, rgba(200,160,40,0.08) 0%, transparent 60%),
               radial-gradient(ellipse 50% 40% at 82% 12%, rgba(167,139,250,0.06) 0%, transparent 45%),
               radial-gradient(ellipse 45% 35% at 12% 78%, rgba(96,165,250,0.05) 0%, transparent 45%),
               radial-gradient(ellipse 40% 30% at 90% 72%, rgba(16,185,129,0.04) 0%, transparent 45%),
@@ -223,7 +223,7 @@ export default function DashboardLayout({ data, userId, user }: DashboardLayoutP
         />
       )}
 
-      {/* ── Golden wireframe glow halo — subtle, matching thin-line globe ── */}
+      {/* ── Golden wireframe glow halo — rich gold, Saturn style ── */}
       {uiReady && (
         <>
           <div
@@ -232,11 +232,11 @@ export default function DashboardLayout({ data, userId, user }: DashboardLayoutP
               left: "50%",
               top: "46%",
               transform: "translate(-50%, -50%)",
-              width: "36vmin",
-              height: "36vmin",
+              width: "44vmin",
+              height: "44vmin",
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(212,175,55,0.06) 0%, rgba(212,175,55,0.03) 30%, transparent 60%)",
-              filter: "blur(18px)",
+              background: "radial-gradient(circle, rgba(232,184,48,0.1) 0%, rgba(232,184,48,0.04) 35%, transparent 60%)",
+              filter: "blur(20px)",
               zIndex: 3,
               animation: "orbGlow 4s ease-in-out infinite alternate",
             }}
@@ -247,11 +247,11 @@ export default function DashboardLayout({ data, userId, user }: DashboardLayoutP
               left: "50%",
               top: "46%",
               transform: "translate(-50%, -50%)",
-              width: "22vmin",
-              height: "22vmin",
+              width: "28vmin",
+              height: "28vmin",
               borderRadius: "50%",
-              background: "radial-gradient(circle, rgba(245,208,96,0.05) 0%, rgba(212,175,55,0.02) 40%, transparent 65%)",
-              filter: "blur(10px)",
+              background: "radial-gradient(circle, rgba(245,200,66,0.07) 0%, rgba(232,184,48,0.03) 45%, transparent 65%)",
+              filter: "blur(12px)",
               zIndex: 3,
             }}
           />
