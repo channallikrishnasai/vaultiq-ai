@@ -6,6 +6,7 @@ import DashboardScene from "./DashboardScene";
 import NeuralNetwork from "./NeuralNetwork";
 import DashboardFloatingCards from "./DashboardFloatingCards";
 import DashboardKPIRow from "./DashboardKPIRow";
+import DashboardHeader from "./DashboardHeader";
 import FlashOverlay from "./FlashOverlay";
 import { DashboardData } from "@/types/dashboard";
 import { useOrb } from "@/contexts/OrbContext";
@@ -162,6 +163,9 @@ export default function DashboardLayout({ data, userId, user }: DashboardLayoutP
       <div className="absolute inset-0">
         <DashboardScene />
       </div>
+
+      {/* ── Header with profile ── */}
+      {uiReady && <DashboardHeader user={{ name: user.name ?? null, email: user.email ?? null, image: user.image ?? null }} />}
 
       {/* ── Top KPI Bar ── */}
       {uiReady && (
