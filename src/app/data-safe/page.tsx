@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Lock, Eye, Fingerprint, ArrowRight, AlertTriangle, Zap, Brain, BarChart3 } from "lucide-react";
 import Link from "next/link";
@@ -80,18 +80,22 @@ function HexPattern() {
 }
 
 function CursorSignIn() {
-  const [pos, setPos] = useState({ x: -100, y: -100 });
-  const [entered, setEntered] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      setPos({ x: e.clientX, y: e.clientY });
-      if (!entered) setEntered(true);
+      const el = ref.current;
+      if (el) {
+        el.style.left = `${e.clientX}px`;
+        el.style.top = `${e.clientY}px`;
+      }
+      if (!visible) setVisible(true);
     };
-    const onLeave = () => setEntered(false);
-    const onEnter = () => setEntered(true);
+    const onLeave = () => setVisible(false);
+    const onEnter = () => setVisible(true);
 
-    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mousemove", onMove, { passive: true });
     document.addEventListener("mouseleave", onLeave);
     document.addEventListener("mouseenter", onEnter);
     return () => {
@@ -99,18 +103,13 @@ function CursorSignIn() {
       document.removeEventListener("mouseleave", onLeave);
       document.removeEventListener("mouseenter", onEnter);
     };
-  }, [entered]);
+  }, [visible]);
 
   return (
-    <motion.div
-      className="fixed z-50 pointer-events-auto"
-      animate={{
-        x: pos.x + 24,
-        y: pos.y + 24,
-        opacity: entered ? 1 : 0,
-        scale: entered ? 1 : 0.5,
-      }}
-      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.5 }}
+    <div
+      ref={ref}
+      className="fixed z-50 pointer-events-auto -translate-x-[2px] -translate-y-[50%]"
+      style={{ left: -100, top: -100, opacity: visible ? 1 : 0, transition: "opacity 0.2s" }}
     >
       <Link href="/sign-in">
         <motion.div
@@ -127,7 +126,7 @@ function CursorSignIn() {
           <ArrowRight size={16} className="text-black" />
         </motion.div>
       </Link>
-    </motion.div>
+    </div>
   );
 }
 
