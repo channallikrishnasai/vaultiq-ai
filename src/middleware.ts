@@ -1,25 +1,23 @@
-import { auth } from "@/lib/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth.config";
 import { NextResponse } from "next/server";
+
+const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;
 
-  // Public routes - always allow
-  if (
-    pathname === "/" ||
-    pathname.startsWith("/sign-in") ||
-    pathname.startsWith("/sign-up") ||
-    pathname.startsWith("/data-safe") ||
-    pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/register")
-  ) {
-    return NextResponse.next();
-  }
+  // If not authenticated and trying to access protected route
+  if (!req.auth) {
+    const isPublic =
+      pathname === "/" ||
+      pathname.startsWith("/sign-in") ||
+      pathname.startsWith("/sign-up") ||
+      pathname.startsWith("/data-safe") ||
+      pathname.startsWith("/api/auth") ||
+      pathname.startsWith("/api/register");
 
-  const isLoggedIn = !!req.auth;
-
-  if (pathname.startsWith("/dashboard")) {
-    if (!isLoggedIn) {
+    if (!isPublic) {
       const url = req.nextUrl.clone();
       url.pathname = "/data-safe";
       url.searchParams.set("from", pathname);

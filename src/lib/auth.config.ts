@@ -2,6 +2,7 @@ import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
   providers: [],
+  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
   pages: {
     signIn: "/sign-in",
     newUser: "/sign-up",
@@ -21,17 +22,20 @@ export const authConfig = {
     },
     authorized({ auth, request }) {
       const { pathname } = request.nextUrl;
-      const isPublic =
+
+      // Public routes — always allowed
+      if (
         pathname === "/" ||
         pathname.startsWith("/sign-in") ||
         pathname.startsWith("/sign-up") ||
+        pathname.startsWith("/data-safe") ||
         pathname.startsWith("/api/auth") ||
-        pathname.startsWith("/api/register");
-
-      if (isPublic) {
+        pathname.startsWith("/api/register")
+      ) {
         return true;
       }
 
+      // Dashboard requires auth
       return !!auth?.user;
     },
   },
