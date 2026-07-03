@@ -35,7 +35,7 @@ export default function RootLayout({
                 {/* Icon-only slim sidebar — always visible globally */}
                 <LeftNav activeItem="Dashboard" />
                 {/* Main content fills the rest */}
-                <main className="flex-1 overflow-hidden h-full">{children}</main>
+                <main className="flex-1 h-full overflow-x-hidden overflow-y-auto">{children}</main>
                 {/* Global AI Chat & API Keys — available on all pages */}
                 <GlobalAIChat />
                 <ApiKeysWidget />
