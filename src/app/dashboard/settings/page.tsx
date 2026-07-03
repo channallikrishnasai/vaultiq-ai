@@ -1,4 +1,9 @@
-export default function SettingsPage() {
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+
+export default async function SettingsPage() {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/data-safe?from=/dashboard/settings");
   return (
     <main className="min-h-screen bg-zinc-950 p-6">
       <div className="mx-auto max-w-4xl">
