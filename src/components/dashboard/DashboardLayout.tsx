@@ -169,7 +169,7 @@ export default function DashboardLayout({ data, userId, user }: DashboardLayoutP
 
       {/* ── Top KPI Bar ── */}
       {uiReady && (
-        <div className="absolute top-0 left-0 right-0 z-10 px-4 pt-2">
+        <div className="absolute top-[52px] left-0 right-0 z-10 px-4 pt-2">
           <DashboardKPIRow
             netWorth={data.netWorth}
             monthlyIncome={data.monthlyIncome}
