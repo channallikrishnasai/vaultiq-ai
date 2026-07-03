@@ -135,15 +135,17 @@ export default function DashboardKPIRow({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.35, delay: i * 0.04 }}
                   whileHover={{
-                    y: -2,
-                    boxShadow: `0 8px 28px rgba(0,0,0,0.7), 0 0 16px ${item.glowColor}`,
+                    y: -3,
+                    boxShadow: `0 10px 32px rgba(0,0,0,0.75), 0 0 20px ${item.glowColor}`,
                   }}
                   className="relative overflow-hidden rounded-xl px-3 py-2.5"
                   style={{
-                    background: "rgba(5,4,2,0.97)",
-                    border: "1px solid rgba(212,175,55,0.18)",
-                    boxShadow: `0 2px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.03)`,
-                    borderBottom: `2px solid ${item.barColor}44`,
+                    background: "rgba(5,4,2,0.96)",
+                    border: "1px solid rgba(212,175,55,0.22)",
+                    boxShadow: `0 4px 16px rgba(0,0,0,0.65), 0 0 12px ${item.glowColor}, inset 0 1px 0 rgba(255,255,255,0.04)`,
+                    borderBottom: `2.5px solid ${item.barColor}55`,
+                    backdropFilter: "blur(32px)",
+                    WebkitBackdropFilter: "blur(32px)",
                   }}
                 >
                   {/* Top accent glow */}
@@ -201,14 +203,15 @@ export default function DashboardKPIRow({
                     )}
                   </div>
 
-                  {/* Progress bar */}
+                  {/* Progress bar — more prominent */}
                   <div
                     style={{
-                      height: 2.5,
+                      height: 3.5,
                       width: "100%",
-                      borderRadius: 3,
-                      background: "rgba(255,255,255,0.04)",
+                      borderRadius: 4,
+                      background: "rgba(255,255,255,0.06)",
                       overflow: "hidden",
+                      boxShadow: `inset 0 1px 2px rgba(0,0,0,0.3)`,
                     }}
                   >
                     <motion.div
@@ -217,9 +220,9 @@ export default function DashboardKPIRow({
                       transition={{ duration: 1.3, delay: i * 0.06 + 0.3, ease: "easeOut" }}
                       style={{
                         height: "100%",
-                        borderRadius: 3,
-                        background: `linear-gradient(90deg, ${item.barColor}88, ${item.barColor})`,
-                        boxShadow: `0 0 6px ${item.barColor}66`,
+                        borderRadius: 4,
+                        background: `linear-gradient(90deg, ${item.barColor}99, ${item.barColor})`,
+                        boxShadow: `0 0 10px ${item.barColor}88, 0 0 4px ${item.barColor}aa`,
                       }}
                     />
                   </div>

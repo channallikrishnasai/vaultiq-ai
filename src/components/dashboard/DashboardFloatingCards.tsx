@@ -35,32 +35,51 @@ function Card({
   accent = "#D4AF37",
   delay = 0,
   className = "",
+  floatDelay = 0,
+  floatDuration = 4,
+  floatAmount = 3,
 }: {
   children: React.ReactNode;
   style?: React.CSSProperties;
   accent?: string;
   delay?: number;
   className?: string;
+  floatDelay?: number;
+  floatDuration?: number;
+  floatAmount?: number;
 }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.88, y: 8 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ delay, type: "spring", stiffness: 180, damping: 20 }}
+      animate={{
+        opacity: 1,
+        scale: 1,
+        y: [0, -floatAmount, 0, floatAmount * 0.6, 0],
+      }}
+      transition={{
+        opacity: { delay, duration: 0.5 },
+        scale: { delay, type: "spring", stiffness: 180, damping: 20 },
+        y: {
+          delay: floatDelay,
+          duration: floatDuration,
+          repeat: Infinity,
+          ease: "easeInOut",
+        },
+      }}
       whileHover={{
-        y: -4,
-        scale: 1.02,
-        boxShadow: `0 20px 60px rgba(0,0,0,0.9), 0 0 40px ${accent}18`,
-        borderColor: `${accent}55`,
+        y: -6,
+        scale: 1.03,
+        boxShadow: `0 24px 64px rgba(0,0,0,0.92), 0 0 48px ${accent}22`,
+        borderColor: `${accent}66`,
       }}
       className={`absolute ${className}`}
       style={{
-        background: "rgba(5,4,2,0.94)",
+        background: "rgba(5,4,2,0.92)",
         border: `1px solid ${accent}30`,
-        borderRadius: 12,
-        backdropFilter: "blur(24px)",
-        WebkitBackdropFilter: "blur(24px)",
-        boxShadow: `0 12px 48px rgba(0,0,0,0.88), 0 0 20px ${accent}08, inset 0 1px 0 rgba(255,255,255,0.04)`,
+        borderRadius: 14,
+        backdropFilter: "blur(28px)",
+        WebkitBackdropFilter: "blur(28px)",
+        boxShadow: `0 14px 52px rgba(0,0,0,0.9), 0 0 24px ${accent}0c, inset 0 1px 0 rgba(255,255,255,0.05)`,
         overflow: "hidden",
         padding: "10px 12px",
         color: "#fff",
@@ -78,7 +97,7 @@ function Card({
           left: "15%",
           right: "15%",
           height: 1,
-          background: `linear-gradient(90deg, transparent, ${accent}55, transparent)`,
+          background: `linear-gradient(90deg, transparent, ${accent}66, transparent)`,
         }}
       />
       {children}
@@ -222,7 +241,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.1}
         accent="#D4AF37"
-        style={{ width: 175, left: "13%", top: "20%" }}
+        floatDelay={0}
+        floatDuration={5}
+        floatAmount={2.5}
+        style={{ width: 175, left: "12.5%", top: "19.5%" }}
       >
         <CardHeader
           label="Financial Level"
@@ -264,7 +286,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.18}
         accent="#a78bfa"
-        style={{ width: 175, left: "13%", top: "36%" }}
+        floatDelay={0.5}
+        floatDuration={4.5}
+        floatAmount={2}
+        style={{ width: 175, left: "12.8%", top: "35.5%" }}
       >
         <CardHeader
           label="Automation Badges"
@@ -299,7 +324,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.25}
         accent="#fb923c"
-        style={{ width: 175, left: "13%", top: "50%" }}
+        floatDelay={1}
+        floatDuration={5.5}
+        floatAmount={3}
+        style={{ width: 175, left: "13.2%", top: "49.5%" }}
       >
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-1.5">
@@ -349,7 +377,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.32}
         accent="#60a5fa"
-        style={{ width: 175, left: "13%", top: "64%" }}
+        floatDelay={1.5}
+        floatDuration={4.8}
+        floatAmount={2.2}
+        style={{ width: 175, left: "12.7%", top: "63.5%" }}
       >
         <CardHeader
           label="Tax Planner"
@@ -382,7 +413,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.38}
         accent="#10b981"
-        style={{ width: 175, left: "13%", top: "80%" }}
+        floatDelay={2}
+        floatDuration={5.2}
+        floatAmount={2.8}
+        style={{ width: 175, left: "13.3%", top: "79.5%" }}
       >
         <CardHeader
           label="Portfolio"
@@ -424,7 +458,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.12}
         accent="#D4AF37"
-        style={{ width: 190, left: "30%", top: "14%" }}
+        floatDelay={0.3}
+        floatDuration={4.8}
+        floatAmount={2}
+        style={{ width: 190, left: "29.5%", top: "13.5%" }}
       >
         <CardHeader
           label="Net Worth"
@@ -469,7 +506,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.18}
         accent="#D4AF37"
-        style={{ width: 195, left: "52%", top: "12%" }}
+        floatDelay={0.7}
+        floatDuration={5}
+        floatAmount={2.5}
+        style={{ width: 195, left: "51.5%", top: "11.5%" }}
       >
         <CardHeader
           label="Portfolio Performance"
@@ -516,7 +556,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.22}
         accent="#10b981"
-        style={{ width: 185, left: "74%", top: "14%" }}
+        floatDelay={0.5}
+        floatDuration={4.5}
+        floatAmount={2.2}
+        style={{ width: 185, left: "73.5%", top: "13.5%" }}
       >
         <CardHeader
           label="Monthly Income"
@@ -555,7 +598,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.28}
         accent="#60a5fa"
-        style={{ width: 185, left: "74%", top: "32%" }}
+        floatDelay={1}
+        floatDuration={5.5}
+        floatAmount={3}
+        style={{ width: 185, left: "73.8%", top: "31.5%" }}
       >
         <CardHeader
           label="Cash Flow Tracker"
@@ -593,7 +639,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.34}
         accent="#D4AF37"
-        style={{ width: 185, left: "74%", top: "50%" }}
+        floatDelay={1.5}
+        floatDuration={4.8}
+        floatAmount={2.5}
+        style={{ width: 185, left: "74.2%", top: "49.5%" }}
       >
         <CardHeader
           label="Savings Rate"
@@ -634,7 +683,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.4}
         accent="#60a5fa"
-        style={{ width: 185, left: "74%", top: "66%" }}
+        floatDelay={2}
+        floatDuration={5.2}
+        floatAmount={2.8}
+        style={{ width: 185, left: "73.7%", top: "65.5%" }}
       >
         <CardHeader
           label="Emergency Fund"
@@ -690,7 +742,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.46}
         accent="#ef4444"
-        style={{ width: 185, left: "74%", top: "82%" }}
+        floatDelay={2.5}
+        floatDuration={4.6}
+        floatAmount={2.3}
+        style={{ width: 185, left: "74.3%", top: "81.5%" }}
       >
         <CardHeader
           label="Expense Analytics"
@@ -735,7 +790,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.5}
         accent="#a78bfa"
-        style={{ width: 175, left: "30%", top: "82%" }}
+        floatDelay={1.8}
+        floatDuration={5}
+        floatAmount={2.5}
+        style={{ width: 175, left: "29.5%", top: "81.5%" }}
       >
         <CardHeader
           label="Goal Progress"
@@ -803,7 +861,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.55}
         accent="#10b981"
-        style={{ width: 185, left: "50%", top: "84%" }}
+        floatDelay={2.2}
+        floatDuration={4.8}
+        floatAmount={2.2}
+        style={{ width: 185, left: "49.5%", top: "83.5%" }}
       >
         <CardHeader
           label="Financial Health Score"
@@ -864,7 +925,10 @@ export default function DashboardFloatingCards({
       <Card
         delay={0.6}
         accent="#a78bfa"
-        style={{ width: 175, left: "70%", top: "84%" }}
+        floatDelay={2.7}
+        floatDuration={5.2}
+        floatAmount={2.8}
+        style={{ width: 175, left: "69.5%", top: "83.5%" }}
       >
         <CardHeader
           label="Investment Returns"

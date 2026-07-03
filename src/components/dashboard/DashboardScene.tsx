@@ -35,11 +35,11 @@ export default function DashboardScene() {
         dpr={[1, 2]}
         performance={{ min: 0.5 }}
       >
-        {/* Scene lighting */}
+        {/* Scene lighting — warm, balanced */}
         <ambientLight intensity={0.04} />
-        <directionalLight position={[-4, 4, 3]} intensity={0.7} color={0xF5D060} />
-        <directionalLight position={[4, -3, -2]} intensity={0.12} color={0x2244aa} />
-        <pointLight position={[0, 0, 2]} intensity={1.5} color={0xD4AF37} distance={12} decay={2} />
+        <directionalLight position={[-4, 4, 3]} intensity={0.5} color={0xF5D060} />
+        <directionalLight position={[4, -3, -2]} intensity={0.08} color={0x2244aa} />
+        <pointLight position={[0, 0, 2]} intensity={1.0} color={0xD4AF37} distance={10} decay={2} />
 
         <Suspense fallback={null}>
           {/* Ambient golden dust */}

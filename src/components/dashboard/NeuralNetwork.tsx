@@ -2,8 +2,7 @@
 
 import { motion } from "framer-motion";
 
-// Nodes positioned to match floating card locations
-// Orb is center (50, 46)
+// Node positions matching floating card locations
 const NODES = [
   { id: "orb",       x: 50,  y: 46 },
   { id: "finLevel",  x: 13,  y: 20 },
@@ -48,7 +47,7 @@ export default function NeuralNetwork({ visible }: { visible: boolean }) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: visible ? 1 : 0 }}
-      transition={{ duration: 1.6, delay: 0.5 }}
+      transition={{ duration: 1.8, delay: 0.6 }}
       style={{
         position: "fixed",
         inset: 0,
@@ -62,28 +61,8 @@ export default function NeuralNetwork({ visible }: { visible: boolean }) {
         preserveAspectRatio="xMidYMid slice"
       >
         <defs>
-          <style>{`
-            @keyframes dashFlow {
-              to { stroke-dashoffset: -24; }
-            }
-            @keyframes dashFlowFast {
-              to { stroke-dashoffset: -16; }
-            }
-            .neural-line {
-              animation: dashFlow 5s linear infinite;
-            }
-            .neural-line-active {
-              animation: dashFlowFast 1.5s linear infinite;
-            }
-            @keyframes pulse-dot {
-              0%, 100% { opacity: 0.3; r: 0.5; }
-              50% { opacity: 0.85; r: 0.7; }
-            }
-            .neural-dot { animation: pulse-dot 3s ease-in-out infinite; }
-            .neural-dot-active { animation: pulse-dot 1s ease-in-out infinite; }
-          `}</style>
           <filter id="neural-glow">
-            <feGaussianBlur stdDeviation="0.8" result="blur" />
+            <feGaussianBlur stdDeviation="0.5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -91,62 +70,36 @@ export default function NeuralNetwork({ visible }: { visible: boolean }) {
           </filter>
         </defs>
 
-        {/* Neural edge lines */}
+        {/* Connection lines — subtle golden */}
         {EDGES.map(([fromId, toId], i) => {
           const from = nodeMap[fromId];
           const to = nodeMap[toId];
           if (!from || !to) return null;
 
-          const midX = (from.x + to.x) / 2 + ((i % 3) - 1) * 2;
-          const midY = (from.y + to.y) / 2 + ((i % 2) - 0.5) * 3;
-
           return (
-            <path
+            <line
               key={i}
-              d={`M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`}
-              fill="none"
-              stroke="rgba(212,175,55,0.12)"
-              strokeWidth="0.18"
-              strokeDasharray="2 4"
-              className="neural-line"
+              x1={from.x}
+              y1={from.y}
+              x2={to.x}
+              y2={to.y}
+              stroke="rgba(212,175,55,0.06)"
+              strokeWidth="0.12"
               filter="url(#neural-glow)"
-              style={{ animationDelay: `${i * 0.25}s` }}
             />
           );
         })}
 
-        {/* Hidden paths for animateMotion */}
-        {EDGES.map(([fromId, toId], i) => {
-          const from = nodeMap[fromId];
-          const to = nodeMap[toId];
-          if (!from || !to) return null;
-          const midX = (from.x + to.x) / 2 + ((i % 3) - 1) * 2;
-          const midY = (from.y + to.y) / 2 + ((i % 2) - 0.5) * 3;
-          return (
-            <path
-              key={`hidden-${i}`}
-              id={`neural-path-${i}`}
-              d={`M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`}
-              fill="none"
-              stroke="none"
-            />
-          );
-        })}
-
-        {/* Peripheral node dots */}
+        {/* Node dots */}
         {NODES.filter((n) => n.id !== "orb").map((n, i) => (
-          <circle
-            key={n.id}
-            cx={n.x}
-            cy={n.y}
-            r="0.55"
-            fill="rgba(212,175,55,0.35)"
-            stroke="rgba(212,175,55,0.5)"
-            strokeWidth="0.2"
-            className="neural-dot"
-            filter="url(#neural-glow)"
-            style={{ animationDelay: `${i * 0.3}s` }}
-          />
+            <circle
+              key={n.id}
+              cx={n.x}
+              cy={n.y}
+              r="0.4"
+              fill="rgba(212,175,55,0.15)"
+              filter="url(#neural-glow)"
+            />
         ))}
       </svg>
     </motion.div>
