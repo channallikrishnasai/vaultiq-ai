@@ -1269,6 +1269,7 @@ export type UserUncheckedUpdateWithoutExpensesInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -1296,6 +1297,7 @@ export type UserCreateWithoutIncomesInput = {
   expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -1323,6 +1325,7 @@ export type UserUncheckedCreateWithoutIncomesInput = {
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -1366,6 +1369,7 @@ export type UserUpdateWithoutIncomesInput = {
   expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -2955,6 +2959,7 @@ export type UserCreateWithoutBillsInput = {
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
   profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
@@ -2982,6 +2987,7 @@ export type UserUncheckedCreateWithoutBillsInput = {
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
   profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
@@ -3025,6 +3031,7 @@ export type UserUpdateWithoutBillsInput = {
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
   profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
@@ -3052,6 +3059,7 @@ export type UserUncheckedUpdateWithoutBillsInput = {
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
   profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput

@@ -84,7 +84,7 @@ export default function BudgetPlanner() {
                 </div>
                 <div className="h-2 w-full rounded-full bg-zinc-800/80 overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${spentVal > allocatedVal ? 'bg-gradient-to-r from-red-600 to-rose-500' : 'bg-gradient-to-r from-violet-600 to-indigo-500'}`}
+                    className={`h-full rounded-full transition-all duration-500 ${spentVal > allocatedVal ? 'bg-linear-to-r from-red-600 to-rose-500' : 'bg-linear-to-r from-violet-600 to-indigo-500'}`}
                     style={{ width: `${Math.min(100, percent)}%` }}
                   />
                 </div>
