@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { FinancialTwinPageClient } from "@/components/financial-twin/FinancialTwinPageClient";
+import BudgetPlanner from "@/components/dashboard/BudgetPlanner";
 
 export default async function TwinPage() {
   const session = await auth();
@@ -14,5 +15,10 @@ export default async function TwinPage() {
 
   if (!user) redirect("/sign-in");
 
-  return <FinancialTwinPageClient user={user} />;
+  return (
+  <>
+    <FinancialTwinPageClient user={user} />
+    <BudgetPlanner />
+  </>
+);
 }

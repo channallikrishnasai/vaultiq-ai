@@ -182,28 +182,32 @@ export function LearningHubClient({ user }: LearningHubClientProps) {
                       <BookOpen className="h-5 w-5 text-cyan-400" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const id = course.youtubeUrl ? extractYouTubeId(course.youtubeUrl) : null;
-                          if (!id) {
-                            const fallbackId = 'WxXCPmKkfUI';
-                            setVideoId(fallbackId);
-                            toast.info('Using fallback video');
-                          } else {
-                            setVideoId(id);
-                          }
-                        }}
-                        className="rounded-full bg-red-600/10 border border-red-500/30 px-2.5 py-0.5 text-xs font-medium text-red-400 hover:bg-red-600/20 transition-all flex items-center gap-1"
-                      >
-                        <Play className="h-3 w-3 fill-current" /> Video
-                      </button>
-                      <span
-                        className={`rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${LEVEL_COLORS[course.level] ?? LEVEL_COLORS.beginner}`}
-                      >
-                        {course.level}
-                      </span>
-                    </div>
+  <button
+    onClick={(e) => {
+      e.stopPropagation();
+      // Open the course viewer modal and ensure video is shown
+      setActiveCourse(course);
+      setActiveLesson(0);
+      setShowQuiz(false);
+      const id = course.youtubeUrl ? extractYouTubeId(course.youtubeUrl) : null;
+      if (!id) {
+        const fallbackId = 'WxXCPmKkfUI';
+        setVideoId(fallbackId);
+        toast.info('Using fallback video');
+      } else {
+        setVideoId(id);
+      }
+    }}
+    className="rounded-full bg-red-600/10 border border-red-500/30 px-2.5 py-0.5 text-xs font-medium text-red-400 hover:bg-red-600/20 transition-all flex items-center gap-1"
+  >
+    <Play className="h-3 w-3 fill-current" /> Video
+  </button>
+  <span
+    className={`rounded-full border px-2.5 py-0.5 text-xs font-medium capitalize ${LEVEL_COLORS[course.level] ?? LEVEL_COLORS.beginner}`}
+  >
+    {course.level}
+  </span>
+</div>
                   </div>
 
                   <h3 className="mb-2 text-lg font-semibold text-zinc-50">{course.title}</h3>
