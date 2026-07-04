@@ -6,6 +6,7 @@ import {
   ChevronDown, ChevronUp, Shield, Zap, Target, TrendingUp,
   PieChart as PieIcon, Activity, Wallet, AlertTriangle, Star,
   Trophy, Cpu, ArrowUpRight, ArrowDownRight, Flame, Send,
+  MessageSquare, Minus, History, Plus, Trash2,
 } from "lucide-react";
 import {
   LineChart, Line, ResponsiveContainer, PieChart, Pie, Cell,
@@ -29,6 +30,55 @@ const PORT_ALLOC = [
 ];
 
 const TT = { contentStyle: { display: "none" }, cursor: false as any };
+
+// ── Animated number counter ───────────────────────────────────────────────────
+function AnimatedNumber({
+  value,
+  prefix = "",
+  suffix = "",
+  decimals = 0,
+  duration = 1400,
+  delay = 0,
+  style = {},
+}: {
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  duration?: number;
+  delay?: number;
+  style?: React.CSSProperties;
+}) {
+  const [displayed, setDisplayed] = useState(0);
+  const frameRef = useRef<number>(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const start = performance.now();
+      const animate = (now: number) => {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setDisplayed(eased * value);
+        if (progress < 1) {
+          frameRef.current = requestAnimationFrame(animate);
+        }
+      };
+      frameRef.current = requestAnimationFrame(animate);
+    }, delay);
+    return () => {
+      clearTimeout(timer);
+      cancelAnimationFrame(frameRef.current);
+    };
+  }, [value, duration, delay]);
+
+  const formatted = displayed.toLocaleString("en-US", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+
+  return <span style={style}>{prefix}{formatted}{suffix}</span>;
+}
 
 // ── Seeded random for deterministic jitter ─────────────────────────────────────
 function seededRandom(seed: number) {
@@ -213,26 +263,26 @@ function Card({
       transition={getTransition()}
       whileHover={
         !isActive
-          ? { y: -6, scale: 1.03, boxShadow: `0 24px 64px rgba(0,0,0,0.85), 0 0 40px ${accent}18`, borderColor: `${accent}55` }
+          ? { y: -5, scale: 1.025, boxShadow: `0 20px 56px rgba(0,0,0,0.82), 0 0 40px ${accent}18, 0 0 15px rgba(212,175,55,0.1)`, borderColor: `${accent}55` }
           : undefined
       }
       className={`absolute ${className}`}
       style={{
-        background: "rgba(8,6,4,0.88)",
-        border: `1px solid ${accent}22`,
-        borderRadius: 16,
-        backdropFilter: "blur(32px)",
-        WebkitBackdropFilter: "blur(32px)",
+        background: "rgba(10,7,3,0.92)",
+        border: `1px solid ${accent}28`,
+        borderRadius: 14,
+        backdropFilter: "blur(36px)",
+        WebkitBackdropFilter: "blur(36px)",
         boxShadow: isJitter
-          ? `0 0 30px ${accent}33, 0 16px 48px rgba(0,0,0,0.85)`
-          : `0 16px 48px rgba(0,0,0,0.85), 0 0 20px ${accent}08, inset 0 1px 0 rgba(255,255,255,0.04)`,
+          ? `0 0 30px ${accent}35, 0 14px 44px rgba(0,0,0,0.82), 0 0 12px rgba(212,175,55,0.1)`
+          : `0 14px 44px rgba(0,0,0,0.82), 0 0 20px ${accent}0a, 0 0 10px rgba(212,175,55,0.06), inset 0 1px 0 rgba(255,220,100,0.04)`,
         overflow: "hidden",
-        padding: "11px 13px",
+        padding: "10px 12px",
         color: "#fff",
         zIndex: isJitter ? 20 : 5,
-        animation: isActive ? "none" : `shimmerBorder 5s ease-in-out ${delay}s infinite`,
+        animation: isActive ? "none" : `shimmerBorder 5.5s ease-in-out ${delay}s infinite`,
         marginLeft: `-${cardWidth / 2}px`,
-        marginTop: "-40px",
+        marginTop: "-38px",
         width: `${cardWidth}px`,
         ...style,
       }}
@@ -241,10 +291,10 @@ function Card({
         style={{
           position: "absolute",
           top: 0,
-          left: "20%",
-          right: "20%",
+          left: "18%",
+          right: "18%",
           height: 1,
-          background: `linear-gradient(90deg, transparent, ${accent}44, transparent)`,
+          background: `linear-gradient(90deg, transparent, ${accent}38, transparent)`,
         }}
       />
       {children}
@@ -355,6 +405,9 @@ export default function DashboardFloatingCards({
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [chatThinking, setChatThinking] = useState(false);
+  const [chatMinimized, setChatMinimized] = useState(false);
+  const [chatHistory, setChatHistory] = useState<Array<{ id: string; messages: { role: "user" | "assistant"; content: string }[]; startedAt: number; summary: string }>>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -371,6 +424,18 @@ export default function DashboardFloatingCards({
   useEffect(() => {
     chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });
   }, [chatMessages, chatThinking]);
+
+  // Chat history persistence
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("vaultiq-chat-history");
+      if (saved) setChatHistory(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem("vaultiq-chat-history", JSON.stringify(chatHistory.slice(0, 50))); } catch {}
+  }, [chatHistory]);
 
   const sendChatMessage = useCallback(async (msg: string) => {
     if (!msg.trim() || chatThinking) return;
@@ -454,12 +519,23 @@ export default function DashboardFloatingCards({
 
       // Back to idle
       setOrbState("idle");
+
+      // Save to history
+      setChatHistory(p => {
+        const summary = msg.length > 40 ? msg.slice(0, 40) + "..." : msg;
+        return [{ id: crypto.randomUUID(), messages: [...chatMessages, { role: "user" as const, content: msg }, { role: "assistant" as const, content: fullContent }], startedAt: Date.now(), summary }, ...p].slice(0, 50);
+      });
     } catch (err: any) {
       const errorMsg = err?.message?.includes("401")
         ? "Please sign in to use AI advisor."
         : "Connection issue — please try again.";
       setChatMessages(p => [...p, { role: "assistant", content: errorMsg }]);
       setOrbState("idle");
+      // Save failed conversation to history too
+      setChatHistory(p => {
+        const summary = msg.length > 40 ? msg.slice(0, 40) + "..." : msg;
+        return [{ id: crypto.randomUUID(), messages: [...chatMessages, { role: "user" as const, content: msg }, { role: "assistant" as const, content: errorMsg }], startedAt: Date.now(), summary }, ...p].slice(0, 50);
+      });
     } finally {
       setChatThinking(false);
     }
@@ -498,7 +574,7 @@ export default function DashboardFloatingCards({
         thinkingStage={thinkingStage}
         cardIndex={0}
         cardWidth={175}
-        style={{ left: "12.5%", top: "19.5%" }}
+        style={{ left: "18%", top: "19.5%" }}
       >
         <CardHeader
           label="Financial Level"
@@ -546,7 +622,7 @@ export default function DashboardFloatingCards({
         thinkingStage={thinkingStage}
         cardIndex={1}
         cardWidth={175}
-        style={{ left: "12.8%", top: "35.5%" }}
+        style={{ left: "18.5%", top: "35.5%" }}
       >
         <CardHeader
           label="Automation Badges"
@@ -587,7 +663,7 @@ export default function DashboardFloatingCards({
         thinkingStage={thinkingStage}
         cardIndex={2}
         cardWidth={175}
-        style={{ left: "13.2%", top: "49.5%" }}
+        style={{ left: "19%", top: "49.5%" }}
       >
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-1.5">
@@ -643,7 +719,7 @@ export default function DashboardFloatingCards({
         thinkingStage={thinkingStage}
         cardIndex={3}
         cardWidth={175}
-        style={{ left: "12.7%", top: "63.5%" }}
+        style={{ left: "18.5%", top: "63.5%" }}
       >
         <CardHeader
           label="Tax Planner"
@@ -682,7 +758,7 @@ export default function DashboardFloatingCards({
         thinkingStage={thinkingStage}
         cardIndex={4}
         cardWidth={175}
-        style={{ left: "13.3%", top: "79.5%" }}
+        style={{ left: "19%", top: "79.5%" }}
       >
         <CardHeader
           label="Portfolio"
@@ -693,7 +769,16 @@ export default function DashboardFloatingCards({
         />
         {!minimized["portfolio2"] && (
           <>
-            <p style={{ fontSize: 9, fontWeight: 800, color: "#f4f4f5", marginBottom: 4 }}>{fmt(portfolio.totalValue)}</p>
+            <AnimatedNumber
+              value={portfolio.totalValue}
+              prefix="$"
+              decimals={2}
+              duration={1600}
+              delay={700}
+              style={{
+                fontSize: 9, fontWeight: 800, color: "#f4f4f5", marginBottom: 4,
+              }}
+            />
             <div className="flex items-center gap-1.5 mb-2">
               <span style={{ fontSize: 7.5, color: "#10b981", fontWeight: 700 }}>+{portfolio.changePercent}%</span>
               <span style={{ fontSize: 6.5, color: "rgba(255,255,255,0.25)" }}>this month</span>
@@ -741,14 +826,17 @@ export default function DashboardFloatingCards({
         {!minimized["netWorth"] && (
           <>
             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Total assets</p>
-            <p
+            <AnimatedNumber
+              value={netWorth}
+              prefix="$"
+              decimals={2}
+              duration={1800}
+              delay={400}
               style={{
                 fontSize: 16, fontWeight: 800, color: "#D4AF37", lineHeight: 1, marginBottom: 6,
                 textShadow: "0 0 20px rgba(212,175,55,0.45)",
               }}
-            >
-              {fmt(netWorth)}
-            </p>
+            />
             <div style={{ height: 36 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={SPARK}>
@@ -846,9 +934,16 @@ export default function DashboardFloatingCards({
         {!minimized["monthlyIncome"] && (
           <>
             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Primary/secondary sources</p>
-            <p style={{ fontSize: 16, fontWeight: 800, color: "#f4f4f5", lineHeight: 1, marginBottom: 3 }}>
-              {fmt(monthlyIncome)}
-            </p>
+            <AnimatedNumber
+              value={monthlyIncome}
+              prefix="$"
+              decimals={0}
+              duration={1600}
+              delay={500}
+              style={{
+                fontSize: 16, fontWeight: 800, color: "#f4f4f5", lineHeight: 1, marginBottom: 3,
+              }}
+            />
             <span
               style={{
                 fontSize: 8, color: "#10b981", fontWeight: 700, display: "inline-block", marginBottom: 5,
@@ -1043,9 +1138,16 @@ export default function DashboardFloatingCards({
         {!minimized["expenseAnalytics"] && (
           <>
             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Monthly breakdown</p>
-            <p style={{ fontSize: 14, fontWeight: 800, color: "#ef4444", lineHeight: 1, marginBottom: 4 }}>
-              {fmt(monthlyExpenses)}
-            </p>
+            <AnimatedNumber
+              value={monthlyExpenses}
+              prefix="$"
+              decimals={2}
+              duration={1600}
+              delay={600}
+              style={{
+                fontSize: 14, fontWeight: 800, color: "#ef4444", lineHeight: 1, marginBottom: 4,
+              }}
+            />
             <div style={{ height: 40 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={EXPENSE_D}>
@@ -1263,279 +1365,460 @@ export default function DashboardFloatingCards({
       </Card>
 
       {/* ════════════════════════════════════════════════════════════════════════
-          AI ASSISTANT BAR — Bottom center (functional chat)
+          AI ASSISTANT BAR — Bottom center (functional chat with minimize)
           ════════════════════════════════════════════════════════════════════════ */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8, type: "spring", stiffness: 120 }}
-        className="absolute"
-        style={{
-          left: "50%",
-          bottom: "3%",
-          transform: "translateX(-50%)",
-          zIndex: 10,
-          width: 480,
-          maxHeight: chatMessages.length > 0 ? "60vh" : "auto",
-        }}
-      >
-        <div
-          style={{
-            background: "rgba(5,4,2,0.96)",
-            border: "1px solid rgba(212,175,55,0.3)",
-            borderRadius: 16,
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            boxShadow: "0 12px 48px rgba(0,0,0,0.92), 0 0 30px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.04)",
-            overflow: "hidden",
-          }}
-        >
-          {/* Top accent line */}
-          <div style={{ position: "absolute", top: 0, left: "10%", right: "10%", height: 1, background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent)", zIndex: 1 }} />
-
-          {/* Messages area (shown when there are messages) */}
-          {chatMessages.length > 0 && (
+      <AnimatePresence>
+        {chatMinimized ? (
+          /* ── Minimized floating button ── */
+          <motion.div
+            key="minimized-btn"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setChatMinimized(false)}
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: "3%",
+              transform: "translateX(-50%)",
+              zIndex: 10,
+              width: 52,
+              height: 52,
+              borderRadius: "50%",
+              background: "rgba(4,3,2,0.97)",
+              border: "1.5px solid rgba(212,175,55,0.4)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: chatThinking
+                ? "0 0 24px rgba(212,175,55,0.5), 0 0 48px rgba(212,175,55,0.2)"
+                : "0 4px 24px rgba(0,0,0,0.8), 0 0 16px rgba(212,175,55,0.15)",
+            }}
+          >
+            {chatThinking ? (
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                <Zap size={18} style={{ color: "#D4AF37" }} />
+              </motion.div>
+            ) : (
+              <MessageSquare size={18} style={{ color: "#D4AF37" }} />
+            )}
+            {!chatThinking && chatMessages.length > 0 && (
+              <div style={{
+                position: "absolute", top: -2, right: -2, width: 10, height: 10,
+                borderRadius: "50%", background: "#D4AF37", border: "2px solid rgba(4,3,2,0.97)",
+              }} />
+            )}
+          </motion.div>
+        ) : (
+          /* ── Full chat bar ── */
+          <motion.div
+            key="full-chat"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 120 }}
+            className="absolute"
+            style={{
+              left: "50%",
+              bottom: "3%",
+              transform: "translateX(-50%)",
+              zIndex: 10,
+              width: 440,
+              maxHeight: chatMessages.length > 0 ? "55vh" : "auto",
+            }}
+          >
             <div
-              ref={chatScrollRef}
               style={{
-                maxHeight: "40vh",
-                overflowY: "auto",
-                padding: "12px 16px 8px",
-                scrollbarWidth: "thin",
+                background: "rgba(4,3,2,0.97)",
+                border: "1px solid rgba(212,175,55,0.25)",
+                borderRadius: 14,
+                backdropFilter: "blur(32px)",
+                WebkitBackdropFilter: "blur(32px)",
+                boxShadow: "0 8px 40px rgba(0,0,0,0.9), 0 0 25px rgba(212,175,55,0.06), inset 0 1px 0 rgba(255,255,255,0.03)",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
               }}
             >
-              <AnimatePresence initial={false}>
-                {chatMessages.length === 0 && !chatThinking && (
-                  <motion.div
-                    key="welcome"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    style={{ padding: "4px 0" }}
-                  >
-                    <p style={{ fontSize: 9, color: "rgba(212,175,55,0.5)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
-                      VaultIQ AI
-                    </p>
-                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
-                      Your financial intelligence is online. Ask me anything about investments, taxes, budgeting, or financial planning.
-                    </p>
-                  </motion.div>
-                )}
-                {chatMessages.map((m, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.35 }}
-                    style={{ marginBottom: 10, display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}
-                  >
-                    {m.role === "user" ? (
-                      <span style={{
-                        fontSize: 11,
-                        color: "rgba(52,211,153,0.9)",
-                        padding: "7px 14px",
-                        borderRadius: 12,
-                        background: "rgba(52,211,153,0.07)",
-                        border: "1px solid rgba(52,211,153,0.14)",
-                        maxWidth: "80%",
-                        lineHeight: 1.5,
-                      }}>
-                        {m.content}
-                      </span>
-                    ) : (
-                      <div style={{ maxWidth: "85%" }}>
-                        <p style={{ fontSize: 9, letterSpacing: "0.1em", color: "rgba(212,175,55,0.5)", marginBottom: 4, textTransform: "uppercase" }}>
-                          VaultIQ AI
-                        </p>
-                        <div style={{
-                          fontSize: 11,
-                          color: "rgba(255,255,255,0.7)",
-                          lineHeight: 1.7,
-                          padding: "10px 14px",
-                          borderRadius: 12,
-                          background: "rgba(212,175,55,0.04)",
-                          border: "1px solid rgba(212,175,55,0.1)",
-                        }}>
-                          {m.content || (
-                            <span style={{ display: "inline-flex", gap: 3, alignItems: "center" }}>
-                              {[0,1,2].map(j => (
-                                <motion.span
-                                  key={j}
-                                  style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(212,175,55,0.5)" }}
-                                  animate={{ opacity: [0.3, 1, 0.3] }}
-                                  transition={{ duration: 0.8, repeat: Infinity, delay: j * 0.15 }}
-                                />
-                              ))}
-                            </span>
-                          )}
-                          {m.content && (
-                            <motion.span
-                              style={{ display: "inline-block", width: 2, height: 12, background: "rgba(212,175,55,0.7)", marginLeft: 1, verticalAlign: "text-bottom" }}
-                              animate={{ opacity: [1, 0] }}
-                              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                ))}
-                {chatThinking && chatMessages[chatMessages.length - 1]?.role === "user" && (
-                  <motion.div
-                    key="thinking"
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 12, background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)" }}
-                  >
-                    <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 18 }}>
-                      {[4,8,14,12,6,10,16,14,8,5,10,14,12,6,4].map((h, i) => (
-                        <motion.div
-                          key={i}
-                          style={{ width: 2, height: h, borderRadius: 2, background: "linear-gradient(to top, rgba(212,175,55,0.2), rgba(212,175,55,0.7))" }}
-                          animate={{ scaleY: [0.3, 1, 0.3] }}
-                          transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.06, ease: "easeInOut" }}
-                        />
-                      ))}
-                    </div>
-                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.35)" }}>Analyzing your finances...</span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
+              {/* Top accent line */}
+              <div style={{ position: "absolute", top: 0, left: "12%", right: "12%", height: 1, background: "linear-gradient(90deg, transparent, rgba(212,175,55,0.35), transparent)", zIndex: 1 }} />
 
-          {/* Input area */}
-          <div style={{ padding: chatMessages.length > 0 ? "8px 16px 12px" : "12px 18px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {/* AI icon */}
+              {/* ── Header bar ── */}
               <div
                 style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: "50%",
-                  background: chatThinking
-                    ? "linear-gradient(135deg, rgba(212,175,55,0.4), rgba(212,175,55,0.15))"
-                    : "linear-gradient(135deg, rgba(212,175,55,0.25), rgba(212,175,55,0.08))",
-                  border: "1.5px solid rgba(212,175,55,0.45)",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
+                  justifyContent: "space-between",
+                  padding: "8px 14px",
+                  borderBottom: chatMessages.length > 0 ? "1px solid rgba(212,175,55,0.1)" : "none",
                   flexShrink: 0,
-                  boxShadow: chatThinking ? "0 0 16px rgba(212,175,55,0.4)" : "0 0 12px rgba(212,175,55,0.2)",
-                  transition: "all 0.3s",
                 }}
               >
-                {chatThinking ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Zap size={12} style={{ color: "#D4AF37" }} />
+                  <span style={{ fontSize: 10, fontWeight: 600, color: "rgba(212,175,55,0.8)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                    VaultIQ AI
+                  </span>
+                  {chatThinking && (
+                    <span style={{ fontSize: 8, color: "rgba(212,175,55,0.5)", letterSpacing: "0.05em" }}>
+                      Thinking...
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  {/* History toggle → opens right panel */}
                   <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowHistory(h => !h)}
+                    style={{
+                      width: 26, height: 26, borderRadius: "50%",
+                      background: showHistory ? "rgba(212,175,55,0.15)" : "transparent",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer",
+                      border: showHistory ? "1px solid rgba(212,175,55,0.25)" : "1px solid transparent",
+                      transition: "all 0.2s",
+                    }}
+                    title="Chat History"
                   >
-                    <Zap size={15} style={{ color: "#D4AF37" }} />
+                    <History size={12} style={{ color: showHistory ? "#D4AF37" : "rgba(255,255,255,0.3)" }} />
                   </motion.div>
-                ) : (
-                  <Zap size={15} style={{ color: "#D4AF37" }} />
-                )}
+                  {/* Clear chat */}
+                  {chatMessages.length > 0 && (
+                    <motion.div
+                      whileHover={{ scale: 1.15 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setChatMessages([])}
+                      style={{
+                        width: 26, height: 26, borderRadius: "50%",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        cursor: "pointer", border: "1px solid transparent", transition: "all 0.2s",
+                      }}
+                      title="New Chat"
+                    >
+                      <Plus size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
+                    </motion.div>
+                  )}
+                  {/* Minimize */}
+                  <motion.div
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setChatMinimized(true)}
+                    style={{
+                      width: 26, height: 26, borderRadius: "50%",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      cursor: "pointer", border: "1px solid transparent", transition: "all 0.2s",
+                    }}
+                    title="Minimize"
+                  >
+                    <Minus size={12} style={{ color: "rgba(255,255,255,0.3)" }} />
+                  </motion.div>
+                </div>
               </div>
 
-              {/* Input field */}
-              <input
-                value={chatInput}
-                onChange={e => setChatInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && sendChatMessage(chatInput)}
-                placeholder="Ask your AI Financial Advisor anything..."
-                disabled={chatThinking}
-                style={{
-                  flex: 1,
-                  fontSize: 11,
-                  color: "rgba(255,255,255,0.85)",
-                  background: "transparent",
-                  border: "none",
-                  outline: "none",
-                  padding: "8px 0",
-                  letterSpacing: "0.01em",
-                }}
-              />
-
-              {/* Quick action chips (only when no messages) */}
-              {chatMessages.length === 0 && !chatThinking && (
-                <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                  {["Analyze spending", "Investment tips"].map((p, i) => (
-                    <span
-                      key={i}
-                      onClick={() => sendChatMessage(p)}
-                      style={{
-                        fontSize: 8,
-                        padding: "3px 10px",
-                        borderRadius: 8,
-                        background: "rgba(212,175,55,0.08)",
-                        border: "1px solid rgba(212,175,55,0.15)",
-                        color: "rgba(212,175,55,0.6)",
-                        cursor: "pointer",
-                        whiteSpace: "nowrap",
-                        transition: "all 0.2s",
-                      }}
-                      onMouseEnter={e => {
-                        e.currentTarget.style.background = "rgba(212,175,55,0.15)";
-                        e.currentTarget.style.color = "rgba(212,175,55,0.9)";
-                      }}
-                      onMouseLeave={e => {
-                        e.currentTarget.style.background = "rgba(212,175,55,0.08)";
-                        e.currentTarget.style.color = "rgba(212,175,55,0.6)";
-                      }}
-                    >
-                      {p}
-                    </span>
-                  ))}
+              {/* ── Messages area ── */}
+              {chatMessages.length > 0 && (
+                <div
+                  ref={chatScrollRef}
+                  style={{
+                    maxHeight: "40vh",
+                    overflowY: "auto",
+                    padding: "12px 16px 8px",
+                    scrollbarWidth: "thin",
+                  }}
+                >
+                  <AnimatePresence initial={false}>
+                    {chatMessages.map((m, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35 }}
+                        style={{ marginBottom: 10, display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start" }}
+                      >
+                        {m.role === "user" ? (
+                          <span style={{
+                            fontSize: 11, color: "rgba(52,211,153,0.9)", padding: "7px 14px",
+                            borderRadius: 12, background: "rgba(52,211,153,0.07)",
+                            border: "1px solid rgba(52,211,153,0.14)", maxWidth: "80%", lineHeight: 1.5,
+                          }}>
+                            {m.content}
+                          </span>
+                        ) : (
+                          <div style={{ maxWidth: "85%" }}>
+                            <p style={{ fontSize: 9, letterSpacing: "0.1em", color: "rgba(212,175,55,0.5)", marginBottom: 4, textTransform: "uppercase" }}>
+                              VaultIQ AI
+                            </p>
+                            <div style={{
+                              fontSize: 11, color: "rgba(255,255,255,0.7)", lineHeight: 1.7,
+                              padding: "10px 14px", borderRadius: 12,
+                              background: "rgba(212,175,55,0.04)", border: "1px solid rgba(212,175,55,0.1)",
+                            }}>
+                              {m.content || (
+                                <span style={{ display: "inline-flex", gap: 3, alignItems: "center" }}>
+                                  {[0,1,2].map(j => (
+                                    <motion.span key={j} style={{ width: 5, height: 5, borderRadius: "50%", background: "rgba(212,175,55,0.5)" }}
+                                      animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 0.8, repeat: Infinity, delay: j * 0.15 }} />
+                                  ))}
+                                </span>
+                              )}
+                              {m.content && (
+                                <motion.span
+                                  style={{ display: "inline-block", width: 2, height: 12, background: "rgba(212,175,55,0.7)", marginLeft: 1, verticalAlign: "text-bottom" }}
+                                  animate={{ opacity: [1, 0] }} transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                                />
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </motion.div>
+                    ))}
+                    {chatThinking && chatMessages[chatMessages.length - 1]?.role === "user" && (
+                      <motion.div key="thinking" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                        style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "10px 16px", borderRadius: 12, background: "rgba(212,175,55,0.03)", border: "1px solid rgba(212,175,55,0.08)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 1.5, height: 20 }}>
+                          {[3,7,12,15,10,6,14,16,11,7,4,9,14,10,6,3].map((h, i) => (
+                            <motion.div key={i} style={{ width: 1.8, height: h, borderRadius: 2, background: "linear-gradient(to top, rgba(212,175,55,0.15), rgba(212,175,55,0.65))" }}
+                              animate={{ scaleY: [0.2, 1, 0.2] }} transition={{ duration: 0.7, repeat: Infinity, delay: i * 0.05, ease: "easeInOut" }} />
+                          ))}
+                        </div>
+                        <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", letterSpacing: "0.03em" }}>Analyzing your finances...</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
 
-              {/* Voice waveform (shown when thinking) */}
-              {chatThinking && (
-                <div style={{ display: "flex", alignItems: "flex-end", gap: 1.5, height: 20, flexShrink: 0 }}>
-                  {[4,8,14,12,6,10,16,14,8,5,10,14,12,6,4].map((h, i) => (
-                    <motion.div
-                      key={i}
-                      style={{
-                        width: 2,
-                        height: h,
-                        borderRadius: 2,
-                        background: "linear-gradient(to top, rgba(212,175,55,0.2), rgba(212,175,55,0.7))",
-                      }}
-                      animate={{ scaleY: [0.3, 1, 0.3] }}
-                      transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.06, ease: "easeInOut" }}
-                    />
-                  ))}
-                </div>
-              )}
+              {/* ── Input area ── */}
+              <div style={{ padding: chatMessages.length > 0 ? "6px 14px 10px" : "10px 16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{
+                    width: 30, height: 30, borderRadius: "50%",
+                    background: chatThinking ? "linear-gradient(135deg, rgba(212,175,55,0.4), rgba(212,175,55,0.12))" : "linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.06))",
+                    border: "1.5px solid rgba(212,175,55,0.4)",
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                    boxShadow: chatThinking ? "0 0 14px rgba(212,175,55,0.35)" : "0 0 10px rgba(212,175,55,0.15)",
+                    transition: "all 0.3s",
+                  }}>
+                    {chatThinking ? (
+                      <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                        <Zap size={13} style={{ color: "#D4AF37" }} />
+                      </motion.div>
+                    ) : <Zap size={13} style={{ color: "#D4AF37" }} />}
+                  </div>
 
-              {/* Send button */}
+                  <input
+                    value={chatInput}
+                    onChange={e => setChatInput(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && sendChatMessage(chatInput)}
+                    placeholder="Ask your AI Financial Advisor anything..."
+                    disabled={chatThinking}
+                    style={{ flex: 1, fontSize: 10.5, color: "rgba(255,255,255,0.85)", background: "transparent", border: "none", outline: "none", padding: "6px 0", letterSpacing: "0.01em" }}
+                  />
+
+                  {chatMessages.length === 0 && !chatThinking && (
+                    <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                      {["Analyze spending", "Investment tips"].map((p, i) => (
+                        <span key={i} onClick={() => sendChatMessage(p)}
+                          style={{ fontSize: 8, padding: "3px 10px", borderRadius: 8, background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.15)", color: "rgba(212,175,55,0.6)", cursor: "pointer", whiteSpace: "nowrap", transition: "all 0.2s" }}
+                          onMouseEnter={e => { e.currentTarget.style.background = "rgba(212,175,55,0.15)"; e.currentTarget.style.color = "rgba(212,175,55,0.9)"; }}
+                          onMouseLeave={e => { e.currentTarget.style.background = "rgba(212,175,55,0.08)"; e.currentTarget.style.color = "rgba(212,175,55,0.6)"; }}
+                        >{p}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  {chatThinking && (
+                    <div style={{ display: "flex", alignItems: "flex-end", gap: 1.5, height: 20, flexShrink: 0 }}>
+                      {[4,8,14,12,6,10,16,14,8,5,10,14,12,6,4].map((h, i) => (
+                        <motion.div key={i} style={{ width: 2, height: h, borderRadius: 2, background: "linear-gradient(to top, rgba(212,175,55,0.2), rgba(212,175,55,0.7))" }}
+                          animate={{ scaleY: [0.3, 1, 0.3] }} transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.06, ease: "easeInOut" }} />
+                      ))}
+                    </div>
+                  )}
+
+                  <motion.div
+                    whileHover={!chatThinking && chatInput.trim() ? { scale: 1.08, boxShadow: "0 0 18px rgba(212,175,55,0.45)" } : {}}
+                    whileTap={!chatThinking && chatInput.trim() ? { scale: 0.92 } : {}}
+                    onClick={() => sendChatMessage(chatInput)}
+                    style={{
+                      width: 30, height: 30, borderRadius: "50%",
+                      background: chatInput.trim() && !chatThinking ? "linear-gradient(135deg, #F5D060, #C8922A)" : "rgba(255,255,255,0.04)",
+                      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                      cursor: chatInput.trim() && !chatThinking ? "pointer" : "default",
+                      boxShadow: chatInput.trim() && !chatThinking ? "0 2px 10px rgba(212,175,55,0.25)" : "none",
+                      transition: "all 0.2s",
+                    }}
+                  >
+                    <Send size={12} style={{ color: chatInput.trim() && !chatThinking ? "#000" : "rgba(255,255,255,0.18)" }} />
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ════════════════════════════════════════════════════════════════════════
+          RIGHT-SIDE HISTORY PANEL — Slides in from right
+          ════════════════════════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div
+            key="history-panel"
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 60 }}
+            transition={{ type: "spring", stiffness: 200, damping: 28 }}
+            style={{
+              position: "absolute",
+              right: "1%",
+              top: "11%",
+              bottom: "12%",
+              width: 300,
+              zIndex: 20,
+              background: "rgba(4,3,2,0.97)",
+              border: "1px solid rgba(212,175,55,0.2)",
+              borderRadius: 16,
+              backdropFilter: "blur(32px)",
+              WebkitBackdropFilter: "blur(32px)",
+              boxShadow: "0 8px 40px rgba(0,0,0,0.9), 0 0 30px rgba(212,175,55,0.08)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "14px 16px 12px",
+              borderBottom: "1px solid rgba(212,175,55,0.12)",
+              flexShrink: 0,
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <History size={14} style={{ color: "#D4AF37" }} />
+                <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(212,175,55,0.85)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                  Chat History
+                </span>
+                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", background: "rgba(212,175,55,0.08)", padding: "1px 7px", borderRadius: 8 }}>
+                  {chatHistory.length}
+                </span>
+              </div>
               <motion.div
-                whileHover={!chatThinking && chatInput.trim() ? { scale: 1.1, boxShadow: "0 0 20px rgba(212,175,55,0.5)" } : {}}
-                whileTap={!chatThinking && chatInput.trim() ? { scale: 0.92 } : {}}
-                onClick={() => sendChatMessage(chatInput)}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowHistory(false)}
                 style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: "50%",
-                  background: chatInput.trim() && !chatThinking
-                    ? "linear-gradient(135deg, #F5D060, #C8922A)"
-                    : "rgba(255,255,255,0.05)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  cursor: chatInput.trim() && !chatThinking ? "pointer" : "default",
-                  boxShadow: chatInput.trim() && !chatThinking ? "0 2px 12px rgba(212,175,55,0.3)" : "none",
+                  width: 24, height: 24, borderRadius: "50%",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "pointer", background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.08)",
                   transition: "all 0.2s",
                 }}
               >
-                <Send size={13} style={{ color: chatInput.trim() && !chatThinking ? "#000" : "rgba(255,255,255,0.2)" }} />
+                <Minus size={10} style={{ color: "rgba(255,255,255,0.4)" }} />
               </motion.div>
             </div>
-          </div>
-        </div>
-      </motion.div>
+
+            {/* History list */}
+            <div style={{ flex: 1, overflowY: "auto", scrollbarWidth: "thin" }}>
+              {chatHistory.length === 0 ? (
+                <div style={{ padding: "40px 20px", textAlign: "center" }}>
+                  <History size={28} style={{ color: "rgba(212,175,55,0.15)", margin: "0 auto 12px" }} />
+                  <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", lineHeight: 1.6 }}>
+                    No conversations yet.
+                  </p>
+                  <p style={{ fontSize: 9, color: "rgba(255,255,255,0.18)", marginTop: 4 }}>
+                    Start chatting to build your history.
+                  </p>
+                </div>
+              ) : (
+                chatHistory.map((session, idx) => (
+                  <motion.div
+                    key={session.id}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.03 }}
+                    onClick={() => {
+                      setChatMessages(session.messages);
+                      setShowHistory(false);
+                    }}
+                    style={{
+                      padding: "12px 16px",
+                      borderBottom: "1px solid rgba(212,175,55,0.06)",
+                      cursor: "pointer",
+                      transition: "background 0.2s",
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = "rgba(212,175,55,0.04)"}
+                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
+                      <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.65)", lineHeight: 1.4, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {session.summary}
+                      </p>
+                      <motion.div
+                        whileHover={{ scale: 1.2, color: "#ef4444" }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setChatHistory(p => p.filter(h => h.id !== session.id));
+                        }}
+                        style={{ marginLeft: 8, flexShrink: 0, cursor: "pointer", padding: 2 }}
+                      >
+                        <Trash2 size={10} style={{ color: "rgba(255,255,255,0.2)" }} />
+                      </motion.div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 8, color: "rgba(212,175,55,0.45)" }}>
+                        {session.messages.length} messages
+                      </span>
+                      <span style={{ fontSize: 8, color: "rgba(255,255,255,0.12)" }}>•</span>
+                      <span style={{ fontSize: 8, color: "rgba(255,255,255,0.22)" }}>
+                        {new Date(session.startedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}{" "}
+                        {new Date(session.startedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
+                    {/* Preview of last message */}
+                    {session.messages.length > 0 && (
+                      <p style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", marginTop: 6, lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {session.messages[session.messages.length - 1].content.slice(0, 80)}...
+                      </p>
+                    )}
+                  </motion.div>
+                ))
+              )}
+            </div>
+
+            {/* Footer with clear all */}
+            {chatHistory.length > 0 && (
+              <div style={{
+                padding: "10px 16px",
+                borderTop: "1px solid rgba(212,175,55,0.1)",
+                flexShrink: 0,
+              }}>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setChatHistory([])}
+                  style={{
+                    width: "100%", padding: "7px 0", borderRadius: 8,
+                    background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    cursor: "pointer", transition: "all 0.2s",
+                  }}
+                >
+                  <Trash2 size={10} style={{ color: "rgba(239,68,68,0.6)" }} />
+                  <span style={{ fontSize: 9, color: "rgba(239,68,68,0.6)", letterSpacing: "0.03em" }}>
+                    Clear All History
+                  </span>
+                </motion.div>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

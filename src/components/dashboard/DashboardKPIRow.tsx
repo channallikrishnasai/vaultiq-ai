@@ -144,12 +144,12 @@ export default function DashboardKPIRow({
                   }}
                   className="relative overflow-hidden rounded-xl px-3 py-2.5"
                   style={{
-                    background: "rgba(5,4,2,0.96)",
-                    border: "1px solid rgba(212,175,55,0.22)",
-                    boxShadow: `0 4px 16px rgba(0,0,0,0.65), 0 0 12px ${item.glowColor}, inset 0 1px 0 rgba(255,255,255,0.04)`,
-                    borderBottom: `2.5px solid ${item.barColor}55`,
-                    backdropFilter: "blur(32px)",
-                    WebkitBackdropFilter: "blur(32px)",
+                    background: "rgba(12,8,4,0.94)",
+                    border: "1px solid rgba(212,175,55,0.3)",
+                    boxShadow: `0 4px 20px rgba(0,0,0,0.65), 0 0 18px ${item.glowColor}, 0 0 10px rgba(212,175,55,0.12), inset 0 1px 0 rgba(255,220,100,0.06)`,
+                    borderBottom: `2.5px solid ${item.barColor}66`,
+                    backdropFilter: "blur(36px)",
+                    WebkitBackdropFilter: "blur(36px)",
                   }}
                 >
                   {/* Top accent glow */}

@@ -63,8 +63,8 @@ export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: str
     >
       {/* V Logo */}
       <motion.div
-        animate={{ boxShadow: ["0 0 8px rgba(212,175,55,0.2)","0 0 18px rgba(212,175,55,0.6)","0 0 8px rgba(212,175,55,0.2)"] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ boxShadow: ["0 0 6px rgba(212,175,55,0.15)","0 0 14px rgba(212,175,55,0.5)","0 0 6px rgba(212,175,55,0.15)"] }}
+        transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
         className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg shrink-0"
         style={{ background: "linear-gradient(135deg,#F5D060,#C8922A)" }}
       >
@@ -91,7 +91,7 @@ export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: str
               className="group relative flex h-9 w-full items-center justify-center rounded-lg transition-all"
               style={
                 isActive
-                  ? { background: "rgba(212,175,55,0.1)", border: "1px solid rgba(212,175,55,0.25)" }
+                  ? { background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)" }
                   : { border: "1px solid transparent" }
               }
             >
