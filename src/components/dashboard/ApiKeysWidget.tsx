@@ -17,15 +17,14 @@ export default function ApiKeysWidget() {
 
   useEffect(() => {
     setMounted(true);
-    // Load state from localStorage
-    const savedMin = localStorage.getItem("api-keys-minimized");
-    if (savedMin !== null) {
-      setIsMinimized(JSON.parse(savedMin));
-    }
-    const savedOpenai = localStorage.getItem("vaultiq-openai-key");
-    if (savedOpenai) setOpenaiKey(savedOpenai);
-    const savedGroq = localStorage.getItem("vaultiq-groq-key");
-    if (savedGroq) setGroqKey(savedGroq);
+    try {
+      const savedMin = localStorage.getItem("api-keys-minimized");
+      if (savedMin !== null) setIsMinimized(JSON.parse(savedMin));
+      const savedOpenai = localStorage.getItem("vaultiq-openai-key");
+      if (savedOpenai) setOpenaiKey(savedOpenai);
+      const savedGroq = localStorage.getItem("vaultiq-groq-key");
+      if (savedGroq) setGroqKey(savedGroq);
+    } catch {}
   }, []);
 
   const saveKeys = () => {

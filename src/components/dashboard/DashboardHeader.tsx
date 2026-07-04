@@ -1,8 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { useOrb } from "@/contexts/OrbContext";
+import { LogOut, User, Mail } from "lucide-react";
 
 interface DashboardHeaderProps {
   user: {
@@ -15,6 +19,13 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ user, visible = true }: DashboardHeaderProps) {
   const { orbState } = useOrb();
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await signOut({ redirect: false });
+    router.push("/");
+  };
 
   return (
     <motion.header
@@ -111,46 +122,133 @@ export default function DashboardHeader({ user, visible = true }: DashboardHeade
         </span>
       </div>
 
-      {/* User */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{ textAlign: "right" }}>
-          <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1 }}>
-            {user.name ?? "User"}
-          </p>
-          <p style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", marginTop: 2 }}>
-            {user.email}
-          </p>
-        </div>
-        {user.image ? (
-          <Image
-            src={user.image}
-            alt={user.name ?? "User"}
-            width={32}
-            height={32}
-            style={{
-              borderRadius: "50%",
-              border: "1.5px solid rgba(212,175,55,0.3)",
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: "50%",
-              background: "linear-gradient(135deg, #D4AF37, #8B6914)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 13,
-              fontWeight: 600,
-              color: "#000",
-              border: "1.5px solid rgba(212,175,55,0.3)",
-            }}
-          >
-            {(user.name ?? "U")[0].toUpperCase()}
+      {/* User profile */}
+      <div style={{ position: "relative" }}>
+        <button
+          onClick={() => setOpen(!open)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            background: open ? "rgba(255,255,255,0.06)" : "transparent",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: 10,
+            padding: "6px 10px",
+            cursor: "pointer",
+            transition: "background 0.2s",
+          }}
+        >
+          <div style={{ textAlign: "right" }}>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", lineHeight: 1 }}>
+              {user.name ?? "User"}
+            </p>
+            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", marginTop: 2 }}>
+              {user.email}
+            </p>
           </div>
-        )}
+          {user.image ? (
+            <Image
+              src={user.image}
+              alt={user.name ?? "User"}
+              width={32}
+              height={32}
+              style={{
+                borderRadius: "50%",
+                border: "1.5px solid rgba(212,175,55,0.3)",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #D4AF37, #8B6914)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 13,
+                fontWeight: 600,
+                color: "#000",
+                border: "1.5px solid rgba(212,175,55,0.3)",
+              }}
+            >
+              {(user.name ?? "U")[0].toUpperCase()}
+            </div>
+          )}
+        </button>
+
+        <AnimatePresence>
+          {open && (
+            <>
+              <div
+                style={{ position: "fixed", inset: 0, zIndex: 40 }}
+                onClick={() => setOpen(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: "100%",
+                  marginTop: 8,
+                  width: 260,
+                  borderRadius: 12,
+                  background: "rgba(15,15,20,0.97)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  backdropFilter: "blur(16px)",
+                  zIndex: 50,
+                  overflow: "hidden",
+                }}
+              >
+                <div style={{ padding: "16px 16px 12px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: "rgba(255,255,255,0.85)", marginBottom: 8 }}>
+                    {user.name ?? "User"}
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <Mail size={12} style={{ color: "rgba(212,175,55,0.6)" }} />
+                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ padding: 6 }}>
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      width: "100%",
+                      padding: "10px 12px",
+                      borderRadius: 8,
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      color: "rgba(255,255,255,0.6)",
+                      fontSize: 13,
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(239,68,68,0.1)";
+                      e.currentTarget.style.color = "#ef4444";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.color = "rgba(255,255,255,0.6)";
+                    }}
+                  >
+                    <LogOut size={14} />
+                    Log Out
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </motion.header>
   );
