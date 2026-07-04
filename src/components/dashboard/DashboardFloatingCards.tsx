@@ -213,25 +213,24 @@ function Card({
       transition={getTransition()}
       whileHover={
         !isActive
-          ? { y: -6, scale: 1.03, boxShadow: `0 24px 64px rgba(0,0,0,0.92), 0 0 48px ${accent}22`, borderColor: `${accent}66` }
+          ? { y: -6, scale: 1.03, boxShadow: `0 24px 64px rgba(0,0,0,0.85), 0 0 40px ${accent}18`, borderColor: `${accent}55` }
           : undefined
       }
       className={`absolute ${className}`}
       style={{
-        background: "rgba(5,4,2,0.92)",
-        border: `1px solid ${accent}30`,
-        borderRadius: 14,
-        backdropFilter: "blur(28px)",
-        WebkitBackdropFilter: "blur(28px)",
+        background: "rgba(8,6,4,0.88)",
+        border: `1px solid ${accent}22`,
+        borderRadius: 16,
+        backdropFilter: "blur(32px)",
+        WebkitBackdropFilter: "blur(32px)",
         boxShadow: isJitter
-          ? `0 0 30px ${accent}44, 0 14px 52px rgba(0,0,0,0.9)`
-          : `0 14px 52px rgba(0,0,0,0.9), 0 0 24px ${accent}0c, inset 0 1px 0 rgba(255,255,255,0.05)`,
+          ? `0 0 30px ${accent}33, 0 16px 48px rgba(0,0,0,0.85)`
+          : `0 16px 48px rgba(0,0,0,0.85), 0 0 20px ${accent}08, inset 0 1px 0 rgba(255,255,255,0.04)`,
         overflow: "hidden",
-        padding: "10px 12px",
+        padding: "11px 13px",
         color: "#fff",
         zIndex: isJitter ? 20 : 5,
-        animation: isActive ? "none" : `shimmerBorder 4s ease-in-out ${delay}s infinite`,
-        // Center the card using negative margins so framer-motion can control transform
+        animation: isActive ? "none" : `shimmerBorder 5s ease-in-out ${delay}s infinite`,
         marginLeft: `-${cardWidth / 2}px`,
         marginTop: "-40px",
         width: `${cardWidth}px`,
@@ -242,10 +241,10 @@ function Card({
         style={{
           position: "absolute",
           top: 0,
-          left: "15%",
-          right: "15%",
+          left: "20%",
+          right: "20%",
           height: 1,
-          background: `linear-gradient(90deg, transparent, ${accent}66, transparent)`,
+          background: `linear-gradient(90deg, transparent, ${accent}44, transparent)`,
         }}
       />
       {children}
