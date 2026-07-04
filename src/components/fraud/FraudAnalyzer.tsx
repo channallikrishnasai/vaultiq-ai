@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Shield, Loader2, Sparkles, ScanLine } from "lucide-react";
+import { useState, useRef, useCallback } from "react";
+import { Shield, Loader2, Sparkles, ScanLine, Upload, X, Image as ImageIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -29,6 +29,55 @@ export function FraudAnalyzer({ onAnalyzed }: FraudAnalyzerProps) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FraudAnalysisResponse | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [extracting, setExtracting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = useCallback(async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image must be under 10MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target?.result as string;
+      setImagePreview(base64);
+      setExtracting(true);
+
+      try {
+        const res = await fetch("/api/fraud/ocr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: base64 }),
+        });
+        const data = await res.json();
+
+        if (data.data?.text) {
+          setContent(data.data.text);
+          toast.success("Text extracted from screenshot");
+        } else {
+          toast.error("Could not extract text from image");
+        }
+      } catch {
+        toast.error("Failed to process image");
+      } finally {
+        setExtracting(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) handleImageUpload(file);
+  }, [handleImageUpload]);
 
   const handleAnalyze = async () => {
     if (!content.trim()) {
@@ -57,7 +106,6 @@ export function FraudAnalyzer({ onAnalyzed }: FraudAnalyzerProps) {
     }
   };
 
-
   return (
     <div className="space-y-6">
       {/* First-use helper panel */}
@@ -76,12 +124,12 @@ export function FraudAnalyzer({ onAnalyzed }: FraudAnalyzerProps) {
                 Protect yourself from financial fraud
               </h3>
               <p className="text-sm leading-relaxed text-zinc-400">
-                Paste suspicious SMS, phishing links, phone numbers, or text extracted from
-                screenshots. Our AI pattern engine scans for urgency tactics, credential
+                Paste suspicious SMS, phishing links, phone numbers, or upload a
+                screenshot. Our AI scans for urgency tactics, credential
                 harvesting, fake KYC links, and lottery scams.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
-                {["SMS scams", "Phishing links", "Fake bank calls", "UPI fraud"].map((tag) => (
+                {["SMS scams", "Phishing links", "Fake bank calls", "UPI fraud", "Screenshot OCR"].map((tag) => (
                   <span
                     key={tag}
                     className="rounded-full border border-zinc-700/60 bg-zinc-900/60 px-2.5 py-0.5 text-xs text-zinc-400"
@@ -113,7 +161,10 @@ export function FraudAnalyzer({ onAnalyzed }: FraudAnalyzerProps) {
             <button
               key={type.value}
               type="button"
-              onClick={() => setInputType(type.value as FraudInputType)}
+              onClick={() => {
+                setInputType(type.value as FraudInputType);
+                setImagePreview(null);
+              }}
               className={`rounded-xl border p-3 text-left transition-all ${
                 inputType === type.value
                   ? "border-teal-500/50 bg-teal-500/10 shadow-md shadow-teal-500/10"
@@ -122,17 +173,67 @@ export function FraudAnalyzer({ onAnalyzed }: FraudAnalyzerProps) {
             >
               <span className="text-lg">{type.icon}</span>
               <p className="mt-1 text-xs font-medium text-zinc-300">{type.label}</p>
-              {type.value === "SCREENSHOT" && (
-                <p className="mt-0.5 text-[10px] text-zinc-500">Paste extracted text</p>
-              )}
             </button>
           ))}
         </div>
 
+        {/* Screenshot Upload Zone */}
         {inputType === "SCREENSHOT" && (
-          <p className="mb-3 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs text-amber-300/90">
-            OCR upload is not available yet — paste text manually from your screenshot.
-          </p>
+          <div className="mb-4">
+            {imagePreview ? (
+              <div className="relative rounded-xl border border-zinc-800 bg-zinc-950/50 overflow-hidden">
+                <img
+                  src={imagePreview}
+                  alt="Screenshot"
+                  className="w-full max-h-64 object-contain bg-black/40"
+                />
+                <button
+                  onClick={() => { setImagePreview(null); setContent(""); }}
+                  className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/70 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 transition"
+                >
+                  <X size={14} />
+                </button>
+                {extracting && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                    <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-zinc-900/90 border border-zinc-700">
+                      <Loader2 size={16} className="animate-spin text-teal-400" />
+                      <span className="text-xs text-zinc-300">Extracting text from screenshot...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className="flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-zinc-700/60 bg-zinc-950/30 p-8 cursor-pointer transition-all hover:border-teal-500/40 hover:bg-teal-500/5"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-zinc-800/60 border border-zinc-700/40">
+                  <Upload size={20} className="text-zinc-400" />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-medium text-zinc-300">
+                    Drop a screenshot here or click to upload
+                  </p>
+                  <p className="text-[10px] text-zinc-500 mt-1">
+                    PNG, JPG, WEBP up to 10MB — AI extracts text automatically
+                  </p>
+                </div>
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleImageUpload(file);
+                e.target.value = "";
+              }}
+            />
+          </div>
         )}
 
         <textarea
@@ -140,7 +241,7 @@ export function FraudAnalyzer({ onAnalyzed }: FraudAnalyzerProps) {
           onChange={(e) => setContent(e.target.value)}
           placeholder={
             inputType === "SCREENSHOT"
-              ? "Paste text extracted from your screenshot here..."
+              ? "Extracted text will appear here... or paste text manually"
               : "Paste suspicious message, link, or phone number here..."
           }
           rows={5}

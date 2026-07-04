@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useState } from "react";
 import {
-  Percent, ArrowUpRight, ShieldCheck, AlertCircle, TrendingUp, Info
+  Percent, ShieldCheck, TrendingUp
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 
@@ -17,12 +16,7 @@ const SCORE_HISTORY = [
 ];
 
 export default function CreditPage() {
-  const [score, setScore] = useState<number>(812);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [score] = useState<number>(812);
 
   // Credit Factors
   const factors = [
@@ -83,7 +77,7 @@ export default function CreditPage() {
               <div className="flex items-center gap-1.5 text-xs text-zinc-300 font-semibold">
                 <ShieldCheck size={14} className="text-emerald-400" /> Safe range
               </div>
-              <p className="text-[10px] text-zinc-500 leading-relaxed max-w-[180px]">
+              <p className="text-[10px] text-zinc-500 leading-relaxed max-w-45">
                 Your score is in the top 15% nationally. You qualify for prime interest rates on loans.
               </p>
             </div>
@@ -94,23 +88,21 @@ export default function CreditPage() {
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-1.5">
               <TrendingUp size={12} className="text-[#f59e0b]" /> Historical Score Progression
             </h3>
-            <div className="h-[140px] w-full">
-              {mounted && (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={SCORE_HISTORY}>
-                    <defs>
-                      <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#fb923c" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#fb923c" stopOpacity={0.0}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="m" stroke="#52525b" fontSize={8} tickLine={false} />
-                    <YAxis domain={[700, 850]} stroke="#52525b" fontSize={8} tickLine={false} />
-                    <Tooltip contentStyle={{ background: "#09090b", border: "1px solid #27272a", fontSize: 9 }} />
-                    <Area type="monotone" dataKey="s" stroke="#fb923c" strokeWidth={1.5} fillOpacity={1} fill="url(#scoreGrad)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              )}
+            <div className="h-35 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={SCORE_HISTORY}>
+                  <defs>
+                    <linearGradient id="scoreGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#fb923c" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#fb923c" stopOpacity={0.0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="m" stroke="#52525b" fontSize={8} tickLine={false} />
+                  <YAxis domain={[700, 850]} stroke="#52525b" fontSize={8} tickLine={false} />
+                  <Tooltip contentStyle={{ background: "#09090b", border: "1px solid #27272a", fontSize: 9 }} />
+                  <Area type="monotone" dataKey="s" stroke="#fb923c" strokeWidth={1.5} fillOpacity={1} fill="url(#scoreGrad)" />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>

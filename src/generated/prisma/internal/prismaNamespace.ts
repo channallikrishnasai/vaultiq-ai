@@ -390,7 +390,6 @@ export const ModelName = {
   VerificationToken: 'VerificationToken',
   Profile: 'Profile',
   Expense: 'Expense',
-  Income: 'Income',
   Budget: 'Budget',
   Goal: 'Goal',
   FraudReport: 'FraudReport',
@@ -403,7 +402,8 @@ export const ModelName = {
   Portfolio: 'Portfolio',
   Trade: 'Trade',
   Watchlist: 'Watchlist',
-  FinancialTwin: 'FinancialTwin'
+  FinancialTwin: 'FinancialTwin',
+  Bill: 'Bill'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -419,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "session" | "verificationToken" | "profile" | "expense" | "income" | "budget" | "goal" | "fraudReport" | "learningProgress" | "quizResult" | "roadmap" | "emergencyPlan" | "platformRecommendation" | "chatHistory" | "portfolio" | "trade" | "watchlist" | "financialTwin"
+    modelProps: "user" | "account" | "session" | "verificationToken" | "profile" | "expense" | "budget" | "goal" | "fraudReport" | "learningProgress" | "quizResult" | "roadmap" | "emergencyPlan" | "platformRecommendation" | "chatHistory" | "portfolio" | "trade" | "watchlist" | "financialTwin" | "bill"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -864,80 +864,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ExpenseCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ExpenseCountAggregateOutputType> | number
-        }
-      }
-    }
-    Income: {
-      payload: Prisma.$IncomePayload<ExtArgs>
-      fields: Prisma.IncomeFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.IncomeFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IncomePayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.IncomeFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IncomePayload>
-        }
-        findFirst: {
-          args: Prisma.IncomeFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IncomePayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.IncomeFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IncomePayload>
-        }
-        findMany: {
-          args: Prisma.IncomeFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IncomePayload>[]
-        }
-        create: {
-          args: Prisma.IncomeCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IncomePayload>
-        }
-        createMany: {
-          args: Prisma.IncomeCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.IncomeCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IncomePayload>[]
-        }
-        delete: {
-          args: Prisma.IncomeDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IncomePayload>
-        }
-        update: {
-          args: Prisma.IncomeUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IncomePayload>
-        }
-        deleteMany: {
-          args: Prisma.IncomeDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.IncomeUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.IncomeUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IncomePayload>[]
-        }
-        upsert: {
-          args: Prisma.IncomeUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$IncomePayload>
-        }
-        aggregate: {
-          args: Prisma.IncomeAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateIncome>
-        }
-        groupBy: {
-          args: Prisma.IncomeGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.IncomeGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.IncomeCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.IncomeCountAggregateOutputType> | number
         }
       }
     }
@@ -1903,6 +1829,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Bill: {
+      payload: Prisma.$BillPayload<ExtArgs>
+      fields: Prisma.BillFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BillFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BillFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillPayload>
+        }
+        findFirst: {
+          args: Prisma.BillFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BillFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillPayload>
+        }
+        findMany: {
+          args: Prisma.BillFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillPayload>[]
+        }
+        create: {
+          args: Prisma.BillCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillPayload>
+        }
+        createMany: {
+          args: Prisma.BillCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BillCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillPayload>[]
+        }
+        delete: {
+          args: Prisma.BillDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillPayload>
+        }
+        update: {
+          args: Prisma.BillUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillPayload>
+        }
+        deleteMany: {
+          args: Prisma.BillDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BillUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BillUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillPayload>[]
+        }
+        upsert: {
+          args: Prisma.BillUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BillPayload>
+        }
+        aggregate: {
+          args: Prisma.BillAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBill>
+        }
+        groupBy: {
+          args: Prisma.BillGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BillGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BillCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BillCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2020,20 +2020,6 @@ export const ExpenseScalarFieldEnum = {
 } as const
 
 export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
-
-
-export const IncomeScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  amount: 'amount',
-  category: 'category',
-  notes: 'notes',
-  date: 'date',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type IncomeScalarFieldEnum = (typeof IncomeScalarFieldEnum)[keyof typeof IncomeScalarFieldEnum]
 
 
 export const BudgetScalarFieldEnum = {
@@ -2218,6 +2204,21 @@ export const FinancialTwinScalarFieldEnum = {
 } as const
 
 export type FinancialTwinScalarFieldEnum = (typeof FinancialTwinScalarFieldEnum)[keyof typeof FinancialTwinScalarFieldEnum]
+
+
+export const BillScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  name: 'name',
+  amount: 'amount',
+  dueDate: 'dueDate',
+  category: 'category',
+  paid: 'paid',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BillScalarFieldEnum = (typeof BillScalarFieldEnum)[keyof typeof BillScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2473,7 +2474,6 @@ export type GlobalOmitConfig = {
   verificationToken?: Prisma.VerificationTokenOmit
   profile?: Prisma.ProfileOmit
   expense?: Prisma.ExpenseOmit
-  income?: Prisma.IncomeOmit
   budget?: Prisma.BudgetOmit
   goal?: Prisma.GoalOmit
   fraudReport?: Prisma.FraudReportOmit
@@ -2487,6 +2487,7 @@ export type GlobalOmitConfig = {
   trade?: Prisma.TradeOmit
   watchlist?: Prisma.WatchlistOmit
   financialTwin?: Prisma.FinancialTwinOmit
+  bill?: Prisma.BillOmit
 }
 
 /* Types for Logging */

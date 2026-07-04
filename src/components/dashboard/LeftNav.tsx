@@ -1,32 +1,30 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import {
-  Home, LayoutDashboard, Briefcase, LineChart, TrendingDown,
-  TrendingUp, PiggyBank, Target, CreditCard, Percent,
-  Bot, ShieldAlert, BarChart3, Receipt, FolderOpen, Settings,
-  Globe
+  Home, LayoutDashboard, Briefcase, PiggyBank, Target, CreditCard,
+  Percent, Bot, ShieldAlert, BarChart3, Receipt, Settings, Globe, BookOpen
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const NAV_ITEMS = [
   { name: "Home",         href: "/",                    icon: Home          },
-  { name: "Dashboard",    href: "/dashboard",            icon: LayoutDashboard},
-  { name: "Portfolio",    href: "/dashboard/portfolio",  icon: Briefcase     },
-  { name: "Learning",     href: "/dashboard/learning",   icon: LineChart     },
-  { name: "Cash Flow",    href: "/dashboard/expenses",   icon: TrendingDown  },
-  { name: "Budgets",      href: "/dashboard/budgets",    icon: PiggyBank     },
-  { name: "Goals",        href: "/dashboard/goals",      icon: Target        },
-  { name: "Bills",        href: "/dashboard/bills",      icon: CreditCard    },
-  { name: "Credit",       href: "/dashboard/credit",     icon: Percent       },
-  { name: "AI Twin",      href: "/dashboard/twin",       icon: Bot           },
-  { name: "Fraud Shield", href: "/dashboard/fraud",      icon: ShieldAlert   },
-  { name: "Reports",      href: "/dashboard/reports",    icon: BarChart3     },
-  { name: "Tax Planner",  href: "/dashboard/tax",        icon: Receipt       },
-  { name: "Settings",     href: "/dashboard/settings",   icon: Settings      },
+  { name: "Dashboard",    href: "/dashboard",           icon: LayoutDashboard},
+  { name: "Portfolio",    href: "/dashboard/portfolio", icon: Briefcase     },
+  { name: "Learning",     href: "/dashboard/learning",  icon: BookOpen      },
+  { name: "Finance",      href: "/dashboard/finance",   icon: BarChart3     },
+  { name: "Budgets",      href: "/dashboard/budgets",   icon: PiggyBank     },
+  { name: "Goals",        href: "/dashboard/goals",     icon: Target        },
+  { name: "Bills",        href: "/dashboard/bills",     icon: CreditCard    },
+  { name: "Credit",       href: "/dashboard/credit",    icon: Percent       },
+  { name: "AI Twin",      href: "/dashboard/twin",      icon: Bot           },
+  { name: "Fraud Shield", href: "/dashboard/fraud",     icon: ShieldAlert   },
+  { name: "Reports",      href: "/dashboard/reports",   icon: BarChart3     },
+  { name: "Tax Planner",  href: "/dashboard/tax",       icon: Receipt       },
+  { name: "Settings",     href: "/dashboard/settings",  icon: Settings      },
 ];
 
 const keyMap: Record<string, string> = {
@@ -37,7 +35,22 @@ const keyMap: Record<string, string> = {
 
 export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: string }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { data: session } = useSession();
   const { language, setLanguage, t } = useLanguage();
+
+  const handleNavClick = (href: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (href === "/") {
+      router.push("/");
+      return;
+    }
+    if (session) {
+      router.push(href);
+    } else {
+      router.push("/data-safe");
+    }
+  };
 
   return (
     <div
@@ -50,8 +63,8 @@ export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: str
     >
       {/* V Logo */}
       <motion.div
-        animate={{ boxShadow: ["0 0 8px rgba(212,175,55,0.2)","0 0 18px rgba(212,175,55,0.6)","0 0 8px rgba(212,175,55,0.2)"] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        animate={{ boxShadow: ["0 0 6px rgba(212,175,55,0.15)","0 0 14px rgba(212,175,55,0.5)","0 0 6px rgba(212,175,55,0.15)"] }}
+        transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
         className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg shrink-0"
         style={{ background: "linear-gradient(135deg,#F5D060,#C8922A)" }}
       >
@@ -72,14 +85,15 @@ export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: str
           const translatedName = t(transKey);
 
           return (
-            <Link
+            <a
               key={item.name}
               href={item.href}
+              onClick={handleNavClick(item.href)}
               title={translatedName}
               className="group relative flex h-9 w-full items-center justify-center rounded-lg transition-all"
               style={
                 isActive
-                  ? { background: "rgba(212,175,55,0.1)", border: "1px solid rgba(212,175,55,0.25)" }
+                  ? { background: "rgba(212,175,55,0.08)", border: "1px solid rgba(212,175,55,0.2)" }
                   : { border: "1px solid transparent" }
               }
             >
@@ -104,7 +118,7 @@ export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: str
               >
                 {translatedName}
               </span>
-            </Link>
+            </a>
           );
         })}
       </div>

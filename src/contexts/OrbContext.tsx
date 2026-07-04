@@ -5,10 +5,12 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
   ReactNode,
 } from "react";
+import { globalOrb } from "@/lib/global-orb";
+import type { ThinkingStage } from "@/lib/thinking-stages";
 
-// All states defined in the VaultIQ AI spec
 export type OrbState =
   | "idle"
   | "thinking"
@@ -24,6 +26,8 @@ interface OrbContextValue {
   setOrbState: (state: OrbState) => void;
   uiReady: boolean;
   setUiReady: (ready: boolean) => void;
+  thinkingStage: ThinkingStage;
+  setThinkingStage: (stage: ThinkingStage) => void;
 }
 
 const OrbContext = createContext<OrbContextValue>({
@@ -31,18 +35,28 @@ const OrbContext = createContext<OrbContextValue>({
   setOrbState: () => {},
   uiReady: false,
   setUiReady: () => {},
+  thinkingStage: "idle",
+  setThinkingStage: () => {},
 });
 
 export function OrbProvider({ children }: { children: ReactNode }) {
-  const [orbState, setOrbStateRaw] = useState<OrbState>("idle");
+  const [orbState, setOrbStateRaw] = useState<OrbState>(globalOrb.getState());
   const [uiReady, setUiReady] = useState(false);
+  const [thinkingStage, setThinkingStage] = useState<ThinkingStage>("idle");
+
+  useEffect(() => {
+    return globalOrb.subscribe((state) => {
+      setOrbStateRaw(state);
+    });
+  }, []);
 
   const setOrbState = useCallback((state: OrbState) => {
     setOrbStateRaw(state);
+    globalOrb.setState(state);
   }, []);
 
   return (
-    <OrbContext.Provider value={{ orbState, setOrbState, uiReady, setUiReady }}>
+    <OrbContext.Provider value={{ orbState, setOrbState, uiReady, setUiReady, thinkingStage, setThinkingStage }}>
       {children}
     </OrbContext.Provider>
   );

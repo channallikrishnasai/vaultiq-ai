@@ -213,6 +213,7 @@ export type UserWhereInput = {
   incomes?: Prisma.IncomeListRelationFilter
   budgets?: Prisma.BudgetListRelationFilter
   goals?: Prisma.GoalListRelationFilter
+  bills?: Prisma.BillListRelationFilter
   fraudReports?: Prisma.FraudReportListRelationFilter
   learningProgress?: Prisma.LearningProgressListRelationFilter
   quizResults?: Prisma.QuizResultListRelationFilter
@@ -241,6 +242,7 @@ export type UserOrderByWithRelationInput = {
   incomes?: Prisma.IncomeOrderByRelationAggregateInput
   budgets?: Prisma.BudgetOrderByRelationAggregateInput
   goals?: Prisma.GoalOrderByRelationAggregateInput
+  bills?: Prisma.BillOrderByRelationAggregateInput
   fraudReports?: Prisma.FraudReportOrderByRelationAggregateInput
   learningProgress?: Prisma.LearningProgressOrderByRelationAggregateInput
   quizResults?: Prisma.QuizResultOrderByRelationAggregateInput
@@ -272,6 +274,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   incomes?: Prisma.IncomeListRelationFilter
   budgets?: Prisma.BudgetListRelationFilter
   goals?: Prisma.GoalListRelationFilter
+  bills?: Prisma.BillListRelationFilter
   fraudReports?: Prisma.FraudReportListRelationFilter
   learningProgress?: Prisma.LearningProgressListRelationFilter
   quizResults?: Prisma.QuizResultListRelationFilter
@@ -328,6 +331,7 @@ export type UserCreateInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -356,6 +360,7 @@ export type UserUncheckedCreateInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -384,6 +389,7 @@ export type UserUpdateInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -412,6 +418,7 @@ export type UserUncheckedUpdateInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -749,6 +756,20 @@ export type UserUpdateOneRequiredWithoutFinancialTwinsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFinancialTwinsInput, Prisma.UserUpdateWithoutFinancialTwinsInput>, Prisma.UserUncheckedUpdateWithoutFinancialTwinsInput>
 }
 
+export type UserCreateNestedOneWithoutBillsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBillsInput, Prisma.UserUncheckedCreateWithoutBillsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBillsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutBillsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBillsInput, Prisma.UserUncheckedCreateWithoutBillsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBillsInput
+  upsert?: Prisma.UserUpsertWithoutBillsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBillsInput, Prisma.UserUpdateWithoutBillsInput>, Prisma.UserUncheckedUpdateWithoutBillsInput>
+}
+
 export type UserCreateWithoutAccountsInput = {
   id?: string
   name?: string | null
@@ -764,6 +785,7 @@ export type UserCreateWithoutAccountsInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -791,6 +813,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -834,6 +857,7 @@ export type UserUpdateWithoutAccountsInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -861,6 +885,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -888,6 +913,7 @@ export type UserCreateWithoutSessionsInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -915,6 +941,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -958,6 +985,7 @@ export type UserUpdateWithoutSessionsInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -985,6 +1013,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -1012,6 +1041,7 @@ export type UserCreateWithoutProfileInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -1039,6 +1069,7 @@ export type UserUncheckedCreateWithoutProfileInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -1082,6 +1113,7 @@ export type UserUpdateWithoutProfileInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -1109,6 +1141,7 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -1136,6 +1169,7 @@ export type UserCreateWithoutExpensesInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -1163,6 +1197,7 @@ export type UserUncheckedCreateWithoutExpensesInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -1206,6 +1241,7 @@ export type UserUpdateWithoutExpensesInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -1357,6 +1393,7 @@ export type UserUncheckedUpdateWithoutIncomesInput = {
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -1384,6 +1421,7 @@ export type UserCreateWithoutBudgetsInput = {
   expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -1411,6 +1449,7 @@ export type UserUncheckedCreateWithoutBudgetsInput = {
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -1454,6 +1493,7 @@ export type UserUpdateWithoutBudgetsInput = {
   expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -1481,6 +1521,7 @@ export type UserUncheckedUpdateWithoutBudgetsInput = {
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -1508,6 +1549,7 @@ export type UserCreateWithoutGoalsInput = {
   expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -1535,6 +1577,7 @@ export type UserUncheckedCreateWithoutGoalsInput = {
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -1578,6 +1621,7 @@ export type UserUpdateWithoutGoalsInput = {
   expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -1605,6 +1649,7 @@ export type UserUncheckedUpdateWithoutGoalsInput = {
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -1633,6 +1678,7 @@ export type UserCreateWithoutFraudReportsInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
   roadmaps?: Prisma.RoadmapCreateNestedManyWithoutUserInput
@@ -1660,6 +1706,7 @@ export type UserUncheckedCreateWithoutFraudReportsInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
   roadmaps?: Prisma.RoadmapUncheckedCreateNestedManyWithoutUserInput
@@ -1703,6 +1750,7 @@ export type UserUpdateWithoutFraudReportsInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
   roadmaps?: Prisma.RoadmapUpdateManyWithoutUserNestedInput
@@ -1730,6 +1778,7 @@ export type UserUncheckedUpdateWithoutFraudReportsInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
   roadmaps?: Prisma.RoadmapUncheckedUpdateManyWithoutUserNestedInput
@@ -1757,6 +1806,7 @@ export type UserCreateWithoutLearningProgressInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
   roadmaps?: Prisma.RoadmapCreateNestedManyWithoutUserInput
@@ -1784,6 +1834,7 @@ export type UserUncheckedCreateWithoutLearningProgressInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
   roadmaps?: Prisma.RoadmapUncheckedCreateNestedManyWithoutUserInput
@@ -1827,6 +1878,7 @@ export type UserUpdateWithoutLearningProgressInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
   roadmaps?: Prisma.RoadmapUpdateManyWithoutUserNestedInput
@@ -1854,6 +1906,7 @@ export type UserUncheckedUpdateWithoutLearningProgressInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
   roadmaps?: Prisma.RoadmapUncheckedUpdateManyWithoutUserNestedInput
@@ -1881,6 +1934,7 @@ export type UserCreateWithoutQuizResultsInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   roadmaps?: Prisma.RoadmapCreateNestedManyWithoutUserInput
@@ -1908,6 +1962,7 @@ export type UserUncheckedCreateWithoutQuizResultsInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   roadmaps?: Prisma.RoadmapUncheckedCreateNestedManyWithoutUserInput
@@ -1951,6 +2006,7 @@ export type UserUpdateWithoutQuizResultsInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   roadmaps?: Prisma.RoadmapUpdateManyWithoutUserNestedInput
@@ -1978,6 +2034,7 @@ export type UserUncheckedUpdateWithoutQuizResultsInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   roadmaps?: Prisma.RoadmapUncheckedUpdateManyWithoutUserNestedInput
@@ -2005,6 +2062,7 @@ export type UserCreateWithoutRoadmapsInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -2032,6 +2090,7 @@ export type UserUncheckedCreateWithoutRoadmapsInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -2075,6 +2134,7 @@ export type UserUpdateWithoutRoadmapsInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -2102,6 +2162,7 @@ export type UserUncheckedUpdateWithoutRoadmapsInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -2129,6 +2190,7 @@ export type UserCreateWithoutEmergencyPlansInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -2156,6 +2218,7 @@ export type UserUncheckedCreateWithoutEmergencyPlansInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -2199,6 +2262,7 @@ export type UserUpdateWithoutEmergencyPlansInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -2226,6 +2290,7 @@ export type UserUncheckedUpdateWithoutEmergencyPlansInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -2253,6 +2318,7 @@ export type UserCreateWithoutPlatformRecommendationsInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -2280,6 +2346,7 @@ export type UserUncheckedCreateWithoutPlatformRecommendationsInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -2323,6 +2390,7 @@ export type UserUpdateWithoutPlatformRecommendationsInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -2350,6 +2418,7 @@ export type UserUncheckedUpdateWithoutPlatformRecommendationsInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -2377,6 +2446,7 @@ export type UserCreateWithoutChatHistoryInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -2404,6 +2474,7 @@ export type UserUncheckedCreateWithoutChatHistoryInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -2447,6 +2518,7 @@ export type UserUpdateWithoutChatHistoryInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -2474,6 +2546,7 @@ export type UserUncheckedUpdateWithoutChatHistoryInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -2501,6 +2574,7 @@ export type UserCreateWithoutPortfoliosInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -2528,6 +2602,7 @@ export type UserUncheckedCreateWithoutPortfoliosInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -2571,6 +2646,7 @@ export type UserUpdateWithoutPortfoliosInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -2598,6 +2674,7 @@ export type UserUncheckedUpdateWithoutPortfoliosInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -2625,6 +2702,7 @@ export type UserCreateWithoutWatchlistsInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -2652,6 +2730,7 @@ export type UserUncheckedCreateWithoutWatchlistsInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -2695,6 +2774,7 @@ export type UserUpdateWithoutWatchlistsInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -2722,6 +2802,7 @@ export type UserUncheckedUpdateWithoutWatchlistsInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -2749,6 +2830,7 @@ export type UserCreateWithoutFinancialTwinsInput = {
   incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
@@ -2776,6 +2858,7 @@ export type UserUncheckedCreateWithoutFinancialTwinsInput = {
   incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
   goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
   fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
   learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
   quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
@@ -2819,6 +2902,7 @@ export type UserUpdateWithoutFinancialTwinsInput = {
   incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
@@ -2846,6 +2930,7 @@ export type UserUncheckedUpdateWithoutFinancialTwinsInput = {
   incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
   goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
   fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
   learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
   quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
@@ -2855,6 +2940,130 @@ export type UserUncheckedUpdateWithoutFinancialTwinsInput = {
   chatHistory?: Prisma.ChatHistoryUncheckedUpdateManyWithoutUserNestedInput
   portfolios?: Prisma.PortfolioUncheckedUpdateManyWithoutUserNestedInput
   watchlists?: Prisma.WatchlistUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutBillsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  passwordHash?: string | null
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
+  goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
+  learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
+  quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
+  roadmaps?: Prisma.RoadmapCreateNestedManyWithoutUserInput
+  emergencyPlans?: Prisma.EmergencyPlanCreateNestedManyWithoutUserInput
+  platformRecommendations?: Prisma.PlatformRecommendationCreateNestedManyWithoutUserInput
+  chatHistory?: Prisma.ChatHistoryCreateNestedManyWithoutUserInput
+  portfolios?: Prisma.PortfolioCreateNestedManyWithoutUserInput
+  watchlists?: Prisma.WatchlistCreateNestedManyWithoutUserInput
+  financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutBillsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  passwordHash?: string | null
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
+  goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
+  learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
+  quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
+  roadmaps?: Prisma.RoadmapUncheckedCreateNestedManyWithoutUserInput
+  emergencyPlans?: Prisma.EmergencyPlanUncheckedCreateNestedManyWithoutUserInput
+  platformRecommendations?: Prisma.PlatformRecommendationUncheckedCreateNestedManyWithoutUserInput
+  chatHistory?: Prisma.ChatHistoryUncheckedCreateNestedManyWithoutUserInput
+  portfolios?: Prisma.PortfolioUncheckedCreateNestedManyWithoutUserInput
+  watchlists?: Prisma.WatchlistUncheckedCreateNestedManyWithoutUserInput
+  financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutBillsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBillsInput, Prisma.UserUncheckedCreateWithoutBillsInput>
+}
+
+export type UserUpsertWithoutBillsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBillsInput, Prisma.UserUncheckedUpdateWithoutBillsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBillsInput, Prisma.UserUncheckedCreateWithoutBillsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBillsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBillsInput, Prisma.UserUncheckedUpdateWithoutBillsInput>
+}
+
+export type UserUpdateWithoutBillsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
+  goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
+  learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
+  quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
+  roadmaps?: Prisma.RoadmapUpdateManyWithoutUserNestedInput
+  emergencyPlans?: Prisma.EmergencyPlanUpdateManyWithoutUserNestedInput
+  platformRecommendations?: Prisma.PlatformRecommendationUpdateManyWithoutUserNestedInput
+  chatHistory?: Prisma.ChatHistoryUpdateManyWithoutUserNestedInput
+  portfolios?: Prisma.PortfolioUpdateManyWithoutUserNestedInput
+  watchlists?: Prisma.WatchlistUpdateManyWithoutUserNestedInput
+  financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBillsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
+  goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
+  learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
+  quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
+  roadmaps?: Prisma.RoadmapUncheckedUpdateManyWithoutUserNestedInput
+  emergencyPlans?: Prisma.EmergencyPlanUncheckedUpdateManyWithoutUserNestedInput
+  platformRecommendations?: Prisma.PlatformRecommendationUncheckedUpdateManyWithoutUserNestedInput
+  chatHistory?: Prisma.ChatHistoryUncheckedUpdateManyWithoutUserNestedInput
+  portfolios?: Prisma.PortfolioUncheckedUpdateManyWithoutUserNestedInput
+  watchlists?: Prisma.WatchlistUncheckedUpdateManyWithoutUserNestedInput
+  financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -2869,6 +3078,7 @@ export type UserCountOutputType = {
   incomes: number
   budgets: number
   goals: number
+  bills: number
   fraudReports: number
   learningProgress: number
   quizResults: number
@@ -2888,6 +3098,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   incomes?: boolean | UserCountOutputTypeCountIncomesArgs
   budgets?: boolean | UserCountOutputTypeCountBudgetsArgs
   goals?: boolean | UserCountOutputTypeCountGoalsArgs
+  bills?: boolean | UserCountOutputTypeCountBillsArgs
   fraudReports?: boolean | UserCountOutputTypeCountFraudReportsArgs
   learningProgress?: boolean | UserCountOutputTypeCountLearningProgressArgs
   quizResults?: boolean | UserCountOutputTypeCountQuizResultsArgs
@@ -2950,6 +3161,13 @@ export type UserCountOutputTypeCountBudgetsArgs<ExtArgs extends runtime.Types.Ex
  */
 export type UserCountOutputTypeCountGoalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.GoalWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountBillsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BillWhereInput
 }
 
 /**
@@ -3039,6 +3257,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   incomes?: boolean | Prisma.User$incomesArgs<ExtArgs>
   budgets?: boolean | Prisma.User$budgetsArgs<ExtArgs>
   goals?: boolean | Prisma.User$goalsArgs<ExtArgs>
+  bills?: boolean | Prisma.User$billsArgs<ExtArgs>
   fraudReports?: boolean | Prisma.User$fraudReportsArgs<ExtArgs>
   learningProgress?: boolean | Prisma.User$learningProgressArgs<ExtArgs>
   quizResults?: boolean | Prisma.User$quizResultsArgs<ExtArgs>
@@ -3094,6 +3313,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   incomes?: boolean | Prisma.User$incomesArgs<ExtArgs>
   budgets?: boolean | Prisma.User$budgetsArgs<ExtArgs>
   goals?: boolean | Prisma.User$goalsArgs<ExtArgs>
+  bills?: boolean | Prisma.User$billsArgs<ExtArgs>
   fraudReports?: boolean | Prisma.User$fraudReportsArgs<ExtArgs>
   learningProgress?: boolean | Prisma.User$learningProgressArgs<ExtArgs>
   quizResults?: boolean | Prisma.User$quizResultsArgs<ExtArgs>
@@ -3119,6 +3339,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     incomes: Prisma.$IncomePayload<ExtArgs>[]
     budgets: Prisma.$BudgetPayload<ExtArgs>[]
     goals: Prisma.$GoalPayload<ExtArgs>[]
+    bills: Prisma.$BillPayload<ExtArgs>[]
     fraudReports: Prisma.$FraudReportPayload<ExtArgs>[]
     learningProgress: Prisma.$LearningProgressPayload<ExtArgs>[]
     quizResults: Prisma.$QuizResultPayload<ExtArgs>[]
@@ -3540,6 +3761,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   incomes<T extends Prisma.User$incomesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$incomesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IncomePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   budgets<T extends Prisma.User$budgetsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$budgetsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BudgetPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   goals<T extends Prisma.User$goalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$goalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bills<T extends Prisma.User$billsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$billsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BillPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   fraudReports<T extends Prisma.User$fraudReportsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$fraudReportsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FraudReportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   learningProgress<T extends Prisma.User$learningProgressArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$learningProgressArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LearningProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   quizResults<T extends Prisma.User$quizResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$quizResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuizResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4138,6 +4360,30 @@ export type User$goalsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   take?: number
   skip?: number
   distinct?: Prisma.GoalScalarFieldEnum | Prisma.GoalScalarFieldEnum[]
+}
+
+/**
+ * User.bills
+ */
+export type User$billsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Bill
+   */
+  select?: Prisma.BillSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Bill
+   */
+  omit?: Prisma.BillOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BillInclude<ExtArgs> | null
+  where?: Prisma.BillWhereInput
+  orderBy?: Prisma.BillOrderByWithRelationInput | Prisma.BillOrderByWithRelationInput[]
+  cursor?: Prisma.BillWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BillScalarFieldEnum | Prisma.BillScalarFieldEnum[]
 }
 
 /**

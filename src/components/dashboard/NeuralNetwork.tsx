@@ -1,42 +1,52 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useOrb } from "@/contexts/OrbContext";
 
-// Nodes in % of screen — orb is center (50, 45)
-// Peripheral nodes map to widget positions
 const NODES = [
-  { id: "orb",       x: 50,  y: 45 }, // center orb
-  { id: "health",    x: 8,   y: 18 },
-  { id: "portfolio", x: 92,  y: 18 },
-  { id: "goals",     x: 8,   y: 72 },
-  { id: "fraud",     x: 92,  y: 72 },
-  { id: "news",      x: 50,  y: 8  },
-  { id: "twin",      x: 25,  y: 55 },
-  { id: "expenses",  x: 75,  y: 55 },
+  { id: "orb",       x: 50,  y: 46 },
+  { id: "finLevel",  x: 19,  y: 20 },
+  { id: "badges",    x: 19,  y: 36 },
+  { id: "fraud",     x: 19,  y: 50 },
+  { id: "tax",       x: 19,  y: 64 },
+  { id: "portfolio", x: 19,  y: 80 },
+  { id: "netWorth",  x: 29.5,  y: 14 },
+  { id: "perf",      x: 51.5,  y: 12 },
+  { id: "income",    x: 73.5,  y: 14 },
+  { id: "cashflow",  x: 73.5,  y: 32 },
+  { id: "savings",   x: 74,  y: 50 },
+  { id: "emergency", x: 73.5,  y: 66 },
+  { id: "expense",   x: 74,  y: 82 },
+  { id: "goals",     x: 29.5,  y: 82 },
+  { id: "health",    x: 49.5,  y: 84 },
+  { id: "invest",    x: 69.5,  y: 84 },
 ];
 
 const EDGES = [
-  ["orb", "health"],
-  ["orb", "portfolio"],
-  ["orb", "goals"],
+  ["orb", "finLevel"],
+  ["orb", "badges"],
   ["orb", "fraud"],
-  ["orb", "news"],
-  ["orb", "twin"],
-  ["orb", "expenses"],
+  ["orb", "tax"],
+  ["orb", "portfolio"],
+  ["orb", "netWorth"],
+  ["orb", "perf"],
+  ["orb", "income"],
+  ["orb", "cashflow"],
+  ["orb", "savings"],
+  ["orb", "emergency"],
+  ["orb", "expense"],
+  ["orb", "goals"],
+  ["orb", "health"],
+  ["orb", "invest"],
 ];
 
 export default function NeuralNetwork({ visible }: { visible: boolean }) {
-  const { orbState } = useOrb();
-  const isActive = orbState === "thinking" || orbState === "speaking";
-
   const nodeMap = Object.fromEntries(NODES.map((n) => [n.id, n]));
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: visible ? 1 : 0 }}
-      transition={{ duration: 1.4, delay: 0.5 }}
+      transition={{ duration: 2.2, delay: 0.8 }}
       style={{
         position: "fixed",
         inset: 0,
@@ -50,103 +60,49 @@ export default function NeuralNetwork({ visible }: { visible: boolean }) {
         preserveAspectRatio="xMidYMid slice"
       >
         <defs>
-          <style>{`
-            @keyframes dashFlow {
-              to { stroke-dashoffset: -24; }
-            }
-            @keyframes dashFlowFast {
-              to { stroke-dashoffset: -16; }
-            }
-            .neural-line {
-              animation: dashFlow 4s linear infinite;
-            }
-            .neural-line-active {
-              animation: dashFlowFast 1.2s linear infinite;
-            }
-            @keyframes pulse-dot {
-              0%, 100% { opacity: 0.3; r: 0.6; }
-              50% { opacity: 0.9; r: 0.9; }
-            }
-            .neural-dot { animation: pulse-dot 2.5s ease-in-out infinite; }
-            .neural-dot-active { animation: pulse-dot 0.8s ease-in-out infinite; }
-          `}</style>
+          <filter id="neural-glow">
+            <feGaussianBlur stdDeviation="0.4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <radialGradient id="nodeGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
+          </radialGradient>
         </defs>
 
-        {/* Neural edge lines */}
+        {/* Connection lines — ultra subtle */}
         {EDGES.map(([fromId, toId], i) => {
           const from = nodeMap[fromId];
           const to = nodeMap[toId];
           if (!from || !to) return null;
 
-          // Slight curve via midpoint offset
-          const midX = (from.x + to.x) / 2 + ((i % 3) - 1) * 3;
-          const midY = (from.y + to.y) / 2 + ((i % 2) - 0.5) * 4;
-
           return (
-            <path
+            <line
               key={i}
-              d={`M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`}
-              fill="none"
-              stroke={isActive ? "rgba(212,175,55,0.28)" : "rgba(212,175,55,0.1)"}
-              strokeWidth={isActive ? "0.3" : "0.2"}
-              strokeDasharray="2 4"
-              className={isActive ? "neural-line-active" : "neural-line"}
-              style={{ animationDelay: `${i * 0.3}s` }}
+              x1={from.x}
+              y1={from.y}
+              x2={to.x}
+              y2={to.y}
+              stroke="rgba(212,175,55,0.04)"
+              strokeWidth="0.1"
+              filter="url(#neural-glow)"
             />
           );
         })}
 
-        {/* Energy packet dots travelling along lines */}
-        {isActive &&
-          EDGES.map(([fromId, toId], i) => {
-            const from = nodeMap[fromId];
-            const to = nodeMap[toId];
-            if (!from || !to) return null;
-
-            return (
-              <circle key={`packet-${i}`} r="0.55" fill="rgba(245,208,96,0.85)">
-                <animateMotion
-                  dur={`${1.2 + i * 0.15}s`}
-                  repeatCount="indefinite"
-                  begin={`${i * 0.2}s`}
-                >
-                  <mpath href={`#neural-path-${i}`} />
-                </animateMotion>
-              </circle>
-            );
-          })}
-
-        {/* Hidden paths for animateMotion */}
-        {EDGES.map(([fromId, toId], i) => {
-          const from = nodeMap[fromId];
-          const to = nodeMap[toId];
-          if (!from || !to) return null;
-          const midX = (from.x + to.x) / 2 + ((i % 3) - 1) * 3;
-          const midY = (from.y + to.y) / 2 + ((i % 2) - 0.5) * 4;
-          return (
-            <path
-              key={`hidden-${i}`}
-              id={`neural-path-${i}`}
-              d={`M ${from.x} ${from.y} Q ${midX} ${midY} ${to.x} ${to.y}`}
-              fill="none"
-              stroke="none"
+        {/* Node dots — softer glow */}
+        {NODES.filter((n) => n.id !== "orb").map((n) => (
+            <circle
+              key={n.id}
+              cx={n.x}
+              cy={n.y}
+              r="0.35"
+              fill="rgba(212,175,55,0.1)"
+              filter="url(#neural-glow)"
             />
-          );
-        })}
-
-        {/* Peripheral node dots */}
-        {NODES.filter((n) => n.id !== "orb").map((n, i) => (
-          <circle
-            key={n.id}
-            cx={n.x}
-            cy={n.y}
-            r="0.7"
-            fill={isActive ? "rgba(212,175,55,0.55)" : "rgba(212,175,55,0.25)"}
-            stroke={isActive ? "rgba(212,175,55,0.7)" : "rgba(212,175,55,0.35)"}
-            strokeWidth="0.25"
-            className={isActive ? "neural-dot-active" : "neural-dot"}
-            style={{ animationDelay: `${i * 0.35}s` }}
-          />
         ))}
       </svg>
     </motion.div>
