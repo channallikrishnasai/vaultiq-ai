@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, GraduationCap, ShieldAlert, Sparkles, ChevronRight, CheckCircle2, AlertTriangle, Eye, RefreshCw } from "lucide-react";
+import { ArrowLeft, GraduationCap, ShieldAlert, ChevronRight, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { toast } from "sonner";
@@ -15,120 +15,163 @@ interface ScamSimulatorClientProps {
   };
 }
 
-interface Scenario {
-  id: number;
-  title: string;
-  sender: string;
-  channel: "SMS" | "WhatsApp" | "Email" | "Instagram";
+interface ScenarioNode {
   message: string;
-  type: string;
   options: {
     text: string;
     consequence: "hack" | "correct" | "safe" | "risk";
     feedback: string;
+    nextNodeId?: string; // Links to next dialogue node
   }[];
 }
 
-const SCENARIOS: Scenario[] = [
+interface BranchingScenario {
+  id: number;
+  title: string;
+  sender: string;
+  channel: "SMS" | "WhatsApp" | "Email" | "Instagram";
+  type: string;
+  startNodeId: string;
+  nodes: Record<string, ScenarioNode>;
+}
+
+const BRANCHING_SCENARIOS: BranchingScenario[] = [
   {
     id: 1,
-    title: "Instant Job Offer",
+    title: "Instant Job Offer Path",
     sender: "Recruiter_HR_98",
     channel: "WhatsApp",
-    message: "Hello! I am a recruiter from Amazon India. We offer simple part-time online jobs. Work 1 hour a day from home and earn ₹5000 daily. Press 1 to get details immediately.",
     type: "Task Scam / Job Fraud",
-    options: [
-      {
-        text: "Reply '1' to check the details and see if it is a legitimate side income.",
-        consequence: "hack",
-        feedback: "🚨 SIMULATED HACK: This is a Task Scam! The attacker will invite you to a Telegram group and ask you to perform simple YouTube likes. Initially, they pay ₹150, but soon require you to deposit ₹10,000 for 'premium levels'. Once you deposit, your money is stolen."
+    startNodeId: "start",
+    nodes: {
+      start: {
+        message: "Hello! I am a recruiter from Amazon India. We offer simple part-time online jobs. Work 1 hour a day from home and earn ₹5000 daily. Press 1 to get details immediately.",
+        options: [
+          {
+            text: "Reply '1' to get details.",
+            consequence: "risk",
+            feedback: "You replied '1'. Attacker immediately sends a follow-up link.",
+            nextNodeId: "step_2_replied",
+          },
+          {
+            text: "Report and block the sender immediately.",
+            consequence: "correct",
+            feedback: "🎉 CORRECT! Legitimate recruiters do not offer daily part-time salaries of ₹5,000 over WhatsApp. Blocked immediately. +25 XP!",
+          },
+        ],
       },
-      {
-        text: "Report and block the sender immediately, and delete the message.",
-        consequence: "correct",
-        feedback: "🎉 CORRECT! Legitimate recruiters do not offer daily part-time salaries of ₹5,000 over WhatsApp. Blocking and reporting flags the account to WhatsApp to prevent them from contacting others. +25 XP!"
+      step_2_replied: {
+        message: "Great! Please join our Telegram channel at https://t.me/amazon-tasks-india to receive your first video-liking task. You will be paid ₹150 instantly upon completion.",
+        options: [
+          {
+            text: "Click the link and join the Telegram group.",
+            consequence: "risk",
+            feedback: "You joined the group. Attacker pays you ₹150 for liking a video, then demands ₹10,000 deposit to access 'Vip Level 2' payouts.",
+            nextNodeId: "step_3_group",
+          },
+          {
+            text: "Realize the scam, block the number, and exit.",
+            consequence: "correct",
+            feedback: "🎉 CORRECT! You successfully avoided the advance-fee trap before depositing any funds. +25 XP!",
+          },
+        ],
       },
-      {
-        text: "Delete the message and ignore it.",
-        consequence: "safe",
-        feedback: "✓ SAFE: Deleting it is safe and avoids interaction. However, reporting helps the community filter these numbers."
-      }
-    ]
+      step_3_group: {
+        message: "[Telegram Adm]: Congratulations! To withdraw your premium salary of ₹15,000, you must make a security deposit of ₹5,000 to verify your account. It will be refunded in 5 minutes.",
+        options: [
+          {
+            text: "Transfer the ₹5,000 deposit.",
+            consequence: "hack",
+            feedback: "🚨 SIMULATED HACK: This is a Task Scam! Once you deposit ₹5,000, they will block you or demand ₹15,000 more for taxes. Your money is gone forever.",
+          },
+          {
+            text: "Refuse to pay and report the Telegram channel to cyber police.",
+            consequence: "correct",
+            feedback: "🎉 CORRECT! Never pay money to receive money. Reporting helps block these phishing syndicates. +25 XP!",
+          },
+        ],
+      },
+    },
   },
   {
     id: 2,
-    title: "Urgent PAN Verification",
+    title: "Urgent PAN Verification Path",
     sender: "IN-INCOMETAX",
     channel: "SMS",
-    message: "Income Tax Department Notification: Your refund of ₹18,450 is approved. Claim immediately by verifying your PAN card at https://incometax-refund-in.xyz/verify.",
     type: "Phishing / Identity Theft",
-    options: [
-      {
-        text: "Click the link to verify your PAN and claim your ₹18,450 refund.",
-        consequence: "hack",
-        feedback: "🚨 SIMULATED HACK: The domain 'incometax-refund-in.xyz' is a copycat phishing page! Attacker will collect your PAN card, Aadhaar number, and banking details to perform identity theft or empty your account. Official government domains always end in '.gov.in'."
+    startNodeId: "start",
+    nodes: {
+      start: {
+        message: "Income Tax Department Notification: Your refund of ₹18,450 is approved. Claim immediately by verifying your PAN card at https://incometax-refund-in.xyz/verify.",
+        options: [
+          {
+            text: "Click the link to verify your PAN.",
+            consequence: "risk",
+            feedback: "You clicked the link. You are redirected to a mock website mimicking the income tax portal.",
+            nextNodeId: "step_2_phish",
+          },
+          {
+            text: "Manually navigate to the official portal 'incometax.gov.in'.",
+            consequence: "correct",
+            feedback: "🎉 CORRECT! Always type official URLs yourself instead of clicking SMS links. +25 XP!",
+          },
+        ],
       },
-      {
-        text: "Check your tax portal directly at the official 'incometax.gov.in' domain.",
-        consequence: "correct",
-        feedback: "🎉 CORRECT! Always navigate to the official, verified government domain manually rather than clicking link structures from SMS. +25 XP!"
+      step_2_phish: {
+        message: "[Phishing Site]: Enter your PAN Number and Bank Account details below to process the refund immediately.",
+        options: [
+          {
+            text: "Enter your real PAN and bank credentials.",
+            consequence: "hack",
+            feedback: "🚨 SIMULATED HACK: The copycat portal harvested your credentials! They can now log in, set up auto-debits, or clone your identity.",
+          },
+          {
+            text: "Close the browser immediately and change banking passwords.",
+            consequence: "correct",
+            feedback: "🎉 CORRECT! Escaping early and resetting security keys protects your assets. +25 XP!",
+          },
+        ],
       },
-      {
-        text: "Delete the SMS and ignore the notification.",
-        consequence: "safe",
-        feedback: "✓ SAFE: Deleting it prevents you from falling into the trap. Stay alert!"
-      }
-    ]
+    },
   },
-  {
-    id: 3,
-    title: "Instagram Crypto Giveaway",
-    sender: "elon_musk_giveaway_real",
-    channel: "Instagram",
-    message: "Congratulations! You have won 0.05 BTC in our official crypto distribution event. Complete validation by transferring 0.005 BTC to verify your wallet address at https://tesla-giveaway-verification.com.",
-    type: "Cryptocurrency Scam",
-    options: [
-      {
-        text: "Send the 0.005 BTC wallet verification fee to claim your prize.",
-        consequence: "hack",
-        feedback: "🚨 SIMULATED HACK: This is an advance-fee crypto giveaway scam! Elon Musk or any reputable figure will never ask you to send crypto to verify a wallet address. Once sent, your coins are gone forever."
-      },
-      {
-        text: "Report the account for fraud, block the user, and delete the DM.",
-        consequence: "correct",
-        feedback: "🎉 CORRECT! Wallet addresses never require pre-payments to receive funds. Reporting and blocking the account triggers platform security algorithms. +25 XP!"
-      },
-      {
-        text: "Delete the DM and ignore it.",
-        consequence: "safe",
-        feedback: "✓ SAFE: Ignoring avoids loss. Stay vigilant about fake celebrity accounts!"
-      }
-    ]
-  }
 ];
 
 export function ScamSimulatorClient({ user }: ScamSimulatorClientProps) {
-  const [currentScenario, setCurrentScenario] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [currentScenarioIdx, setCurrentScenarioIdx] = useState(0);
+  const [currentNodeId, setCurrentNodeId] = useState("start");
+  const [selectedOptionIdx, setSelectedOptionIdx] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [totalXP, setTotalXP] = useState(0);
 
-  const handleOptionSelect = (index: number) => {
-    setSelectedOption(index);
+  const scenario = BRANCHING_SCENARIOS[currentScenarioIdx];
+  const node = scenario.nodes[currentNodeId];
+
+  const handleOptionSelect = (idx: number) => {
+    setSelectedOptionIdx(idx);
     setShowFeedback(true);
-    if (SCENARIOS[currentScenario].options[index].consequence === "correct") {
+    if (node.options[idx].consequence === "correct") {
       setTotalXP((prev) => prev + 25);
     }
   };
 
-  const nextScenario = () => {
-    setSelectedOption(null);
-    setShowFeedback(false);
-    setCurrentScenario((prev) => (prev + 1) % SCENARIOS.length);
+  const handleNext = () => {
+    const option = node.options[selectedOptionIdx!];
+    if (option.nextNodeId) {
+      // Transition to next dialogue node inside the branching path
+      setCurrentNodeId(option.nextNodeId);
+      setSelectedOptionIdx(null);
+      setShowFeedback(false);
+    } else {
+      // Complete path, transition to next scenario
+      setSelectedOptionIdx(null);
+      setShowFeedback(false);
+      setCurrentNodeId("start");
+      setCurrentScenarioIdx((prev) => (prev + 1) % BRANCHING_SCENARIOS.length);
+    }
   };
 
   return (
-    <main className="min-h-screen bg-[#040407] text-zinc-100 px-6 py-6 pt-24 overflow-y-auto scrollbar-none">
+    <main className="min-h-screen bg-[#040407]/45 text-zinc-100 px-6 py-6 pt-24 overflow-y-auto scrollbar-none backdrop-blur-sm">
       <div className="mx-auto max-w-4xl space-y-6">
         <DashboardHeader user={user} visible={true} />
 
@@ -148,7 +191,7 @@ export function ScamSimulatorClient({ user }: ScamSimulatorClientProps) {
               <div>
                 <h1 className="text-xl font-bold text-zinc-50">Scam & Phishing Simulator</h1>
                 <p className="text-xs text-zinc-500 mt-0.5">
-                  Interactive academy to train your scam defense instincts and secure your assets
+                  Interactive branching drills to test your scam defense instincts
                 </p>
               </div>
             </div>
@@ -171,11 +214,11 @@ export function ScamSimulatorClient({ user }: ScamSimulatorClientProps) {
                 Defense Drill
               </span>
               <h3 className="text-sm font-bold text-zinc-200 mt-0.5">
-                {SCENARIOS[currentScenario].title}
+                {scenario.title}
               </h3>
             </div>
             <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
-              {SCENARIOS[currentScenario].type}
+              {scenario.type}
             </div>
           </div>
 
@@ -185,25 +228,25 @@ export function ScamSimulatorClient({ user }: ScamSimulatorClientProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] uppercase font-bold text-zinc-500">From:</span>
-                  <span className="text-[11px] font-mono text-zinc-300 font-semibold">{SCENARIOS[currentScenario].sender}</span>
+                  <span className="text-[11px] font-mono text-zinc-300 font-semibold">{scenario.sender}</span>
                 </div>
                 <span className="text-[9px] uppercase font-black tracking-wider text-rose-400 bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20">
-                  {SCENARIOS[currentScenario].channel}
+                  {scenario.channel}
                 </span>
               </div>
               <div className="border-t border-zinc-850 my-1" />
               <p className="text-xs text-zinc-200 leading-relaxed font-mono bg-black/40 p-3 rounded border border-zinc-900 whitespace-pre-wrap select-text">
-                {SCENARIOS[currentScenario].message}
+                {node.message}
               </p>
             </div>
 
             {/* Options */}
             <div className="space-y-2">
               <span className="text-[10px] uppercase font-bold text-zinc-500 block">How will you respond?</span>
-              {SCENARIOS[currentScenario].options.map((opt, idx) => {
-                const isChosen = selectedOption === idx;
+              {node.options.map((opt, idx) => {
+                const isChosen = selectedOptionIdx === idx;
                 let btnStyle = "border-zinc-850 bg-zinc-900/30 hover:border-zinc-700 text-zinc-300";
-                
+
                 if (showFeedback && isChosen) {
                   if (opt.consequence === "correct") btnStyle = "border-emerald-500/40 bg-emerald-500/5 text-emerald-300";
                   else if (opt.consequence === "hack") btnStyle = "border-rose-500/40 bg-rose-500/5 text-rose-300 animate-pulse";
@@ -226,27 +269,25 @@ export function ScamSimulatorClient({ user }: ScamSimulatorClientProps) {
             </div>
 
             {/* Feedback Message */}
-            {showFeedback && selectedOption !== null && (
+            {showFeedback && selectedOptionIdx !== null && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="p-4 rounded-lg border border-zinc-800 bg-zinc-900/50 space-y-3"
               >
                 <p className="text-xs leading-relaxed text-zinc-300">
-                  {SCENARIOS[currentScenario].options[selectedOption].feedback}
+                  {node.options[selectedOptionIdx].feedback}
                 </p>
                 <button
-                  onClick={nextScenario}
+                  onClick={handleNext}
                   className="flex items-center gap-1 py-1.5 px-3 bg-cyan-500 hover:bg-cyan-600 text-black font-bold text-xs rounded transition"
                 >
-                  Next Challenge <ChevronRight size={12} />
+                  {node.options[selectedOptionIdx].nextNodeId ? "Continue Drill" : "Next Challenge"} <ChevronRight size={12} />
                 </button>
               </motion.div>
             )}
           </div>
-
         </div>
-
       </div>
     </main>
   );

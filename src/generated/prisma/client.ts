@@ -136,3 +136,8 @@ export type Watchlist = Prisma.WatchlistModel
  * 
  */
 export type FinancialTwin = Prisma.FinancialTwinModel
+/**
+ * Model Bill
+ * 
+ */
+export type Bill = Prisma.BillModel

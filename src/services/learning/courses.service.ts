@@ -19,6 +19,7 @@ export interface Course {
   level: "beginner" | "intermediate" | "advanced";
   lessons: Lesson[];
   quiz: QuizQuestion[];
+  youtubeUrl?: string;
 }
 
 const COURSES: Course[] = [
@@ -27,6 +28,7 @@ const COURSES: Course[] = [
     title: "Personal Finance Basics",
     description: "Master budgeting, saving, and money management fundamentals.",
     level: "beginner",
+    youtubeUrl: "https://www.youtube.com/watch?v=s53cQ_AeeR8",
     lessons: [
       { id: "fb-1", title: "Understanding Income & Expenses", duration: "10 min", content: "Learn to track your cash flow and identify spending patterns." },
       { id: "fb-2", title: "Building a Budget", duration: "12 min", content: "Create a 50/30/20 budget tailored to Indian households." },
@@ -42,6 +44,7 @@ const COURSES: Course[] = [
     title: "Investing 101",
     description: "Introduction to stocks, mutual funds, and SIP investing.",
     level: "beginner",
+    youtubeUrl: "https://www.youtube.com/watch?v=L7G0Of_d4A8",
     lessons: [
       { id: "inv-1", title: "What is Investing?", duration: "10 min", content: "Difference between saving and investing, power of compounding." },
       { id: "inv-2", title: "Mutual Funds & SIPs", duration: "15 min", content: "How SIPs work, types of mutual funds, expense ratios." },
@@ -57,6 +60,7 @@ const COURSES: Course[] = [
     title: "Fraud & Scam Awareness",
     description: "Protect yourself from financial fraud, phishing, and scams.",
     level: "beginner",
+    youtubeUrl: "https://www.youtube.com/watch?v=J5xS5U1mEWY",
     lessons: [
       { id: "fr-1", title: "Common Scam Types", duration: "10 min", content: "OTP fraud, phishing, investment scams, and social engineering." },
       { id: "fr-2", title: "Red Flags to Watch", duration: "8 min", content: "Urgency tactics, guaranteed returns, and suspicious links." },
@@ -72,6 +76,7 @@ const COURSES: Course[] = [
     title: "Tax Planning for Indians",
     description: "Understand income tax, deductions, and tax-saving investments.",
     level: "intermediate",
+    youtubeUrl: "https://www.youtube.com/watch?v=d_M5L_sJ62k",
     lessons: [
       { id: "tx-1", title: "Income Tax Slabs", duration: "12 min", content: "Old vs new tax regime, applicable slabs for FY 2025-26." },
       { id: "tx-2", title: "Section 80C Deductions", duration: "10 min", content: "PPF, ELSS, LIC, and other 80C instruments up to ₹1.5L." },

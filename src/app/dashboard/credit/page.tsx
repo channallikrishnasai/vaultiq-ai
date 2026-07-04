@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import {
-  Percent, ArrowUpRight, ShieldCheck, AlertCircle, TrendingUp, Info
+  Percent, ShieldCheck, TrendingUp
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
 
@@ -17,7 +16,7 @@ const SCORE_HISTORY = [
 ];
 
 export default function CreditPage() {
-  const [score, setScore] = useState<number>(812);
+  const [score] = useState<number>(812);
 
   // Credit Factors
   const factors = [
@@ -78,7 +77,7 @@ export default function CreditPage() {
               <div className="flex items-center gap-1.5 text-xs text-zinc-300 font-semibold">
                 <ShieldCheck size={14} className="text-emerald-400" /> Safe range
               </div>
-              <p className="text-[10px] text-zinc-500 leading-relaxed max-w-[180px]">
+              <p className="text-[10px] text-zinc-500 leading-relaxed max-w-45">
                 Your score is in the top 15% nationally. You qualify for prime interest rates on loans.
               </p>
             </div>
@@ -89,7 +88,7 @@ export default function CreditPage() {
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-1.5">
               <TrendingUp size={12} className="text-[#f59e0b]" /> Historical Score Progression
             </h3>
-            <div className="h-[140px] w-full">
+            <div className="h-35 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={SCORE_HISTORY}>
                   <defs>

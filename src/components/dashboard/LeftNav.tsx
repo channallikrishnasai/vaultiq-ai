@@ -8,27 +8,23 @@ import {
   Home, LayoutDashboard, Briefcase, LineChart, TrendingDown,
   TrendingUp, PiggyBank, Target, CreditCard, Percent,
   Bot, ShieldAlert, BarChart3, Receipt, FolderOpen, Settings,
-  Globe
+  Globe, BookOpen
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const NAV_ITEMS = [
   { name: "Home",         href: "/",                    icon: Home          },
-  { name: "Dashboard",    href: "/dashboard",            icon: LayoutDashboard},
-  { name: "Portfolio",    href: "/dashboard/portfolio",  icon: Briefcase     },
-  { name: "Learning",     href: "/dashboard/learning",   icon: LineChart     },
-  { name: "Expenses",     href: "/dashboard/expenses",   icon: TrendingDown  },
-  { name: "Income",       href: "/dashboard/income",     icon: TrendingUp    },
-  { name: "Budgets",      href: "/dashboard/budgets",    icon: PiggyBank     },
-  { name: "Goals",        href: "/dashboard/goals",      icon: Target        },
-  { name: "Bills",        href: "/dashboard/bills",      icon: CreditCard    },
-  { name: "Credit",       href: "/dashboard/credit",     icon: Percent       },
-  { name: "AI Twin",      href: "/dashboard/twin",       icon: Bot           },
-  { name: "Fraud Shield", href: "/dashboard/fraud",      icon: ShieldAlert   },
-  { name: "Reports",      href: "/dashboard/reports",    icon: BarChart3     },
-  { name: "Tax Planner",  href: "/dashboard/tax",        icon: Receipt       },
-  { name: "Documents",    href: "/dashboard/documents",  icon: FolderOpen    },
-  { name: "Settings",     href: "/dashboard/settings",   icon: Settings      },
+  { name: "Dashboard",    href: "/dashboard",           icon: LayoutDashboard},
+  { name: "Portfolio",    href: "/dashboard/portfolio", icon: Briefcase     },
+  { name: "Learning",     href: "/dashboard/learning",  icon: BookOpen     },
+  { name: "Finance",      href: "/dashboard/finance",   icon: BarChart3     },
+  { name: "Budgets",      href: "/dashboard/budgets",   icon: PiggyBank     },
+  { name: "Goals",        href: "/dashboard/goals",     icon: Target        },
+  { name: "Credit",       href: "/dashboard/credit",    icon: Percent       },
+  { name: "AI Twin",      href: "/dashboard/twin",      icon: Bot           },
+  { name: "Fraud Shield", href: "/dashboard/fraud",     icon: ShieldAlert   },
+  { name: "Tax Planner",  href: "/dashboard/tax",       icon: Receipt       },
+  { name: "Settings",     href: "/dashboard/settings",  icon: Settings      },
 ];
 
 const keyMap: Record<string, string> = {
