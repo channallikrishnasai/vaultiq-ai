@@ -28,6 +28,9 @@ export const authConfig = {
         pathname === "/" ||
         pathname.startsWith("/sign-in") ||
         pathname.startsWith("/sign-up") ||
+        pathname.startsWith("/verify-email") ||
+        pathname.startsWith("/forgot-password") ||
+        pathname.startsWith("/reset-password") ||
         pathname.startsWith("/data-safe") ||
         pathname.startsWith("/api/auth") ||
         pathname.startsWith("/api/register")

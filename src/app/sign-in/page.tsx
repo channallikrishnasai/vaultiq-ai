@@ -16,6 +16,26 @@ export default function SignInPage() {
     setLoading(true);
     setError("");
 
+    // Check email verification status before attempting sign-in
+    try {
+      const statusRes = await fetch("/api/auth/email-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const statusData = await statusRes.json();
+
+      if (statusData.exists && !statusData.verified) {
+        setError(
+          "Please verify your email before signing in. Check your inbox for the verification link.",
+        );
+        setLoading(false);
+        return;
+      }
+    } catch {
+      // If the status check fails, proceed with sign-in attempt anyway
+    }
+
     const result = await signIn("credentials", {
       email,
       password,
@@ -55,6 +75,11 @@ export default function SignInPage() {
             className="w-full rounded-lg border border-gold bg-background/30 px-4 py-2 text-lightgray placeholder:text-lightgray focus:outline-none focus:ring-2 focus:ring-gold"
             required
           />
+          <div className="flex justify-end">
+            <Link href="/forgot-password" className="text-sm text-gold hover:underline">
+              Forgot password?
+            </Link>
+          </div>
           <button
             type="submit"
             disabled={loading}

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -12,6 +11,7 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -31,13 +31,39 @@ export default function SignUpPage() {
       return;
     }
 
-    const result = await signIn("credentials", { email, password, redirect: false });
     setLoading(false);
-    if (result?.error) {
-      router.push("/sign-in");
+
+    // In dev mode, redirect to verify-email with the token so the user can
+    // complete verification without relying on email delivery.
+    if (data.data?.devMode && data.data?.token) {
+      router.push(
+        `/verify-email?dev=true&token=${encodeURIComponent(data.data.token)}&email=${encodeURIComponent(data.data.email)}`,
+      );
       return;
     }
-    router.push("/dashboard");
+
+    setRegistered(true);
+  }
+
+  if (registered) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-zinc-950 px-4">
+        <div className="w-full max-w-md space-y-6 rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center">
+          <div className="text-4xl">&#9993;</div>
+          <h1 className="text-2xl font-bold text-white">Check your email</h1>
+          <p className="text-zinc-400">
+            We sent a verification link to <span className="text-white">{email}</span>.
+            Please verify your email before signing in.
+          </p>
+          <Link
+            href="/sign-in"
+            className="inline-block rounded-lg bg-white px-6 py-2 font-medium text-zinc-900 hover:bg-zinc-200"
+          >
+            Go to Sign In
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -304,6 +304,72 @@ a, button {
   100% { stroke-dashoffset: 0; }
 }
 
+/* ── Dev Mode Premium Animations ────────────────────────────────────────────── */
+
+@keyframes devBannerGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(212,175,55,0.08), 0 0 40px rgba(212,175,55,0.04);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(212,175,55,0.18), 0 0 60px rgba(212,175,55,0.08);
+  }
+}
+
+@keyframes successScaleIn {
+  0% { opacity: 0; transform: scale(0.5); }
+  60% { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes successCircleDraw {
+  0% { stroke-dasharray: 189; stroke-dashoffset: 189; }
+  100% { stroke-dasharray: 189; stroke-dashoffset: 0; }
+}
+
+@keyframes successCheckDraw {
+  0% { stroke-dasharray: 50; stroke-dashoffset: 50; }
+  100% { stroke-dasharray: 50; stroke-dashoffset: 0; }
+}
+
+@keyframes successGlowPulse {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(212,175,55,0.3)); }
+  50% { filter: drop-shadow(0 0 20px rgba(212,175,55,0.6)); }
+}
+
+@keyframes premiumBtnGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(212,175,55,0.2); }
+  50% { box-shadow: 0 0 16px rgba(212,175,55,0.4); }
+}
+
+.dev-banner-glow {
+  animation: devBannerGlow 3s ease-in-out infinite;
+}
+
+.dev-success-container {
+  animation: scaleIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.success-checkmark {
+  animation: successScaleIn 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+             successGlowPulse 2s ease-in-out infinite 0.6s;
+}
+
+.success-checkmark svg circle {
+  animation: successCircleDraw 0.8s ease-out 0.3s both;
+}
+
+.success-checkmark svg .checkmark-path {
+  animation: successCheckDraw 0.5s ease-out 0.8s both;
+}
+
+.btn-premium-glow {
+  animation: premiumBtnGlow 2s ease-in-out infinite;
+}
+
+.dev-main-container {
+  animation: fadeInUp 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* ── Selection ──────────────────────────────────────────────────────────── */
 
 ::selection {

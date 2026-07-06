@@ -47,6 +47,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        // Block unverified users. Return null so no session is created.
+        // The client checks /api/auth/email-status BEFORE signIn to show
+        // the specific "email not verified" message.
+        if (!user.emailVerified) {
+          return null;
+        }
+
         return {
           id: user.id,
           email: user.email,

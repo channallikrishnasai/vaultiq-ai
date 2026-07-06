@@ -6,6 +6,7 @@ import "./globals.css";
 import ThemeProvider from "@/components/providers/ThemeProvider";
 import LearningProgressProvider from "@/components/providers/learning-progress-provider";
 import LeftNav from "@/components/dashboard/LeftNav";
+import GlobalAIChat from "@/components/dashboard/GlobalAIChat";
 import ApiKeysWidget from "@/components/dashboard/ApiKeysWidget";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 
