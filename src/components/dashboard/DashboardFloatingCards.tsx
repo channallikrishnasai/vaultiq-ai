@@ -406,9 +406,10 @@ export default function DashboardFloatingCards({
   const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [chatThinking, setChatThinking] = useState(false);
   const [chatMinimized, setChatMinimized] = useState(false);
-  const [chatHistory, setChatHistory] = useState<Array<{ id: string; messages: { role: "user" | "assistant"; content: string }[]; startedAt: number; summary: string }>>([]);
+  const [chatHistory, setChatHistory] = useState<Array<{ id: string; session_id: string; messages: { role: "user" | "assistant"; content: string }[]; startedAt: number; summary: string }>>([]);
   const [showHistory, setShowHistory] = useState(false);
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const activeSessionIdRef = useRef<string>(crypto.randomUUID());
 
   useEffect(() => {
     try {
@@ -425,17 +426,24 @@ export default function DashboardFloatingCards({
     chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });
   }, [chatMessages, chatThinking]);
 
-  // Chat history persistence
-  useEffect(() => {
+  // Load chat history from Supabase via /api/chat
+  const loadHistory = useCallback(async () => {
     try {
-      const saved = localStorage.getItem("vaultiq-chat-history");
-      if (saved) setChatHistory(JSON.parse(saved));
+      const res = await fetch("/api/chat");
+      const data = await res.json();
+      if (data.conversations) {
+        setChatHistory(data.conversations.map((c: any) => ({
+          id: c.conversation_id,
+          session_id: c.conversation_id,
+          messages: [],
+          startedAt: new Date(c.created_at).getTime(),
+          summary: c.summary || "New chat",
+        })));
+      }
     } catch {}
   }, []);
 
-  useEffect(() => {
-    try { localStorage.setItem("vaultiq-chat-history", JSON.stringify(chatHistory.slice(0, 50))); } catch {}
-  }, [chatHistory]);
+  useEffect(() => { loadHistory(); }, [loadHistory]);
 
   const sendChatMessage = useCallback(async (msg: string) => {
     if (!msg.trim() || chatThinking) return;
@@ -494,15 +502,6 @@ export default function DashboardFloatingCards({
         }
       }
 
-      // If no content was streamed, try parsing as JSON (fallback)
-      if (!fullContent) {
-        const data = await res.json().catch(() => null);
-        fullContent = data?.data?.message || data?.message || data?.content || "Response unavailable.";
-        setChatMessages(p => p.map((m, idx) =>
-          idx === p.length - 1 ? { ...m, content: fullContent } : m
-        ));
-      }
-
       // Ensure minimum 2.5 seconds of thinking animation
       const elapsed = Date.now() - thinkStartTime;
       const minDelay = 2500;
@@ -523,7 +522,7 @@ export default function DashboardFloatingCards({
       // Save to history
       setChatHistory(p => {
         const summary = msg.length > 40 ? msg.slice(0, 40) + "..." : msg;
-        return [{ id: crypto.randomUUID(), messages: [...chatMessages, { role: "user" as const, content: msg }, { role: "assistant" as const, content: fullContent }], startedAt: Date.now(), summary }, ...p].slice(0, 50);
+        return [{ id: crypto.randomUUID(), session_id: activeSessionIdRef.current, messages: [...chatMessages, { role: "user" as const, content: msg }, { role: "assistant" as const, content: fullContent }], startedAt: Date.now(), summary }, ...p].slice(0, 50);
       });
     } catch (err: any) {
       const errorMsg = err?.message?.includes("401")
@@ -534,7 +533,7 @@ export default function DashboardFloatingCards({
       // Save failed conversation to history too
       setChatHistory(p => {
         const summary = msg.length > 40 ? msg.slice(0, 40) + "..." : msg;
-        return [{ id: crypto.randomUUID(), messages: [...chatMessages, { role: "user" as const, content: msg }, { role: "assistant" as const, content: errorMsg }], startedAt: Date.now(), summary }, ...p].slice(0, 50);
+        return [{ id: crypto.randomUUID(), session_id: activeSessionIdRef.current, messages: [...chatMessages, { role: "user" as const, content: msg }, { role: "assistant" as const, content: errorMsg }], startedAt: Date.now(), summary }, ...p].slice(0, 50);
       });
     } finally {
       setChatThinking(false);

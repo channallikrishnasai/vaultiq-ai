@@ -32,5 +32,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", ".next", "out", "build", "vaultiq-ai", "supabase"]
+  "exclude": ["node_modules"]
 }

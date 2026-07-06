@@ -1,4 +1,4 @@
-// src/components/landing/Footer.tsx
+"use client";
 
 import Link from "next/link";
 import { footerLinks } from "@/lib/landing-data";

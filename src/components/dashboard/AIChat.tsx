@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Send, Mic, TrendingUp, PiggyBank, Receipt, GraduationCap,
   ShieldCheck, Landmark, ChevronDown, ChevronUp, X, MessageSquare,
+  Plus, History, Trash2,
 } from "lucide-react";
 import { globalOrb } from "@/lib/global-orb";
 
@@ -12,6 +13,14 @@ interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   streamed?: boolean;
+}
+
+interface ChatSession {
+  id: string;
+  session_id: string;
+  summary: string;
+  created_at: string;
+  updated_at: string;
 }
 
 const PROMPTS = [
@@ -131,6 +140,10 @@ export default function AIChat({
   const [localMinimized, setLocalMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const sessionIdRef = useRef<string>(crypto.randomUUID());
+  const [sessions, setSessions] = useState<ChatSession[]>([]);
+  const [showSessions, setShowSessions] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const uiReady = true;
 
   // Sync with global orb and set state
@@ -142,6 +155,89 @@ export default function AIChat({
     setOrbStateRaw(state);
     globalOrb.setState(state);
   }, []);
+
+  // ─── Session Management ─────────────────────────────────────────────────────
+
+  // Load conversations list for the sidebar
+  const loadSessions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/chat");
+      const data = await res.json();
+      if (data.conversations) {
+        setSessions(data.conversations.map((c: any) => ({
+          id: c.conversation_id,
+          session_id: c.conversation_id,
+          summary: c.summary || "New chat",
+          created_at: c.created_at,
+          updated_at: c.created_at,
+        })));
+      }
+    } catch (e) {
+      console.error("[chat] loadSessions error:", e);
+    }
+  }, []);
+
+  // Load messages for a specific conversation
+  const loadSession = useCallback(async (sessionId: string) => {
+    setLoadingHistory(true);
+    try {
+      const res = await fetch(`/api/chat?conversation_id=${sessionId}`);
+      const data = await res.json();
+      if (data.messages) {
+        setMessages(data.messages.map((m: any) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+          streamed: true,
+        })));
+        sessionIdRef.current = sessionId;
+        setShowSessions(false);
+      }
+    } catch (e) {
+      console.error("[chat] loadSession error:", e);
+    }
+    setLoadingHistory(false);
+  }, []);
+
+  const startNewChat = useCallback(() => {
+    sessionIdRef.current = crypto.randomUUID();
+    setMessages([]);
+    setShowSessions(false);
+  }, []);
+
+  const deleteSession = useCallback(async (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await fetch(`/api/chat?conversation_id=${sessionId}`, { method: "DELETE" });
+      setSessions((prev) => prev.filter((s) => s.session_id !== sessionId));
+      if (sessionIdRef.current === sessionId) startNewChat();
+    } catch {}
+  }, [startNewChat]);
+
+  // Load sessions and auto-restore most recent conversation on mount
+  useEffect(() => {
+    if (!userId) return;
+    const loadAndRestore = async () => {
+      try {
+        const res = await fetch("/api/chat");
+        const data = await res.json();
+        if (data.conversations) {
+          setSessions(data.conversations.map((c: any) => ({
+            id: c.conversation_id,
+            session_id: c.conversation_id,
+            summary: c.summary || "New chat",
+            created_at: c.created_at,
+            updated_at: c.created_at,
+          })));
+          if (data.conversations.length > 0) {
+            await loadSession(data.conversations[0].conversation_id);
+          }
+        }
+      } catch (e) {
+        console.error("[chat] load error:", e);
+      }
+    };
+    loadAndRestore();
+  }, [userId, loadSession]);
 
   // Handle minimize state
   const handleMinimize = (value: boolean) => {
@@ -166,7 +262,10 @@ export default function AIChat({
       if (!msg.trim() || thinking) return;
 
       setInput("");
-      setMessages((p) => [...p, { role: "user", content: msg }]);
+      const convId = sessionIdRef.current;
+      const userMsg = { role: "user" as const, content: msg };
+      setMessages((p) => [...p, userMsg]);
+
       if (setOrbState) setOrbState("thinking");
       setThinking(true);
       const thinkStart = Date.now();
@@ -175,7 +274,7 @@ export default function AIChat({
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg, sessionId: crypto.randomUUID() }),
+          body: JSON.stringify({ message: msg, sessionId: convId }),
         });
         if (!res.ok) throw new Error("API error");
 
@@ -183,19 +282,21 @@ export default function AIChat({
         const reader = res.body?.getReader();
         const decoder = new TextDecoder();
         let accumulatedContent = "";
+        let buffer = "";
 
         if (reader) {
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split("\n");
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
             for (const line of lines) {
               if (line.startsWith("data: ")) {
-                const data = line.slice(6).trim();
-                if (data === "[DONE]") continue;
+                const payload = line.slice(6).trim();
+                if (payload === "[DONE]") continue;
                 try {
-                  const parsed = JSON.parse(data);
+                  const parsed = JSON.parse(payload);
                   if (parsed.content) {
                     accumulatedContent += parsed.content;
                   }
@@ -214,7 +315,11 @@ export default function AIChat({
 
         // Now show the response and animate cards back
         if (setOrbState) setOrbState("speaking");
-        setMessages((p) => [...p, { role: "assistant", content: accumulatedContent, streamed: false }]);
+        const assistantMsg = { role: "assistant" as const, content: accumulatedContent, streamed: false };
+        setMessages((p) => [...p, assistantMsg]);
+
+        // Refresh sessions list in sidebar
+        loadSessions();
 
         // Streaming text reveal effect
         let i = 0;
@@ -250,7 +355,7 @@ export default function AIChat({
         setThinking(false);
       }
     },
-    [thinking, setOrbState]
+    [thinking, setOrbState, loadSessions]
   );
 
   // For global chat on the right sidebar
@@ -385,6 +490,45 @@ export default function AIChat({
 
           {/* Controls */}
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {/* New Chat */}
+            <button
+              onClick={startNewChat}
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "rgba(255,255,255,0.4)",
+                cursor: "pointer",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              className="hover:text-white transition-colors"
+              title="New chat"
+            >
+              <Plus size={15} />
+            </button>
+            {/* History */}
+            <button
+              onClick={() => {
+                setShowSessions(!showSessions);
+                if (!showSessions) loadSessions();
+              }}
+              style={{
+                background: showSessions ? "rgba(212,175,55,0.1)" : "transparent",
+                border: "none",
+                color: showSessions ? "#D4AF37" : "rgba(255,255,255,0.4)",
+                cursor: "pointer",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              className="hover:text-white transition-colors"
+              title="Chat history"
+            >
+              <History size={15} />
+            </button>
             {/* Minimize */}
             <button
               onClick={() => handleMinimize(true)}
@@ -426,6 +570,87 @@ export default function AIChat({
           </div>
         </div>
 
+        {/* Sessions dropdown */}
+        <AnimatePresence>
+          {showSessions && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{
+                overflow: "hidden",
+                borderBottom: "1px solid rgba(255,255,255,0.05)",
+              }}
+            >
+              <div
+                style={{
+                  maxHeight: 200,
+                  overflowY: "auto",
+                  padding: "6px 0",
+                  scrollbarWidth: "thin",
+                  scrollbarColor: "rgba(255,255,255,0.08) transparent",
+                }}
+              >
+                {sessions.length === 0 ? (
+                  <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", padding: "8px 16px", textAlign: "center" }}>
+                    No chat history yet
+                  </p>
+                ) : (
+                  sessions.map((s) => (
+                    <motion.button
+                      key={s.session_id}
+                      onClick={() => loadSession(s.session_id)}
+                      whileHover={{ background: "rgba(212,175,55,0.06)" }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        width: "100%",
+                        padding: "7px 16px",
+                        background: sessionIdRef.current === s.session_id ? "rgba(212,175,55,0.08)" : "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                        textAlign: "left",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: sessionIdRef.current === s.session_id ? "#D4AF37" : "rgba(255,255,255,0.5)",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          maxWidth: 220,
+                        }}
+                      >
+                        {s.summary || "New chat"}
+                      </span>
+                      <button
+                        onClick={(e) => deleteSession(s.session_id, e)}
+                        style={{
+                          background: "transparent",
+                          border: "none",
+                          color: "rgba(255,255,255,0.2)",
+                          cursor: "pointer",
+                          padding: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          flexShrink: 0,
+                        }}
+                        className="hover:text-rose-400 transition-colors"
+                        title="Delete chat"
+                      >
+                        <Trash2 size={11} />
+                      </button>
+                    </motion.button>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Messages container */}
         <div
           ref={scrollRef}
@@ -438,7 +663,31 @@ export default function AIChat({
           }}
         >
           <AnimatePresence initial={false}>
-            {messages.length === 0 && (
+            {loadingHistory && (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  background: "rgba(255,255,255,0.02)",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                  marginTop: 10,
+                }}
+              >
+                <Waveform active />
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+                  Loading chat history…
+                </span>
+              </motion.div>
+            )}
+
+            {!loadingHistory && messages.length === 0 && (
               <motion.div
                 key="welcome"
                 initial={{ opacity: 0 }}
@@ -664,56 +913,75 @@ export default function AIChat({
         style={{
           display: "flex",
           alignItems: "center",
+          justifyContent: "space-between",
           gap: 8,
           padding: "10px 16px 0",
         }}
       >
-        <motion.div
-          animate={{
-            background:
-              orbState === "thinking"
-                ? ["#D4AF37", "#F5D060", "#D4AF37"]
-                : orbState === "speaking"
-                ? ["#34d399", "#6ee7b7", "#34d399"]
-                : orbState === "listening"
-                ? ["#60a5fa", "#93c5fd", "#60a5fa"]
-                : orbState === "processing"
-                ? ["#a855f7", "#c084fc", "#a855f7"]
-                : orbState === "celebrating"
-                ? ["#22c55e", "#4ade80", "#22c55e"]
-                : orbState === "error"
-                ? ["#ef4444", "#f87171", "#ef4444"]
-                : orbState === "sleeping"
-                ? ["rgba(100,116,139,0.4)", "rgba(100,116,139,0.6)", "rgba(100,116,139,0.4)"]
-                : ["rgba(212,175,55,0.4)", "rgba(212,175,55,0.7)", "rgba(212,175,55,0.4)"],
-          }}
-          transition={{ duration: orbState === "idle" ? 3 : 0.8, repeat: Infinity }}
-          style={{ width: 6, height: 6, borderRadius: "50%" }}
-        />
-        <span
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <motion.div
+            animate={{
+              background:
+                orbState === "thinking"
+                  ? ["#D4AF37", "#F5D060", "#D4AF37"]
+                  : orbState === "speaking"
+                  ? ["#34d399", "#6ee7b7", "#34d399"]
+                  : orbState === "listening"
+                  ? ["#60a5fa", "#93c5fd", "#60a5fa"]
+                  : orbState === "processing"
+                  ? ["#a855f7", "#c084fc", "#a855f7"]
+                  : orbState === "celebrating"
+                  ? ["#22c55e", "#4ade80", "#22c55e"]
+                  : orbState === "error"
+                  ? ["#ef4444", "#f87171", "#ef4444"]
+                  : orbState === "sleeping"
+                  ? ["rgba(100,116,139,0.4)", "rgba(100,116,139,0.6)", "rgba(100,116,139,0.4)"]
+                  : ["rgba(212,175,55,0.4)", "rgba(212,175,55,0.7)", "rgba(212,175,55,0.4)"],
+            }}
+            transition={{ duration: orbState === "idle" ? 3 : 0.8, repeat: Infinity }}
+            style={{ width: 6, height: 6, borderRadius: "50%" }}
+          />
+          <span
+            style={{
+              fontSize: 10,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.2)",
+            }}
+          >
+            {orbState === "thinking"
+              ? "Analyzing…"
+              : orbState === "speaking"
+              ? "Responding"
+              : orbState === "listening"
+              ? "Listening"
+              : orbState === "processing"
+              ? "Processing…"
+              : orbState === "celebrating"
+              ? "Celebrating"
+              : orbState === "sleeping"
+              ? "Standby"
+              : orbState === "error"
+              ? "Connection error"
+              : "VaultIQ AI · Online"}
+          </span>
+        </div>
+        <button
+          onClick={startNewChat}
           style={{
-            fontSize: 10,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.2)",
+            background: "transparent",
+            border: "none",
+            color: "rgba(255,255,255,0.3)",
+            cursor: "pointer",
+            padding: 2,
+            display: "flex",
+            alignItems: "center",
           }}
+          className="hover:text-amber-400 transition-colors"
+          title="New chat"
         >
-          {orbState === "thinking"
-            ? "Analyzing…"
-            : orbState === "speaking"
-            ? "Responding"
-            : orbState === "listening"
-            ? "Listening"
-            : orbState === "processing"
-            ? "Processing…"
-            : orbState === "celebrating"
-            ? "Celebrating"
-            : orbState === "sleeping"
-            ? "Standby"
-            : orbState === "error"
-            ? "Connection error"
-            : "VaultIQ AI · Online"}
-        </span>
+          <Plus size={13} />
+        </button>
       </div>
 
       {/* Messages */}
