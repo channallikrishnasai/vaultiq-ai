@@ -56,6 +56,10 @@ export const userRepository = {
     });
   },
 
+  delete(userId: string) {
+    return prisma.user.delete({ where: { id: userId } });
+  },
+
   getDashboardStats(userId: string) {
     return prisma.$transaction([
       prisma.expense.count({ where: { userId } }),
