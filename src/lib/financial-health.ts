@@ -1,5 +1,3 @@
-import { DEMO_PROFILE } from "@/lib/demo-profile";
-
 export interface HealthBreakdownItem {
   name: string;
   value: number;
@@ -130,27 +128,4 @@ export function computeHealthScore(metrics: HealthMetrics): HealthScoreResult {
         : "Focus on savings, debt, and your emergency fund."
     }`,
   };
-}
-
-export function getDemoHealthMetrics(): HealthMetrics {
-  const goals = Object.values(DEMO_PROFILE.goals);
-  const goalProgressAvg =
-    goals.reduce((sum, g) => sum + Math.min(100, (g.current / g.target) * 100), 0) /
-    goals.length;
-
-  return {
-    monthlyIncome: DEMO_PROFILE.monthlyIncome,
-    monthlyExpenses: DEMO_PROFILE.monthlyExpenses,
-    savingsBalance: DEMO_PROFILE.savingsBalance,
-    investments: DEMO_PROFILE.investments,
-    debt: DEMO_PROFILE.debt,
-    emergencyFundCurrent: DEMO_PROFILE.goals.emergency.current,
-    emergencyFundTarget: DEMO_PROFILE.goals.emergency.target,
-    goalProgressAvg,
-    hasBudgets: true,
-  };
-}
-
-export function getDemoHealthScore(): HealthScoreResult {
-  return computeHealthScore(getDemoHealthMetrics());
 }

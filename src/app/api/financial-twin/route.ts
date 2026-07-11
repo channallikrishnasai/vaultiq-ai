@@ -27,7 +27,6 @@ export async function POST(request: Request) {
 
     const twin = await financialTwinRepository.upsert(session.user.id, {
       name: generated.name,
-      healthScore: generated.healthScore,
       riskAppetite: (generated.riskAppetite as RiskAppetite) ?? RiskAppetite.MODERATE,
       snapshot: generated.snapshot as unknown as Prisma.InputJsonValue,
       projections: generated.projections as unknown as Prisma.InputJsonValue,

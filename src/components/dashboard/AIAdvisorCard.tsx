@@ -410,8 +410,8 @@ export default function AIAdvisorCard({
     goal: null,
     riskAppetite: "Moderate",
     portfolioValue: 0,
-    healthScore: 80,
-    healthLabel: "Good"
+    healthScore: 0,
+    healthLabel: "N/A"
   },
   suggestions = []
 }: AIAdvisorCardProps) {
@@ -483,7 +483,7 @@ export default function AIAdvisorCard({
 
   const goalPct = profile?.portfolioValue && profile?.goal?.targetAmount
     ? Math.min(100, Math.round((profile.portfolioValue / profile.goal.targetAmount) * 100))
-    : 41;
+    : 0;
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden select-none">
@@ -527,24 +527,24 @@ export default function AIAdvisorCard({
         <HoloPanel className="top-[8%] left-[2%] w-44 pointer-events-auto" delay={0.1}>
           <p className="text-[9px] uppercase tracking-[0.12em] text-amber-400/60 mb-1.5">Financial Health</p>
           <p className="text-2xl font-semibold text-amber-300 leading-none">
-            {profile.healthScore ?? 82}<span className="text-sm text-amber-300/50">%</span>
+            {profile.healthScore ?? 0}<span className="text-sm text-amber-300/50">%</span>
           </p>
-          <p className="text-[11px] text-white/35 mt-1">{profile.healthLabel ?? "Excellent"} · ↑ 4pts</p>
-          <AnimBar value={profile.healthScore ?? 82} delay={0.1} />
+          <p className="text-[11px] text-white/35 mt-1">{profile.healthLabel ?? "N/A"}</p>
+          <AnimBar value={profile.healthScore ?? 0} delay={0.1} />
         </HoloPanel>
 
         {/* Top-right: Portfolio */}
         <HoloPanel className="top-[8%] right-[2%] w-44 pointer-events-auto" delay={0.2}>
           <p className="text-[9px] uppercase tracking-[0.12em] text-amber-400/60 mb-1.5">Portfolio</p>
           <p className="text-2xl font-semibold text-amber-300 leading-none">{formatINR(profile.portfolioValue)}</p>
-          <p className="text-[11px] text-white/35 mt-1">+12.4% YTD · {profile.riskAppetite ?? "Moderate"}</p>
+          <p className="text-[11px] text-white/35 mt-1">{profile.riskAppetite ?? "Moderate"}</p>
           <AnimBar value={68} color="linear-gradient(90deg,#60a5fa,#D4AF37)" delay={0.2} />
         </HoloPanel>
 
         {/* Bottom-left: Goal */}
         <HoloPanel className="bottom-[30%] left-[2%] w-48 pointer-events-auto" delay={0.3}>
           <p className="text-[9px] uppercase tracking-[0.12em] text-amber-400/60 mb-1.5">{profile.goal?.name ?? "House Purchase"}</p>
-          <p className="text-lg font-semibold text-amber-300">₹{((profile.goal?.targetAmount ?? 4500000) / 100000).toFixed(0)}L <span className="text-xs text-white/30">target</span></p>
+          <p className="text-lg font-semibold text-amber-300">₹{((profile.goal?.targetAmount ?? 0) / 100000).toFixed(0)}L <span className="text-xs text-white/30">target</span></p>
           <p className="text-[11px] text-white/35 mt-1">{formatINR(profile.portfolioValue)} saved · {goalPct}% done</p>
           <AnimBar value={goalPct} color="linear-gradient(90deg,#34d399,#D4AF37)" delay={0.3} />
         </HoloPanel>

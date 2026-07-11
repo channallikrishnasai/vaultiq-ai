@@ -18,9 +18,11 @@ export interface TwinProjections {
 }
 
 const GROWTH_RATES: Record<RiskAppetite, number> = {
+  VERY_CONSERVATIVE: 0.05,
   CONSERVATIVE: 0.07,
   MODERATE: 0.1,
-  AGGRESSIVE: 0.12,
+  GROWTH: 0.12,
+  AGGRESSIVE: 0.15,
 };
 
 export function computeProjections(
@@ -52,7 +54,9 @@ export function scenarioProjection(
 }
 
 export const RISK_APPETITE_OPTIONS: { value: RiskAppetite; label: string; desc: string }[] = [
+  { value: "VERY_CONSERVATIVE", label: "Very Conservative", desc: "5% annual growth" },
   { value: "CONSERVATIVE", label: "Conservative", desc: "7% annual growth" },
-  { value: "MODERATE", label: "Moderate", desc: "10% annual growth" },
-  { value: "AGGRESSIVE", label: "Aggressive", desc: "12% annual growth" },
+  { value: "MODERATE", label: "Balanced", desc: "10% annual growth" },
+  { value: "GROWTH", label: "Growth", desc: "12% annual growth" },
+  { value: "AGGRESSIVE", label: "Aggressive", desc: "15% annual growth" },
 ];

@@ -6,7 +6,6 @@ import { userRepository } from "@/repositories/user.repository";
 import { prisma } from "@/lib/prisma";
 import { computeProjections } from "@/lib/twin-utils";
 import { generateTwinRecommendations } from "@/lib/twin-recommendations";
-import { DEMO_PROFILE } from "@/lib/demo-profile";
 
 async function buildUserSnapshot(userId: string) {
   const now = new Date();
@@ -28,9 +27,8 @@ async function buildUserSnapshot(userId: string) {
   ]);
 
   const monthlyIncome = user?.profile?.income ?? 0;
-  const annualIncome = monthlyIncome > 0 ? monthlyIncome * 12 : DEMO_PROFILE.annualIncome;
-  const annualExpenses =
-    monthlyExpensesRaw > 0 ? monthlyExpensesRaw * 12 : DEMO_PROFILE.annualExpenses;
+  const annualIncome = monthlyIncome * 12;
+  const annualExpenses = monthlyExpensesRaw * 12;
 
   const savings = goals.reduce((sum, g) => sum + g.currentAmount, 0);
   let investments = portfolio?.totalValue ?? 0;
@@ -43,7 +41,7 @@ async function buildUserSnapshot(userId: string) {
     investments = portfolio.cashBalance + trades.reduce((sum, t) => sum + t.totalAmount, 0);
   }
 
-  const debt = savings > 0 || investments > 0 ? DEMO_PROFILE.debt : 0;
+  const debt = 0;
 
   return {
     income: annualIncome,

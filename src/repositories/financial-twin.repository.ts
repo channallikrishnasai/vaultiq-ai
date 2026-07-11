@@ -19,7 +19,6 @@ export const financialTwinRepository = {
 
   upsert(userId: string, data: {
     name?: string;
-    healthScore: number;
     riskAppetite: RiskAppetite;
       snapshot: Prisma.InputJsonValue;
       projections?: Prisma.InputJsonValue;

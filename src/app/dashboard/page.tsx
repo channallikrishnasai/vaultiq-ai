@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { healthScoreService } from "@/services/finance/health-score.service";
 import { normalizeCategory, getCategoryColor } from "@/lib/expense-categories";
-import { computeNetWorth, computeSavingsRate } from "@/lib/demo-profile";
+import { computeNetWorth, computeSavingsRate } from "@/lib/finance-utils";
 import DashboardClient from "@/components/dashboard/DashboardClient";
 
 // ─── All data fetching is UNCHANGED ──────────────────────────────────────────
@@ -14,7 +14,7 @@ async function getDashboardData(userId: string) {
     select: { name: true, email: true, image: true },
   });
 
-  if (!user) throw new Error("User not found");
+  if (!user) redirect("/sign-in");
 
   const profile = await prisma.profile.findUnique({
     where: { userId },
@@ -54,7 +54,7 @@ async function getDashboardData(userId: string) {
       prisma.fraudReport.findMany({ where: { userId }, select: { riskScore: true } }),
       prisma.financialTwin.findFirst({
         where: { userId, isActive: true },
-        select: { name: true, healthScore: true, snapshot: true },
+        select: { name: true, snapshot: true },
       }),
     ]);
 
@@ -198,7 +198,7 @@ async function getDashboardData(userId: string) {
     },
     twinStats: {
       hasTwin: !!activeTwin,
-      healthScore: activeTwin?.healthScore ?? healthScore.score,
+      healthScore: healthScore.score,
       netWorth: twinSnapshot?.netWorth ?? netWorth,
       twinName: activeTwin?.name ?? null,
     },

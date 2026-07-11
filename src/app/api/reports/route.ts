@@ -4,24 +4,26 @@ import { handleApiError } from "@/lib/api-handler";
 import { expenseRepository } from "@/repositories/expense.repository";
 import { budgetRepository } from "@/repositories/budget.repository";
 import { tradingRepository } from "@/repositories/trading.repository";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
     const session = await requireAuth();
     const userId = session.user.id;
 
-    // Fetch expenses
-    const expenses = await expenseRepository.findAll(userId);
-    const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const [expenses, budgets, portfolios, incomes] = await Promise.all([
+      expenseRepository.findAll(userId),
+      budgetRepository.findAll(userId),
+      tradingRepository.getPortfolios(userId),
+      prisma.income.findMany({ where: { userId }, select: { amount: true } }),
+    ]);
 
-    // Fetch budgets
-    const budgets = await budgetRepository.findAll(userId);
+    const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const totalIncome = incomes.reduce((sum, i) => sum + i.amount, 0);
     const totalBudgetLimit = budgets.reduce((sum, b) => sum + b.limit, 0);
 
-    // Fetch trading portfolio
-    const portfolios = await tradingRepository.getPortfolios(userId);
     const defaultPortfolio = portfolios.find(p => p.isDefault) || portfolios[0];
-    const portfolioValue = defaultPortfolio ? defaultPortfolio.totalValue : 100000;
+    const portfolioValue = defaultPortfolio ? defaultPortfolio.totalValue : 0;
 
     // Categorized spending
     const categories: Record<string, number> = {};
@@ -54,7 +56,7 @@ export async function GET() {
         totalExpenses,
         totalBudgetLimit,
         portfolioValue,
-        netSavings: Math.max(0, 150000 - totalExpenses), // Assuming mock income or baseline
+        netSavings: Math.max(0, totalIncome - totalExpenses),
       },
       categorySummary,
       statements,

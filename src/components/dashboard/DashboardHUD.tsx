@@ -148,10 +148,10 @@ export default function DashboardHUD({
                 marginBottom: 6,
               }}
             >
-              {profile.goal?.name ?? "House purchase"}
+              {profile.goal?.name ?? "Goal"}
             </p>
             <p style={{ fontSize: 18, fontWeight: 600, color: "#E8C84A", lineHeight: 1 }}>
-              ₹{((profile.goal?.targetAmount ?? 4500000) / 100000).toFixed(0)}L{" "}
+              ₹{((profile.goal?.targetAmount ?? 0) / 100000).toFixed(0)}L{" "}
               <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)" }}>target</span>
             </p>
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>

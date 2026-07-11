@@ -61,10 +61,10 @@ export default function FinancialLevelOverlay({ data }: { data: DashboardData })
   const goals = data.goals?.slice(0, 3).length
     ? data.goals.slice(0, 3).map((g, i) => ({
         name:    g.name,
-        percent: g.percent ?? GOALS_DEFAULT[i].percent,
-        color:   GOALS_DEFAULT[i].color,
+        percent: g.percent ?? 0,
+        color:   GOALS_DEFAULT[i]?.color ?? "#D4AF37",
       }))
-    : GOALS_DEFAULT;
+    : [];
 
   return (
     <div

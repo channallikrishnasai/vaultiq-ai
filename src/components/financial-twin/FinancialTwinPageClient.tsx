@@ -13,7 +13,6 @@ import { TwinRecommendations } from "@/components/financial-twin/TwinRecommendat
 interface TwinData {
   id: string;
   name: string;
-  healthScore: number;
   riskAppetite: string;
   snapshot: {
     income: number;
@@ -46,19 +45,24 @@ interface FinancialTwinPageClientProps {
 
 export function FinancialTwinPageClient({ user }: FinancialTwinPageClientProps) {
   const [twin, setTwin] = useState<TwinData | null>(null);
+  const [healthScore, setHealthScore] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchTwin = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/financial-twin");
-      const json = await res.json();
-      if (json.success && json.data.active) {
-        const active = json.data.active;
+      const [twinRes, healthRes] = await Promise.all([
+        fetch("/api/financial-twin"),
+        fetch("/api/finance/health-score"),
+      ]);
+      const twinJson = await twinRes.json();
+      const healthJson = await healthRes.json();
+
+      if (twinJson.success && twinJson.data.active) {
+        const active = twinJson.data.active;
         setTwin({
           id: active.id,
           name: active.name,
-          healthScore: active.healthScore,
           riskAppetite: active.riskAppetite,
           snapshot: active.snapshot as TwinData["snapshot"],
           projections: active.projections as TwinData["projections"],
@@ -66,6 +70,10 @@ export function FinancialTwinPageClient({ user }: FinancialTwinPageClientProps) 
         });
       } else {
         setTwin(null);
+      }
+
+      if (healthJson.success && healthJson.data) {
+        setHealthScore(healthJson.data.score);
       }
     } catch {
       setTwin(null);
@@ -189,7 +197,7 @@ export function FinancialTwinPageClient({ user }: FinancialTwinPageClientProps) 
               <div className="h-8 w-px bg-zinc-800" />
               <div>
                 <p className="text-xs text-zinc-500">Health Score</p>
-                <p className="text-lg font-semibold text-emerald-400">{twin.healthScore}/100</p>
+                <p className="text-lg font-semibold text-emerald-400">{healthScore ?? "—"}/100</p>
               </div>
               <div className="h-8 w-px bg-zinc-800" />
               <div>

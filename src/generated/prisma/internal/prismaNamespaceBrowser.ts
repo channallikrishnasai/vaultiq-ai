@@ -71,7 +71,8 @@ export const ModelName = {
   Trade: 'Trade',
   Watchlist: 'Watchlist',
   FinancialTwin: 'FinancialTwin',
-  Bill: 'Bill'
+  Bill: 'Bill',
+  AiProfile: 'AiProfile'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -151,6 +152,10 @@ export const ProfileScalarFieldEnum = {
   streak: 'streak',
   lastActiveDate: 'lastActiveDate',
   badges: 'badges',
+  onboardingCompleted: 'onboardingCompleted',
+  occupation: 'occupation',
+  monthlyExpenses: 'monthlyExpenses',
+  emergencyFundTarget: 'emergencyFundTarget',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -357,7 +362,6 @@ export const FinancialTwinScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   name: 'name',
-  healthScore: 'healthScore',
   riskAppetite: 'riskAppetite',
   snapshot: 'snapshot',
   projections: 'projections',
@@ -383,6 +387,23 @@ export const BillScalarFieldEnum = {
 } as const
 
 export type BillScalarFieldEnum = (typeof BillScalarFieldEnum)[keyof typeof BillScalarFieldEnum]
+
+
+export const AiProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  occupation: 'occupation',
+  riskAppetite: 'riskAppetite',
+  monthlyIncome: 'monthlyIncome',
+  monthlyExpenses: 'monthlyExpenses',
+  financialGoals: 'financialGoals',
+  riskTolerance: 'riskTolerance',
+  personaSummary: 'personaSummary',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiProfileScalarFieldEnum = (typeof AiProfileScalarFieldEnum)[keyof typeof AiProfileScalarFieldEnum]
 
 
 export const SortOrder = {

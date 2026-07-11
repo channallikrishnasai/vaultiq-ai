@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getAIProvider } from "@/services/ai";
+import { prisma } from "@/lib/prisma";
 
 const SYSTEM_PROMPT = `You are VaultIQ AI, India's AI-powered financial guardian.
 
@@ -54,13 +55,33 @@ export const chatService = {
       console.error("[chatService] Failed to read history:", historyError);
     }
 
-    // 3. Generate AI response
+    // 3. Fetch AI Profile for personalized responses
+    let personalContext = "";
+    try {
+      const aiProfile = await prisma.aiProfile.findUnique({ where: { userId } });
+      if (aiProfile) {
+        const goals = aiProfile.financialGoals as { goalName?: string; targetAmount?: number } | null;
+        personalContext = `
+User context:
+- Occupation: ${aiProfile.occupation || "Not specified"}
+- Monthly income: ₹${aiProfile.monthlyIncome?.toLocaleString("en-IN") || "Not specified"}
+- Monthly expenses: ₹${aiProfile.monthlyExpenses?.toLocaleString("en-IN") || "Not specified"}
+- Risk appetite: ${aiProfile.riskTolerance || "Balanced"}
+- Financial goal: ${goals?.goalName || "Not specified"}
+- Target amount: ₹${goals?.targetAmount?.toLocaleString("en-IN") || "Not specified"}
+Tailor your advice to their specific financial situation and goals.`;
+      }
+    } catch {
+      // AiProfile fetch is best-effort; use generic prompt if it fails
+    }
+
+    // 4. Generate AI response
     const ai = getAIProvider();
     let response: string;
 
     try {
       response = await ai.chat([
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: SYSTEM_PROMPT + personalContext },
         ...(history || []).map((h) => ({
           role: h.role as "user" | "assistant" | "system",
           content: h.content,

@@ -432,10 +432,6 @@ export type LearningProgressUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.LearningProgressScalarWhereInput | Prisma.LearningProgressScalarWhereInput[]
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type LearningProgressCreateWithoutUserInput = {
   id?: string
   courseId: string

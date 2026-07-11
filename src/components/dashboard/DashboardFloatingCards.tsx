@@ -15,19 +15,11 @@ import {
 import { useOrb } from "@/contexts/OrbContext";
 import type { ThinkingStage } from "@/lib/thinking-stages";
 
-// ── Chart data ────────────────────────────────────────────────────────────────
-const SPARK = [{ v: 30 }, { v: 55 }, { v: 40 }, { v: 70 }, { v: 60 }, { v: 85 }, { v: 75 }, { v: 100 }];
-const SPARK2 = [{ v: 20 }, { v: 38 }, { v: 30 }, { v: 52 }, { v: 45 }, { v: 65 }, { v: 58 }, { v: 80 }];
-const CASH_D = [{ m: "", i: 80, o: 40 }, { m: "", i: 90, o: 55 }, { m: "", i: 70, o: 35 }, { m: "", i: 100, o: 60 }, { m: "", i: 85, o: 50 }];
-const INV_D = [{ v: 40 }, { v: 55 }, { v: 48 }, { v: 72 }, { v: 65 }, { v: 90 }, { v: 85 }, { v: 110 }];
-const SAVINGS_D = [{ v: 32 }, { v: 35 }, { v: 38 }, { v: 42 }, { v: 45 }, { v: 48 }, { v: 49 }];
-const EXPENSE_D = [{ m: "J", v: 600 }, { m: "F", v: 800 }, { m: "M", v: 750 }, { m: "A", v: 900 }, { m: "M", v: 850 }, { m: "J", v: 960 }];
-const PORT_ALLOC = [
-  { name: "Equity", percent: 55, color: "#10b981" },
-  { name: "Debt", percent: 25, color: "#60a5fa" },
-  { name: "Gold", percent: 10, color: "#D4AF37" },
-  { name: "Cash", percent: 10, color: "#34d399" },
-];
+// ── Empty chart data ──────────────────────────────────────────────────────────
+const EMPTY_SPARK = [{ v: 0 }];
+const EMPTY_CASH_D = [{ m: "", i: 0, o: 0 }];
+const EMPTY_EXPENSE_D: { m: string; v: number }[] = [];
+const EMPTY_PORT_ALLOC: { name: string; percent: number; color: string }[] = [];
 
 const TT = { contentStyle: { display: "none" }, cursor: false as any };
 
@@ -363,6 +355,7 @@ function CardHeader({
 // ── Interface ─────────────────────────────────────────────────────────────────
 interface Props {
   netWorth?: number;
+  netWorthChange?: number;
   monthlyIncome?: number;
   monthlyExpenses?: number;
   savingsRate?: number;
@@ -386,16 +379,17 @@ interface Props {
 }
 
 export default function DashboardFloatingCards({
-  netWorth = 1280450.78,
-  monthlyIncome = 15450,
-  monthlyExpenses = 7890.12,
-  savingsRate = 48.9,
-  healthScore = 94,
+  netWorth = 0,
+  netWorthChange = 0,
+  monthlyIncome = 0,
+  monthlyExpenses = 0,
+  savingsRate = 0,
+  healthScore = 0,
   goals = [],
-  portfolio = { totalValue: 500000, cashBalance: 25000, change: 12000, changePercent: 2.4, allocation: PORT_ALLOC, topHoldings: [], isEmpty: false },
-  expenses = { total: 7890.12, categories: [] },
-  fraudStats = { scanCount: 45, highRiskCount: 2 },
-  twinStats = { hasTwin: true, healthScore: 91, netWorth: 1250000, twinName: "Alex" },
+  portfolio = { totalValue: 0, cashBalance: 0, change: 0, changePercent: 0, allocation: EMPTY_PORT_ALLOC, topHoldings: [], isEmpty: true },
+  expenses = { total: 0, categories: [] },
+  fraudStats = { scanCount: 0, highRiskCount: 0 },
+  twinStats = { hasTwin: false, healthScore: 0, netWorth: 0, twinName: null },
   user,
   profile,
   orbState = "idle",
@@ -546,16 +540,12 @@ export default function DashboardFloatingCards({
 
   const goalList = goals.length
     ? goals.slice(0, 3)
-    : [
-        { name: "Home purchase", percent: 32 },
-        { name: "Retirement", percent: 90 },
-        { name: "Vacation", percent: 55 },
-      ];
+    : [];
 
   const fmt = (n: number) =>
     `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  const userName = user?.name?.split(" ")[0] || "Alex";
+  const userName = user?.name?.split(" ")[0] || "";
 
   return (
     <>
@@ -584,7 +574,7 @@ export default function DashboardFloatingCards({
         {!minimized["finLevel"] && (
           <>
             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 2 }}>
-              Level 21 · Wealth Builder
+              Level {Math.floor((profile?.xp ?? 0) / 1000) + 1} · Wealth Builder
             </p>
             <p style={{ fontSize: 8, color: "rgba(255,255,255,0.5)", marginBottom: 4 }}>
               XP Progress
@@ -605,7 +595,7 @@ export default function DashboardFloatingCards({
             <div className="flex items-center gap-1">
               <Flame size={7} style={{ color: "#fb923c" }} />
               <span style={{ fontSize: 7, color: "rgba(255,255,255,0.4)" }}>Savings Streak</span>
-              <span style={{ fontSize: 7, color: "#D4AF37", fontWeight: 700 }}>6 months</span>
+              <span style={{ fontSize: 7, color: "#D4AF37", fontWeight: 700 }}>{profile?.streak ?? 0} months</span>
             </div>
           </>
         )}
@@ -729,11 +719,11 @@ export default function DashboardFloatingCards({
         {!minimized["taxPlanner"] && (
           <div className="space-y-1">
             {[
-              { k: "Amounts", v: "$1,500.00", c: "#f4f4f5" },
-              { k: "Due date", v: "08.06.2023", c: "rgba(255,255,255,0.45)" },
-              { k: "Dep. cont", v: "08.06.2023", c: "rgba(255,255,255,0.45)" },
-              { k: "Tax tax", v: "03.05.2023", c: "rgba(255,255,255,0.45)" },
-              { k: "Deadlines", v: "08.06.2022", c: "rgba(255,255,255,0.45)" },
+              { k: "Amounts", v: fmt(monthlyIncome), c: "#f4f4f5" },
+              { k: "Due date", v: "—", c: "rgba(255,255,255,0.45)" },
+              { k: "Dep. cont", v: "—", c: "rgba(255,255,255,0.45)" },
+              { k: "Tax tax", v: "—", c: "rgba(255,255,255,0.45)" },
+              { k: "Deadlines", v: "—", c: "rgba(255,255,255,0.45)" },
             ].map((r, i) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
@@ -784,7 +774,7 @@ export default function DashboardFloatingCards({
             </div>
             <div style={{ height: 36 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={SPARK}>
+                  <AreaChart data={EMPTY_SPARK}>
                   <defs>
                     <linearGradient id="portGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
@@ -838,7 +828,7 @@ export default function DashboardFloatingCards({
             />
             <div style={{ height: 36 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={SPARK}>
+                  <AreaChart data={EMPTY_SPARK}>
                   <defs>
                     <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.3} />
@@ -851,7 +841,9 @@ export default function DashboardFloatingCards({
               </ResponsiveContainer>
             </div>
             <div className="flex items-center justify-between mt-1">
-              <span style={{ fontSize: 7.5, color: "#10b981", fontWeight: 700 }}>+$13,250</span>
+              <span style={{ fontSize: 7.5, color: "#10b981", fontWeight: 700 }}>
+                {netWorthChange >= 0 ? "+" : ""}{fmt(netWorthChange)}
+              </span>
               <span style={{ fontSize: 6.5, color: "rgba(255,255,255,0.2)" }}>this month</span>
             </div>
           </>
@@ -880,19 +872,22 @@ export default function DashboardFloatingCards({
           <>
             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 3 }}>Overall return</p>
             <div className="flex items-center gap-2 mb-2">
-              <span style={{ fontSize: 18, fontWeight: 800, color: "#D4AF37", lineHeight: 1 }}>+15.45%</span>
+              <span style={{ fontSize: 18, fontWeight: 800, color: "#D4AF37", lineHeight: 1 }}>
+                {portfolio.changePercent >= 0 ? "+" : ""}{portfolio.changePercent}%
+              </span>
               <span
                 style={{
-                  fontSize: 8, color: "#10b981", fontWeight: 700,
-                  background: "rgba(16,185,129,0.12)", padding: "2px 5px", borderRadius: 4,
+                  fontSize: 8, color: portfolio.changePercent >= 0 ? "#10b981" : "#ef4444", fontWeight: 700,
+                  background: portfolio.changePercent >= 0 ? "rgba(16,185,129,0.12)" : "rgba(239,68,68,0.12)",
+                  padding: "2px 5px", borderRadius: 4,
                 }}
               >
-                +14.55%
+                {portfolio.changePercent >= 0 ? "+" : ""}{portfolio.changePercent}%
               </span>
             </div>
             <div style={{ height: 40 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={SPARK}>
+                  <LineChart data={EMPTY_SPARK}>
                   <Line type="monotone" dataKey="v" stroke="#D4AF37" strokeWidth={2} dot={false} />
                   <Tooltip {...TT} />
                 </LineChart>
@@ -900,7 +895,6 @@ export default function DashboardFloatingCards({
             </div>
             <div className="flex justify-between mt-1">
               <span style={{ fontSize: 7, color: "rgba(255,255,255,0.3)" }}>Debt volume</span>
-              <span style={{ fontSize: 7, color: "#ef4444", fontWeight: 700 }}>-76.82%</span>
               <span style={{ fontSize: 7, color: "rgba(255,255,255,0.3)" }}>Best invest</span>
             </div>
           </>
@@ -953,7 +947,7 @@ export default function DashboardFloatingCards({
             </span>
             <div style={{ height: 36 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={SPARK2}>
+                  <LineChart data={EMPTY_SPARK}>
                   <Line type="monotone" dataKey="v" stroke="#10b981" strokeWidth={1.8} dot={false} />
                   <Tooltip {...TT} />
                 </LineChart>
@@ -986,7 +980,7 @@ export default function DashboardFloatingCards({
             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 5 }}>Inflow vs. outflow · Liquidity ratio</p>
             <div style={{ height: 50 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={CASH_D}>
+                <BarChart data={EMPTY_CASH_D}>
                   <Bar dataKey="i" fill="#10b981" radius={[3, 3, 0, 0]} />
                   <Bar dataKey="o" fill="#ef4444" radius={[3, 3, 0, 0]} />
                   <Tooltip {...TT} />
@@ -1037,7 +1031,7 @@ export default function DashboardFloatingCards({
             </p>
             <div style={{ height: 36 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={SAVINGS_D}>
+                <AreaChart data={EMPTY_SPARK}>
                   <defs>
                     <linearGradient id="savingsGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#D4AF37" stopOpacity={0.3} />
@@ -1049,7 +1043,9 @@ export default function DashboardFloatingCards({
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-            <p style={{ fontSize: 7, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>Target: 50%</p>
+            <p style={{ fontSize: 7, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>
+              Target: {savingsRate > 0 ? savingsRate : 50}%
+            </p>
           </>
         )}
       </Card>
@@ -1080,7 +1076,7 @@ export default function DashboardFloatingCards({
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={[{ v: 85 }, { v: 15 }]}
+                      data={[{ v: Math.round(savingsRate) || 0 }, { v: 100 - (Math.round(savingsRate) || 0) }]}
                       dataKey="v"
                       innerRadius={14}
                       outerRadius={23}
@@ -1104,11 +1100,13 @@ export default function DashboardFloatingCards({
                     color: "#60a5fa",
                   }}
                 >
-                  85%
+                  {Math.round(savingsRate) || 0}%
                 </span>
               </div>
               <div>
-                <p style={{ fontSize: 9, fontWeight: 700, color: "#f4f4f5", marginBottom: 2 }}>$25,000</p>
+                <p style={{ fontSize: 9, fontWeight: 700, color: "#f4f4f5", marginBottom: 2 }}>
+                  {fmt(portfolio.cashBalance)}
+                </p>
                 <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)" }}>Month coverage</p>
               </div>
             </div>
@@ -1149,9 +1147,9 @@ export default function DashboardFloatingCards({
             />
             <div style={{ height: 40 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={EXPENSE_D}>
+                <BarChart data={EMPTY_EXPENSE_D}>
                   <Bar dataKey="v" radius={[2, 2, 0, 0]}>
-                    {EXPENSE_D.map((_, i) => (
+                    {EMPTY_EXPENSE_D.map((_, i) => (
                       <Cell
                         key={i}
                         fill={["#ef4444", "#f59e0b", "#D4AF37", "#10b981", "#60a5fa", "#a78bfa"][i]}
@@ -1164,7 +1162,6 @@ export default function DashboardFloatingCards({
             </div>
             <div className="flex justify-between mt-1">
               <span style={{ fontSize: 7, color: "rgba(255,255,255,0.3)" }}>This month</span>
-              <span style={{ fontSize: 7, color: "#10b981", fontWeight: 600 }}>-8.2%</span>
             </div>
           </>
         )}
@@ -1222,7 +1219,7 @@ export default function DashboardFloatingCards({
               <div style={{ position: "relative", width: 44, height: 44, flexShrink: 0 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={[{ v: 90 }, { v: 10 }]} dataKey="v" innerRadius={12} outerRadius={20} startAngle={90} endAngle={-270}>
+                    <Pie data={[{ v: Math.round(savingsRate) || 0 }, { v: 100 - (Math.round(savingsRate) || 0) }]} dataKey="v" innerRadius={12} outerRadius={20} startAngle={90} endAngle={-270}>
                       <Cell fill="#10b981" />
                       <Cell fill="rgba(255,255,255,0.05)" />
                     </Pie>
@@ -1240,7 +1237,7 @@ export default function DashboardFloatingCards({
                     color: "#10b981",
                   }}
                 >
-                  90%
+                  {Math.round(savingsRate) || 0}%
                 </span>
               </div>
             </div>
@@ -1338,26 +1335,37 @@ export default function DashboardFloatingCards({
             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 5 }}>YTD performance</p>
             <div style={{ height: 42 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={INV_D}>
+                <LineChart data={EMPTY_SPARK}>
                   <Line type="monotone" dataKey="v" stroke="#a78bfa" strokeWidth={1.8} dot={false} />
                   <Tooltip {...TT} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
             <div className="space-y-1 mt-1.5">
-              {[
-                { n: "Equities", v: "+18.2%", c: "#10b981" },
-                { n: "Real Estate", v: "+9.4%", c: "#D4AF37" },
-                { n: "Bonds", v: "+3.1%", c: "#60a5fa" },
-              ].map((r, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: r.c }} />
-                    <span style={{ fontSize: 7, color: "rgba(255,255,255,0.45)" }}>{r.n}</span>
-                  </div>
-                  <span style={{ fontSize: 7.5, color: r.c, fontWeight: 700 }}>{r.v}</span>
-                </div>
-              ))}
+              {portfolio.allocation.length > 0
+                ? portfolio.allocation.map((r, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: r.color }} />
+                        <span style={{ fontSize: 7, color: "rgba(255,255,255,0.45)" }}>{r.name}</span>
+                      </div>
+                      <span style={{ fontSize: 7.5, color: r.color, fontWeight: 700 }}>{r.percent}%</span>
+                    </div>
+                  ))
+                : [
+                    { n: "Equities", v: "—", c: "#10b981" },
+                    { n: "Real Estate", v: "—", c: "#D4AF37" },
+                    { n: "Bonds", v: "—", c: "#60a5fa" },
+                  ].map((r, i) => (
+                    <div key={i} className="flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full" style={{ background: r.c }} />
+                        <span style={{ fontSize: 7, color: "rgba(255,255,255,0.45)" }}>{r.n}</span>
+                      </div>
+                      <span style={{ fontSize: 7.5, color: r.c, fontWeight: 700 }}>{r.v}</span>
+                    </div>
+                  ))
+              }
             </div>
           </>
         )}

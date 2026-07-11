@@ -26,10 +26,7 @@ export default function SignInPage() {
       const statusData = await statusRes.json();
 
       if (statusData.exists && !statusData.verified) {
-        setError(
-          "Please verify your email before signing in. Check your inbox for the verification link.",
-        );
-        setLoading(false);
+        router.push(`/verify-email/dev?email=${encodeURIComponent(email)}`);
         return;
       }
     } catch {
@@ -47,7 +44,14 @@ export default function SignInPage() {
       setError("Invalid email or password");
       return;
     }
-    router.push("/dashboard");
+    // Check onboarding status to redirect to the right place
+    try {
+      const statusRes = await fetch("/api/onboarding/status");
+      const statusData = await statusRes.json();
+      router.push(statusData.completed ? "/dashboard" : "/onboarding");
+    } catch {
+      router.push("/dashboard");
+    }
   }
 
   return (

@@ -146,3 +146,8 @@ export type FinancialTwin = Prisma.FinancialTwinModel
  * 
  */
 export type Bill = Prisma.BillModel
+/**
+ * Model AiProfile
+ * 
+ */
+export type AiProfile = Prisma.AiProfileModel

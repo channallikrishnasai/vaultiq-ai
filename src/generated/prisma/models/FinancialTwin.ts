@@ -20,25 +20,14 @@ export type FinancialTwinModel = runtime.Types.Result.DefaultSelection<Prisma.$F
 
 export type AggregateFinancialTwin = {
   _count: FinancialTwinCountAggregateOutputType | null
-  _avg: FinancialTwinAvgAggregateOutputType | null
-  _sum: FinancialTwinSumAggregateOutputType | null
   _min: FinancialTwinMinAggregateOutputType | null
   _max: FinancialTwinMaxAggregateOutputType | null
-}
-
-export type FinancialTwinAvgAggregateOutputType = {
-  healthScore: number | null
-}
-
-export type FinancialTwinSumAggregateOutputType = {
-  healthScore: number | null
 }
 
 export type FinancialTwinMinAggregateOutputType = {
   id: string | null
   userId: string | null
   name: string | null
-  healthScore: number | null
   riskAppetite: $Enums.RiskAppetite | null
   isActive: boolean | null
   createdAt: Date | null
@@ -49,7 +38,6 @@ export type FinancialTwinMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   name: string | null
-  healthScore: number | null
   riskAppetite: $Enums.RiskAppetite | null
   isActive: boolean | null
   createdAt: Date | null
@@ -60,7 +48,6 @@ export type FinancialTwinCountAggregateOutputType = {
   id: number
   userId: number
   name: number
-  healthScore: number
   riskAppetite: number
   snapshot: number
   projections: number
@@ -72,19 +59,10 @@ export type FinancialTwinCountAggregateOutputType = {
 }
 
 
-export type FinancialTwinAvgAggregateInputType = {
-  healthScore?: true
-}
-
-export type FinancialTwinSumAggregateInputType = {
-  healthScore?: true
-}
-
 export type FinancialTwinMinAggregateInputType = {
   id?: true
   userId?: true
   name?: true
-  healthScore?: true
   riskAppetite?: true
   isActive?: true
   createdAt?: true
@@ -95,7 +73,6 @@ export type FinancialTwinMaxAggregateInputType = {
   id?: true
   userId?: true
   name?: true
-  healthScore?: true
   riskAppetite?: true
   isActive?: true
   createdAt?: true
@@ -106,7 +83,6 @@ export type FinancialTwinCountAggregateInputType = {
   id?: true
   userId?: true
   name?: true
-  healthScore?: true
   riskAppetite?: true
   snapshot?: true
   projections?: true
@@ -155,18 +131,6 @@ export type FinancialTwinAggregateArgs<ExtArgs extends runtime.Types.Extensions.
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
-   * Select which fields to average
-  **/
-  _avg?: FinancialTwinAvgAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
-   * Select which fields to sum
-  **/
-  _sum?: FinancialTwinSumAggregateInputType
-  /**
-   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-   * 
    * Select which fields to find the minimum value
   **/
   _min?: FinancialTwinMinAggregateInputType
@@ -197,8 +161,6 @@ export type FinancialTwinGroupByArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   _count?: FinancialTwinCountAggregateInputType | true
-  _avg?: FinancialTwinAvgAggregateInputType
-  _sum?: FinancialTwinSumAggregateInputType
   _min?: FinancialTwinMinAggregateInputType
   _max?: FinancialTwinMaxAggregateInputType
 }
@@ -207,7 +169,6 @@ export type FinancialTwinGroupByOutputType = {
   id: string
   userId: string
   name: string
-  healthScore: number
   riskAppetite: $Enums.RiskAppetite
   snapshot: runtime.JsonValue
   projections: runtime.JsonValue | null
@@ -216,8 +177,6 @@ export type FinancialTwinGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   _count: FinancialTwinCountAggregateOutputType | null
-  _avg: FinancialTwinAvgAggregateOutputType | null
-  _sum: FinancialTwinSumAggregateOutputType | null
   _min: FinancialTwinMinAggregateOutputType | null
   _max: FinancialTwinMaxAggregateOutputType | null
 }
@@ -244,7 +203,6 @@ export type FinancialTwinWhereInput = {
   id?: Prisma.StringFilter<"FinancialTwin"> | string
   userId?: Prisma.StringFilter<"FinancialTwin"> | string
   name?: Prisma.StringFilter<"FinancialTwin"> | string
-  healthScore?: Prisma.IntFilter<"FinancialTwin"> | number
   riskAppetite?: Prisma.EnumRiskAppetiteFilter<"FinancialTwin"> | $Enums.RiskAppetite
   snapshot?: Prisma.JsonFilter<"FinancialTwin">
   projections?: Prisma.JsonNullableFilter<"FinancialTwin">
@@ -259,7 +217,6 @@ export type FinancialTwinOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  healthScore?: Prisma.SortOrder
   riskAppetite?: Prisma.SortOrder
   snapshot?: Prisma.SortOrder
   projections?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -277,7 +234,6 @@ export type FinancialTwinWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.FinancialTwinWhereInput | Prisma.FinancialTwinWhereInput[]
   userId?: Prisma.StringFilter<"FinancialTwin"> | string
   name?: Prisma.StringFilter<"FinancialTwin"> | string
-  healthScore?: Prisma.IntFilter<"FinancialTwin"> | number
   riskAppetite?: Prisma.EnumRiskAppetiteFilter<"FinancialTwin"> | $Enums.RiskAppetite
   snapshot?: Prisma.JsonFilter<"FinancialTwin">
   projections?: Prisma.JsonNullableFilter<"FinancialTwin">
@@ -292,7 +248,6 @@ export type FinancialTwinOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  healthScore?: Prisma.SortOrder
   riskAppetite?: Prisma.SortOrder
   snapshot?: Prisma.SortOrder
   projections?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -301,10 +256,8 @@ export type FinancialTwinOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.FinancialTwinCountOrderByAggregateInput
-  _avg?: Prisma.FinancialTwinAvgOrderByAggregateInput
   _max?: Prisma.FinancialTwinMaxOrderByAggregateInput
   _min?: Prisma.FinancialTwinMinOrderByAggregateInput
-  _sum?: Prisma.FinancialTwinSumOrderByAggregateInput
 }
 
 export type FinancialTwinScalarWhereWithAggregatesInput = {
@@ -314,7 +267,6 @@ export type FinancialTwinScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"FinancialTwin"> | string
   userId?: Prisma.StringWithAggregatesFilter<"FinancialTwin"> | string
   name?: Prisma.StringWithAggregatesFilter<"FinancialTwin"> | string
-  healthScore?: Prisma.IntWithAggregatesFilter<"FinancialTwin"> | number
   riskAppetite?: Prisma.EnumRiskAppetiteWithAggregatesFilter<"FinancialTwin"> | $Enums.RiskAppetite
   snapshot?: Prisma.JsonWithAggregatesFilter<"FinancialTwin">
   projections?: Prisma.JsonNullableWithAggregatesFilter<"FinancialTwin">
@@ -327,7 +279,6 @@ export type FinancialTwinScalarWhereWithAggregatesInput = {
 export type FinancialTwinCreateInput = {
   id?: string
   name?: string
-  healthScore?: number
   riskAppetite?: $Enums.RiskAppetite
   snapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -342,7 +293,6 @@ export type FinancialTwinUncheckedCreateInput = {
   id?: string
   userId: string
   name?: string
-  healthScore?: number
   riskAppetite?: $Enums.RiskAppetite
   snapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -355,7 +305,6 @@ export type FinancialTwinUncheckedCreateInput = {
 export type FinancialTwinUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  healthScore?: Prisma.IntFieldUpdateOperationsInput | number
   riskAppetite?: Prisma.EnumRiskAppetiteFieldUpdateOperationsInput | $Enums.RiskAppetite
   snapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -370,7 +319,6 @@ export type FinancialTwinUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  healthScore?: Prisma.IntFieldUpdateOperationsInput | number
   riskAppetite?: Prisma.EnumRiskAppetiteFieldUpdateOperationsInput | $Enums.RiskAppetite
   snapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -384,7 +332,6 @@ export type FinancialTwinCreateManyInput = {
   id?: string
   userId: string
   name?: string
-  healthScore?: number
   riskAppetite?: $Enums.RiskAppetite
   snapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -397,7 +344,6 @@ export type FinancialTwinCreateManyInput = {
 export type FinancialTwinUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  healthScore?: Prisma.IntFieldUpdateOperationsInput | number
   riskAppetite?: Prisma.EnumRiskAppetiteFieldUpdateOperationsInput | $Enums.RiskAppetite
   snapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -411,7 +357,6 @@ export type FinancialTwinUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  healthScore?: Prisma.IntFieldUpdateOperationsInput | number
   riskAppetite?: Prisma.EnumRiskAppetiteFieldUpdateOperationsInput | $Enums.RiskAppetite
   snapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -435,7 +380,6 @@ export type FinancialTwinCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  healthScore?: Prisma.SortOrder
   riskAppetite?: Prisma.SortOrder
   snapshot?: Prisma.SortOrder
   projections?: Prisma.SortOrder
@@ -445,15 +389,10 @@ export type FinancialTwinCountOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
-export type FinancialTwinAvgOrderByAggregateInput = {
-  healthScore?: Prisma.SortOrder
-}
-
 export type FinancialTwinMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  healthScore?: Prisma.SortOrder
   riskAppetite?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -464,15 +403,10 @@ export type FinancialTwinMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  healthScore?: Prisma.SortOrder
   riskAppetite?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-}
-
-export type FinancialTwinSumOrderByAggregateInput = {
-  healthScore?: Prisma.SortOrder
 }
 
 export type FinancialTwinCreateNestedManyWithoutUserInput = {
@@ -520,7 +454,6 @@ export type FinancialTwinUncheckedUpdateManyWithoutUserNestedInput = {
 export type FinancialTwinCreateWithoutUserInput = {
   id?: string
   name?: string
-  healthScore?: number
   riskAppetite?: $Enums.RiskAppetite
   snapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -533,7 +466,6 @@ export type FinancialTwinCreateWithoutUserInput = {
 export type FinancialTwinUncheckedCreateWithoutUserInput = {
   id?: string
   name?: string
-  healthScore?: number
   riskAppetite?: $Enums.RiskAppetite
   snapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -575,7 +507,6 @@ export type FinancialTwinScalarWhereInput = {
   id?: Prisma.StringFilter<"FinancialTwin"> | string
   userId?: Prisma.StringFilter<"FinancialTwin"> | string
   name?: Prisma.StringFilter<"FinancialTwin"> | string
-  healthScore?: Prisma.IntFilter<"FinancialTwin"> | number
   riskAppetite?: Prisma.EnumRiskAppetiteFilter<"FinancialTwin"> | $Enums.RiskAppetite
   snapshot?: Prisma.JsonFilter<"FinancialTwin">
   projections?: Prisma.JsonNullableFilter<"FinancialTwin">
@@ -588,7 +519,6 @@ export type FinancialTwinScalarWhereInput = {
 export type FinancialTwinCreateManyUserInput = {
   id?: string
   name?: string
-  healthScore?: number
   riskAppetite?: $Enums.RiskAppetite
   snapshot: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -601,7 +531,6 @@ export type FinancialTwinCreateManyUserInput = {
 export type FinancialTwinUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  healthScore?: Prisma.IntFieldUpdateOperationsInput | number
   riskAppetite?: Prisma.EnumRiskAppetiteFieldUpdateOperationsInput | $Enums.RiskAppetite
   snapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -614,7 +543,6 @@ export type FinancialTwinUpdateWithoutUserInput = {
 export type FinancialTwinUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  healthScore?: Prisma.IntFieldUpdateOperationsInput | number
   riskAppetite?: Prisma.EnumRiskAppetiteFieldUpdateOperationsInput | $Enums.RiskAppetite
   snapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -627,7 +555,6 @@ export type FinancialTwinUncheckedUpdateWithoutUserInput = {
 export type FinancialTwinUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  healthScore?: Prisma.IntFieldUpdateOperationsInput | number
   riskAppetite?: Prisma.EnumRiskAppetiteFieldUpdateOperationsInput | $Enums.RiskAppetite
   snapshot?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   projections?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -643,7 +570,6 @@ export type FinancialTwinSelect<ExtArgs extends runtime.Types.Extensions.Interna
   id?: boolean
   userId?: boolean
   name?: boolean
-  healthScore?: boolean
   riskAppetite?: boolean
   snapshot?: boolean
   projections?: boolean
@@ -658,7 +584,6 @@ export type FinancialTwinSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   id?: boolean
   userId?: boolean
   name?: boolean
-  healthScore?: boolean
   riskAppetite?: boolean
   snapshot?: boolean
   projections?: boolean
@@ -673,7 +598,6 @@ export type FinancialTwinSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   id?: boolean
   userId?: boolean
   name?: boolean
-  healthScore?: boolean
   riskAppetite?: boolean
   snapshot?: boolean
   projections?: boolean
@@ -688,7 +612,6 @@ export type FinancialTwinSelectScalar = {
   id?: boolean
   userId?: boolean
   name?: boolean
-  healthScore?: boolean
   riskAppetite?: boolean
   snapshot?: boolean
   projections?: boolean
@@ -698,7 +621,7 @@ export type FinancialTwinSelectScalar = {
   updatedAt?: boolean
 }
 
-export type FinancialTwinOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "healthScore" | "riskAppetite" | "snapshot" | "projections" | "recommendations" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["financialTwin"]>
+export type FinancialTwinOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "name" | "riskAppetite" | "snapshot" | "projections" | "recommendations" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["financialTwin"]>
 export type FinancialTwinInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -718,7 +641,6 @@ export type $FinancialTwinPayload<ExtArgs extends runtime.Types.Extensions.Inter
     id: string
     userId: string
     name: string
-    healthScore: number
     riskAppetite: $Enums.RiskAppetite
     snapshot: runtime.JsonValue
     projections: runtime.JsonValue | null
@@ -1153,7 +1075,6 @@ export interface FinancialTwinFieldRefs {
   readonly id: Prisma.FieldRef<"FinancialTwin", 'String'>
   readonly userId: Prisma.FieldRef<"FinancialTwin", 'String'>
   readonly name: Prisma.FieldRef<"FinancialTwin", 'String'>
-  readonly healthScore: Prisma.FieldRef<"FinancialTwin", 'Int'>
   readonly riskAppetite: Prisma.FieldRef<"FinancialTwin", 'RiskAppetite'>
   readonly snapshot: Prisma.FieldRef<"FinancialTwin", 'Json'>
   readonly projections: Prisma.FieldRef<"FinancialTwin", 'Json'>

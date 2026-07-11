@@ -41,9 +41,9 @@ export default function DashboardKPIRow({
   monthlyExpenses,
   savingsRate,
   healthScore,
-  portfolioReturn = 14.5,
-  creditScore = 812,
-  emergencyFund = 25000,
+  portfolioReturn = 0,
+  creditScore = 0,
+  emergencyFund = 0,
   user,
 }: DashboardKPIRowProps) {
   const [minimized, setMinimized] = useState(false);
@@ -52,7 +52,7 @@ export default function DashboardKPIRow({
   const items: KPIItem[] = [
     {
       label: "Total Net Worth",
-      value: currency(netWorth || 1280450.78),
+      value: currency(netWorth),
       bar: 75,
       barColor: "#D4AF37",
       glowColor: "rgba(212,175,55,0.15)",
@@ -60,7 +60,7 @@ export default function DashboardKPIRow({
     },
     {
       label: "Monthly Income",
-      value: currency(monthlyIncome || 15450),
+      value: currency(monthlyIncome),
       bar: 60,
       barColor: "#2dd4bf",
       glowColor: "rgba(45,212,191,0.12)",
@@ -68,7 +68,7 @@ export default function DashboardKPIRow({
     },
     {
       label: "Monthly Expenses",
-      value: currency(monthlyExpenses || 7890.12),
+      value: currency(monthlyExpenses),
       bar: 51,
       barColor: "#ef4444",
       glowColor: "rgba(239,68,68,0.12)",
@@ -76,8 +76,8 @@ export default function DashboardKPIRow({
     },
     {
       label: "Savings Rate",
-      value: `${(savingsRate || 48.9).toFixed(1)}%`,
-      bar: savingsRate || 48.9,
+      value: `${savingsRate.toFixed(1)}%`,
+      bar: savingsRate,
       barColor: "#facc15",
       glowColor: "rgba(250,204,21,0.12)",
       trend: "up",

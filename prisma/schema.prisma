@@ -15,8 +15,10 @@ datasource db {
 // ---------------------------------------------------------------------------
 
 enum RiskAppetite {
+  VERY_CONSERVATIVE
   CONSERVATIVE
   MODERATE
+  GROWTH
   AGGRESSIVE
 }
 
@@ -78,6 +80,7 @@ model User {
   portfolios              Portfolio[]
   watchlists              Watchlist[]
   financialTwins          FinancialTwin[]
+  aiProfile               AiProfile?
 
   @@index([createdAt])
 }
@@ -126,18 +129,22 @@ model VerificationToken {
 // ---------------------------------------------------------------------------
 
 model Profile {
-  id             String       @id @default(cuid())
-  userId         String       @unique
-  age            Int?
-  income         Float?
-  currency       String       @default("INR")
-  riskAppetite   RiskAppetite @default(MODERATE)
-  xp             Int          @default(0)
-  streak         Int          @default(0)
-  lastActiveDate DateTime?
-  badges         Json?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id                   String       @id @default(cuid())
+  userId               String       @unique
+  age                  Int?
+  income               Float?
+  currency             String       @default("INR")
+  riskAppetite         RiskAppetite @default(MODERATE)
+  xp                   Int          @default(0)
+  streak               Int          @default(0)
+  lastActiveDate       DateTime?
+  badges               Json?
+  onboardingCompleted  Boolean      @default(false)
+  occupation           String?
+  monthlyExpenses      Float?
+  emergencyFundTarget  Float?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -406,7 +413,6 @@ model FinancialTwin {
   id              String       @id @default(cuid())
   userId          String
   name            String       @default("My Financial Twin")
-  healthScore     Int          @default(0)
   riskAppetite    RiskAppetite @default(MODERATE)
   snapshot        Json
   projections     Json?
@@ -435,4 +441,24 @@ model Bill {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// AI Memory / Personalization
+// ---------------------------------------------------------------------------
+
+model AiProfile {
+  id              String       @id @default(cuid())
+  userId          String       @unique
+  occupation      String?
+  riskAppetite    RiskAppetite @default(MODERATE)
+  monthlyIncome   Float?
+  monthlyExpenses Float?
+  financialGoals  Json?
+  riskTolerance   String?
+  personaSummary  String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

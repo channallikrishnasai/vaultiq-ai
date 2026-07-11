@@ -404,7 +404,8 @@ export const ModelName = {
   Trade: 'Trade',
   Watchlist: 'Watchlist',
   FinancialTwin: 'FinancialTwin',
-  Bill: 'Bill'
+  Bill: 'Bill',
+  AiProfile: 'AiProfile'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -420,7 +421,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "session" | "verificationToken" | "profile" | "expense" | "income" | "budget" | "goal" | "fraudReport" | "learningProgress" | "quizResult" | "roadmap" | "emergencyPlan" | "platformRecommendation" | "chatHistory" | "portfolio" | "trade" | "watchlist" | "financialTwin" | "bill"
+    modelProps: "user" | "account" | "session" | "verificationToken" | "profile" | "expense" | "income" | "budget" | "goal" | "fraudReport" | "learningProgress" | "quizResult" | "roadmap" | "emergencyPlan" | "platformRecommendation" | "chatHistory" | "portfolio" | "trade" | "watchlist" | "financialTwin" | "bill" | "aiProfile"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1978,6 +1979,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AiProfile: {
+      payload: Prisma.$AiProfilePayload<ExtArgs>
+      fields: Prisma.AiProfileFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AiProfileFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProfilePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AiProfileFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProfilePayload>
+        }
+        findFirst: {
+          args: Prisma.AiProfileFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProfilePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AiProfileFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProfilePayload>
+        }
+        findMany: {
+          args: Prisma.AiProfileFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProfilePayload>[]
+        }
+        create: {
+          args: Prisma.AiProfileCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProfilePayload>
+        }
+        createMany: {
+          args: Prisma.AiProfileCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AiProfileCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProfilePayload>[]
+        }
+        delete: {
+          args: Prisma.AiProfileDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProfilePayload>
+        }
+        update: {
+          args: Prisma.AiProfileUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProfilePayload>
+        }
+        deleteMany: {
+          args: Prisma.AiProfileDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AiProfileUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AiProfileUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProfilePayload>[]
+        }
+        upsert: {
+          args: Prisma.AiProfileUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AiProfilePayload>
+        }
+        aggregate: {
+          args: Prisma.AiProfileAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAiProfile>
+        }
+        groupBy: {
+          args: Prisma.AiProfileGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiProfileGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AiProfileCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AiProfileCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2078,6 +2153,10 @@ export const ProfileScalarFieldEnum = {
   streak: 'streak',
   lastActiveDate: 'lastActiveDate',
   badges: 'badges',
+  onboardingCompleted: 'onboardingCompleted',
+  occupation: 'occupation',
+  monthlyExpenses: 'monthlyExpenses',
+  emergencyFundTarget: 'emergencyFundTarget',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2284,7 +2363,6 @@ export const FinancialTwinScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   name: 'name',
-  healthScore: 'healthScore',
   riskAppetite: 'riskAppetite',
   snapshot: 'snapshot',
   projections: 'projections',
@@ -2310,6 +2388,23 @@ export const BillScalarFieldEnum = {
 } as const
 
 export type BillScalarFieldEnum = (typeof BillScalarFieldEnum)[keyof typeof BillScalarFieldEnum]
+
+
+export const AiProfileScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  occupation: 'occupation',
+  riskAppetite: 'riskAppetite',
+  monthlyIncome: 'monthlyIncome',
+  monthlyExpenses: 'monthlyExpenses',
+  financialGoals: 'financialGoals',
+  riskTolerance: 'riskTolerance',
+  personaSummary: 'personaSummary',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AiProfileScalarFieldEnum = (typeof AiProfileScalarFieldEnum)[keyof typeof AiProfileScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -2416,6 +2511,13 @@ export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'GoalType'
  */
 export type EnumGoalTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoalType'>
@@ -2426,13 +2528,6 @@ export type EnumGoalTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
  * Reference to a field of type 'FraudInputType'
  */
 export type EnumFraudInputTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FraudInputType'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -2580,6 +2675,7 @@ export type GlobalOmitConfig = {
   watchlist?: Prisma.WatchlistOmit
   financialTwin?: Prisma.FinancialTwinOmit
   bill?: Prisma.BillOmit
+  aiProfile?: Prisma.AiProfileOmit
 }
 
 /* Types for Logging */

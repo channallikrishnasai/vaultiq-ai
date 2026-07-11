@@ -42,11 +42,7 @@ export default function LeftPanel({ data }: LeftPanelProps) {
   const xpToNext = 1000;
   const xpPct = (xpInLevel / xpToNext) * 100;
 
-  const goals = data.goals?.slice(0, 3) ?? [
-    { name: "Home Purchase", percent: 32, color: "#D4AF37" },
-    { name: "Retirement", percent: 90, color: "#10b981" },
-    { name: "Vacation", percent: 55, color: "#60a5fa" },
-  ];
+  const goals = data.goals?.slice(0, 3) ?? [];
 
   return (
     <div className="flex h-full w-[200px] shrink-0 flex-col gap-4 overflow-y-auto border-r border-zinc-900/80 bg-zinc-950 p-4 scrollbar-thin scrollbar-thumb-zinc-900">

@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api-response";
-import { sendVerificationEmail } from "@/lib/email";
 import crypto from "crypto";
 
 export async function POST(request: Request) {
@@ -18,8 +17,6 @@ export async function POST(request: Request) {
       select: { id: true, email: true, emailVerified: true },
     });
 
-    // Always return success to prevent email enumeration.
-    // If the user doesn't exist or is already verified, we simply don't send anything.
     if (!user || user.emailVerified) {
       return successResponse(
         { sent: true },
@@ -27,12 +24,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Delete any existing tokens for this email
     await prisma.verificationToken.deleteMany({
       where: { identifier: normalizedEmail },
     });
 
-    // Generate a new verification token
     const token = crypto.randomBytes(32).toString("hex");
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
@@ -44,24 +39,9 @@ export async function POST(request: Request) {
       },
     });
 
-    // Send verification email
-    const emailResult = await sendVerificationEmail(normalizedEmail, token);
-
-    if (emailResult.devMode) {
-      return successResponse(
-        { token, devMode: true },
-        "Verification email resent. Check the server terminal for the new link.",
-      );
-    }
-
-    if (emailResult.sent) {
-      return successResponse({ sent: true }, "Verification email sent successfully.");
-    }
-
-    return errorResponse(
-      "email_failed",
-      "Failed to send verification email. Please try again later.",
-      500,
+    return successResponse(
+      { redirectUrl: `/verify-email/dev?email=${encodeURIComponent(normalizedEmail)}` },
+      "Verification email resent.",
     );
   } catch {
     return errorResponse("internal_error", "An unexpected error occurred", 500);

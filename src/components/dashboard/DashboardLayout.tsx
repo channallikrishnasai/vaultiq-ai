@@ -224,6 +224,7 @@ export default function DashboardLayout({ data, userId, user }: DashboardLayoutP
       {uiReady && (
         <DashboardFloatingCards
           netWorth={data.netWorth}
+          netWorthChange={data.netWorthChange}
           monthlyIncome={data.monthlyIncome}
           monthlyExpenses={data.monthlyExpenses}
           savingsRate={data.savingsRate}

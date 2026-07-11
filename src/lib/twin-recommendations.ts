@@ -47,7 +47,7 @@ export function generateTwinRecommendations(ctx: TwinRecommendationContext): str
     recs.push("Allocate 15% of monthly surplus toward debt repayment before new investments");
   }
 
-  if (ctx.investments > 0 && ctx.riskAppetite === "MODERATE") {
+  if (ctx.investments > 0 && (ctx.riskAppetite === "MODERATE" || ctx.riskAppetite === "GROWTH")) {
     recs.push("Rebalance portfolio if equity allocation exceeds 70% of total investments");
   }
 

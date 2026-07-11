@@ -33,12 +33,9 @@ export default function SignUpPage() {
 
     setLoading(false);
 
-    // In dev mode, redirect to verify-email with the token so the user can
-    // complete verification without relying on email delivery.
-    if (data.data?.devMode && data.data?.token) {
-      router.push(
-        `/verify-email?dev=true&token=${encodeURIComponent(data.data.token)}&email=${encodeURIComponent(data.data.email)}`,
-      );
+    // Redirect to verification page
+    if (data.data?.redirectUrl) {
+      router.push(data.data.redirectUrl);
       return;
     }
 

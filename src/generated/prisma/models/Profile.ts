@@ -31,6 +31,8 @@ export type ProfileAvgAggregateOutputType = {
   income: number | null
   xp: number | null
   streak: number | null
+  monthlyExpenses: number | null
+  emergencyFundTarget: number | null
 }
 
 export type ProfileSumAggregateOutputType = {
@@ -38,6 +40,8 @@ export type ProfileSumAggregateOutputType = {
   income: number | null
   xp: number | null
   streak: number | null
+  monthlyExpenses: number | null
+  emergencyFundTarget: number | null
 }
 
 export type ProfileMinAggregateOutputType = {
@@ -50,6 +54,10 @@ export type ProfileMinAggregateOutputType = {
   xp: number | null
   streak: number | null
   lastActiveDate: Date | null
+  onboardingCompleted: boolean | null
+  occupation: string | null
+  monthlyExpenses: number | null
+  emergencyFundTarget: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -64,6 +72,10 @@ export type ProfileMaxAggregateOutputType = {
   xp: number | null
   streak: number | null
   lastActiveDate: Date | null
+  onboardingCompleted: boolean | null
+  occupation: string | null
+  monthlyExpenses: number | null
+  emergencyFundTarget: number | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -79,6 +91,10 @@ export type ProfileCountAggregateOutputType = {
   streak: number
   lastActiveDate: number
   badges: number
+  onboardingCompleted: number
+  occupation: number
+  monthlyExpenses: number
+  emergencyFundTarget: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -90,6 +106,8 @@ export type ProfileAvgAggregateInputType = {
   income?: true
   xp?: true
   streak?: true
+  monthlyExpenses?: true
+  emergencyFundTarget?: true
 }
 
 export type ProfileSumAggregateInputType = {
@@ -97,6 +115,8 @@ export type ProfileSumAggregateInputType = {
   income?: true
   xp?: true
   streak?: true
+  monthlyExpenses?: true
+  emergencyFundTarget?: true
 }
 
 export type ProfileMinAggregateInputType = {
@@ -109,6 +129,10 @@ export type ProfileMinAggregateInputType = {
   xp?: true
   streak?: true
   lastActiveDate?: true
+  onboardingCompleted?: true
+  occupation?: true
+  monthlyExpenses?: true
+  emergencyFundTarget?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -123,6 +147,10 @@ export type ProfileMaxAggregateInputType = {
   xp?: true
   streak?: true
   lastActiveDate?: true
+  onboardingCompleted?: true
+  occupation?: true
+  monthlyExpenses?: true
+  emergencyFundTarget?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -138,6 +166,10 @@ export type ProfileCountAggregateInputType = {
   streak?: true
   lastActiveDate?: true
   badges?: true
+  onboardingCompleted?: true
+  occupation?: true
+  monthlyExpenses?: true
+  emergencyFundTarget?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -240,6 +272,10 @@ export type ProfileGroupByOutputType = {
   streak: number
   lastActiveDate: Date | null
   badges: runtime.JsonValue | null
+  onboardingCompleted: boolean
+  occupation: string | null
+  monthlyExpenses: number | null
+  emergencyFundTarget: number | null
   createdAt: Date
   updatedAt: Date
   _count: ProfileCountAggregateOutputType | null
@@ -278,6 +314,10 @@ export type ProfileWhereInput = {
   streak?: Prisma.IntFilter<"Profile"> | number
   lastActiveDate?: Prisma.DateTimeNullableFilter<"Profile"> | Date | string | null
   badges?: Prisma.JsonNullableFilter<"Profile">
+  onboardingCompleted?: Prisma.BoolFilter<"Profile"> | boolean
+  occupation?: Prisma.StringNullableFilter<"Profile"> | string | null
+  monthlyExpenses?: Prisma.FloatNullableFilter<"Profile"> | number | null
+  emergencyFundTarget?: Prisma.FloatNullableFilter<"Profile"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -294,6 +334,10 @@ export type ProfileOrderByWithRelationInput = {
   streak?: Prisma.SortOrder
   lastActiveDate?: Prisma.SortOrderInput | Prisma.SortOrder
   badges?: Prisma.SortOrderInput | Prisma.SortOrder
+  onboardingCompleted?: Prisma.SortOrder
+  occupation?: Prisma.SortOrderInput | Prisma.SortOrder
+  monthlyExpenses?: Prisma.SortOrderInput | Prisma.SortOrder
+  emergencyFundTarget?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -313,6 +357,10 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   streak?: Prisma.IntFilter<"Profile"> | number
   lastActiveDate?: Prisma.DateTimeNullableFilter<"Profile"> | Date | string | null
   badges?: Prisma.JsonNullableFilter<"Profile">
+  onboardingCompleted?: Prisma.BoolFilter<"Profile"> | boolean
+  occupation?: Prisma.StringNullableFilter<"Profile"> | string | null
+  monthlyExpenses?: Prisma.FloatNullableFilter<"Profile"> | number | null
+  emergencyFundTarget?: Prisma.FloatNullableFilter<"Profile"> | number | null
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -329,6 +377,10 @@ export type ProfileOrderByWithAggregationInput = {
   streak?: Prisma.SortOrder
   lastActiveDate?: Prisma.SortOrderInput | Prisma.SortOrder
   badges?: Prisma.SortOrderInput | Prisma.SortOrder
+  onboardingCompleted?: Prisma.SortOrder
+  occupation?: Prisma.SortOrderInput | Prisma.SortOrder
+  monthlyExpenses?: Prisma.SortOrderInput | Prisma.SortOrder
+  emergencyFundTarget?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProfileCountOrderByAggregateInput
@@ -352,6 +404,10 @@ export type ProfileScalarWhereWithAggregatesInput = {
   streak?: Prisma.IntWithAggregatesFilter<"Profile"> | number
   lastActiveDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Profile"> | Date | string | null
   badges?: Prisma.JsonNullableWithAggregatesFilter<"Profile">
+  onboardingCompleted?: Prisma.BoolWithAggregatesFilter<"Profile"> | boolean
+  occupation?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
+  monthlyExpenses?: Prisma.FloatNullableWithAggregatesFilter<"Profile"> | number | null
+  emergencyFundTarget?: Prisma.FloatNullableWithAggregatesFilter<"Profile"> | number | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Profile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Profile"> | Date | string
 }
@@ -366,6 +422,10 @@ export type ProfileCreateInput = {
   streak?: number
   lastActiveDate?: Date | string | null
   badges?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardingCompleted?: boolean
+  occupation?: string | null
+  monthlyExpenses?: number | null
+  emergencyFundTarget?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutProfileInput
@@ -382,6 +442,10 @@ export type ProfileUncheckedCreateInput = {
   streak?: number
   lastActiveDate?: Date | string | null
   badges?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardingCompleted?: boolean
+  occupation?: string | null
+  monthlyExpenses?: number | null
+  emergencyFundTarget?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -396,6 +460,10 @@ export type ProfileUpdateInput = {
   streak?: Prisma.IntFieldUpdateOperationsInput | number
   lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   badges?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  monthlyExpenses?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  emergencyFundTarget?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutProfileNestedInput
@@ -412,6 +480,10 @@ export type ProfileUncheckedUpdateInput = {
   streak?: Prisma.IntFieldUpdateOperationsInput | number
   lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   badges?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  monthlyExpenses?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  emergencyFundTarget?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -427,6 +499,10 @@ export type ProfileCreateManyInput = {
   streak?: number
   lastActiveDate?: Date | string | null
   badges?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardingCompleted?: boolean
+  occupation?: string | null
+  monthlyExpenses?: number | null
+  emergencyFundTarget?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -441,6 +517,10 @@ export type ProfileUpdateManyMutationInput = {
   streak?: Prisma.IntFieldUpdateOperationsInput | number
   lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   badges?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  monthlyExpenses?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  emergencyFundTarget?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -456,6 +536,10 @@ export type ProfileUncheckedUpdateManyInput = {
   streak?: Prisma.IntFieldUpdateOperationsInput | number
   lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   badges?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  monthlyExpenses?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  emergencyFundTarget?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -476,6 +560,10 @@ export type ProfileCountOrderByAggregateInput = {
   streak?: Prisma.SortOrder
   lastActiveDate?: Prisma.SortOrder
   badges?: Prisma.SortOrder
+  onboardingCompleted?: Prisma.SortOrder
+  occupation?: Prisma.SortOrder
+  monthlyExpenses?: Prisma.SortOrder
+  emergencyFundTarget?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -485,6 +573,8 @@ export type ProfileAvgOrderByAggregateInput = {
   income?: Prisma.SortOrder
   xp?: Prisma.SortOrder
   streak?: Prisma.SortOrder
+  monthlyExpenses?: Prisma.SortOrder
+  emergencyFundTarget?: Prisma.SortOrder
 }
 
 export type ProfileMaxOrderByAggregateInput = {
@@ -497,6 +587,10 @@ export type ProfileMaxOrderByAggregateInput = {
   xp?: Prisma.SortOrder
   streak?: Prisma.SortOrder
   lastActiveDate?: Prisma.SortOrder
+  onboardingCompleted?: Prisma.SortOrder
+  occupation?: Prisma.SortOrder
+  monthlyExpenses?: Prisma.SortOrder
+  emergencyFundTarget?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -511,6 +605,10 @@ export type ProfileMinOrderByAggregateInput = {
   xp?: Prisma.SortOrder
   streak?: Prisma.SortOrder
   lastActiveDate?: Prisma.SortOrder
+  onboardingCompleted?: Prisma.SortOrder
+  occupation?: Prisma.SortOrder
+  monthlyExpenses?: Prisma.SortOrder
+  emergencyFundTarget?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -520,6 +618,8 @@ export type ProfileSumOrderByAggregateInput = {
   income?: Prisma.SortOrder
   xp?: Prisma.SortOrder
   streak?: Prisma.SortOrder
+  monthlyExpenses?: Prisma.SortOrder
+  emergencyFundTarget?: Prisma.SortOrder
 }
 
 export type ProfileCreateNestedOneWithoutUserInput = {
@@ -574,6 +674,10 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type ProfileCreateWithoutUserInput = {
   id?: string
   age?: number | null
@@ -584,6 +688,10 @@ export type ProfileCreateWithoutUserInput = {
   streak?: number
   lastActiveDate?: Date | string | null
   badges?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardingCompleted?: boolean
+  occupation?: string | null
+  monthlyExpenses?: number | null
+  emergencyFundTarget?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -598,6 +706,10 @@ export type ProfileUncheckedCreateWithoutUserInput = {
   streak?: number
   lastActiveDate?: Date | string | null
   badges?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardingCompleted?: boolean
+  occupation?: string | null
+  monthlyExpenses?: number | null
+  emergencyFundTarget?: number | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -628,6 +740,10 @@ export type ProfileUpdateWithoutUserInput = {
   streak?: Prisma.IntFieldUpdateOperationsInput | number
   lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   badges?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  monthlyExpenses?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  emergencyFundTarget?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -642,6 +758,10 @@ export type ProfileUncheckedUpdateWithoutUserInput = {
   streak?: Prisma.IntFieldUpdateOperationsInput | number
   lastActiveDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   badges?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  onboardingCompleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  monthlyExpenses?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  emergencyFundTarget?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -659,6 +779,10 @@ export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   streak?: boolean
   lastActiveDate?: boolean
   badges?: boolean
+  onboardingCompleted?: boolean
+  occupation?: boolean
+  monthlyExpenses?: boolean
+  emergencyFundTarget?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -675,6 +799,10 @@ export type ProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   streak?: boolean
   lastActiveDate?: boolean
   badges?: boolean
+  onboardingCompleted?: boolean
+  occupation?: boolean
+  monthlyExpenses?: boolean
+  emergencyFundTarget?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -691,6 +819,10 @@ export type ProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   streak?: boolean
   lastActiveDate?: boolean
   badges?: boolean
+  onboardingCompleted?: boolean
+  occupation?: boolean
+  monthlyExpenses?: boolean
+  emergencyFundTarget?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -707,11 +839,15 @@ export type ProfileSelectScalar = {
   streak?: boolean
   lastActiveDate?: boolean
   badges?: boolean
+  onboardingCompleted?: boolean
+  occupation?: boolean
+  monthlyExpenses?: boolean
+  emergencyFundTarget?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "age" | "income" | "currency" | "riskAppetite" | "xp" | "streak" | "lastActiveDate" | "badges" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>
+export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "age" | "income" | "currency" | "riskAppetite" | "xp" | "streak" | "lastActiveDate" | "badges" | "onboardingCompleted" | "occupation" | "monthlyExpenses" | "emergencyFundTarget" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>
 export type ProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -738,6 +874,10 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     streak: number
     lastActiveDate: Date | null
     badges: runtime.JsonValue | null
+    onboardingCompleted: boolean
+    occupation: string | null
+    monthlyExpenses: number | null
+    emergencyFundTarget: number | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["profile"]>
@@ -1174,6 +1314,10 @@ export interface ProfileFieldRefs {
   readonly streak: Prisma.FieldRef<"Profile", 'Int'>
   readonly lastActiveDate: Prisma.FieldRef<"Profile", 'DateTime'>
   readonly badges: Prisma.FieldRef<"Profile", 'Json'>
+  readonly onboardingCompleted: Prisma.FieldRef<"Profile", 'Boolean'>
+  readonly occupation: Prisma.FieldRef<"Profile", 'String'>
+  readonly monthlyExpenses: Prisma.FieldRef<"Profile", 'Float'>
+  readonly emergencyFundTarget: Prisma.FieldRef<"Profile", 'Float'>
   readonly createdAt: Prisma.FieldRef<"Profile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Profile", 'DateTime'>
 }
