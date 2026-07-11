@@ -122,16 +122,16 @@ export default function TaxPage() {
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="p-3 rounded-lg border border-zinc-800 bg-zinc-900/40">
               <span className="text-[9px] uppercase font-bold text-zinc-500 block">Old Regime Tax</span>
-              <h2 className="text-lg font-bold text-rose-400 mt-1">₹{oldTax.toLocaleString()}</h2>
+              <h2 className="text-lg font-bold text-rose-400 mt-1">₹{oldTax.toLocaleString("en-IN")}</h2>
             </div>
             <div className="p-3 rounded-lg border border-zinc-800 bg-zinc-900/40">
               <span className="text-[9px] uppercase font-bold text-zinc-500 block">New Regime Tax</span>
-              <h2 className="text-lg font-bold text-emerald-400 mt-1">₹{newTax.toLocaleString()}</h2>
+              <h2 className="text-lg font-bold text-emerald-400 mt-1">₹{newTax.toLocaleString("en-IN")}</h2>
             </div>
           </div>
 
           <div className="p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 mb-4 text-xs">
-            🎉 <strong>{betterRegime}</strong> is better for you. You save <strong>₹{difference.toLocaleString()}</strong>.
+            🎉 <strong>{betterRegime}</strong> is better for you. You save <strong>₹{difference.toLocaleString("en-IN")}</strong>.
           </div>
 
           {/* Chart comparison */}

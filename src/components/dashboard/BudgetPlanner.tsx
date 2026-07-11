@@ -77,9 +77,9 @@ export default function BudgetPlanner() {
               <div key={b.id} className="p-5 rounded-xl border border-zinc-800/80 bg-zinc-900/40 hover:border-zinc-700/80 transition-all duration-300">
                 <h3 className="text-sm font-semibold text-zinc-300 mb-2">{b.category}</h3>
                 <div className="flex justify-between text-xs text-zinc-400 mb-3">
-                  <span>Allocated: ${allocatedVal.toLocaleString()}</span>
+                  <span>Allocated: ₹{allocatedVal.toLocaleString("en-IN")}</span>
                   <span className={spentVal > allocatedVal ? "text-red-400 font-semibold" : "text-emerald-400 font-semibold"}>
-                    Spent: ${spentVal.toLocaleString()}
+                    Spent: ₹{spentVal.toLocaleString("en-IN")}
                   </span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-zinc-800/80 overflow-hidden">

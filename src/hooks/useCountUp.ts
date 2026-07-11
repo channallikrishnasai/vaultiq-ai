@@ -32,7 +32,7 @@ export function useCountUp(end: number, duration = 1200, delay = 0) {
 
 export function useCountUpFormatted(end: number, duration = 1200, delay = 0, prefix = "", suffix = "", decimals = 0) {
   const raw = useCountUp(end, duration, delay);
-  const formatted = raw.toLocaleString("en-US", {
+  const formatted = raw.toLocaleString("en-IN", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });

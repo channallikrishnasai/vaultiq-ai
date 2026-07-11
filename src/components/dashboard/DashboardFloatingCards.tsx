@@ -64,7 +64,7 @@ function AnimatedNumber({
     };
   }, [value, duration, delay]);
 
-  const formatted = displayed.toLocaleString("en-US", {
+  const formatted = displayed.toLocaleString("en-IN", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
@@ -543,7 +543,7 @@ export default function DashboardFloatingCards({
     : [];
 
   const fmt = (n: number) =>
-    `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    `₹${n.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const userName = user?.name?.split(" ")[0] || "";
 
@@ -760,7 +760,7 @@ export default function DashboardFloatingCards({
           <>
             <AnimatedNumber
               value={portfolio.totalValue}
-              prefix="$"
+              prefix="₹"
               decimals={2}
               duration={1600}
               delay={700}
@@ -817,7 +817,7 @@ export default function DashboardFloatingCards({
             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Total assets</p>
             <AnimatedNumber
               value={netWorth}
-              prefix="$"
+              prefix="₹"
               decimals={2}
               duration={1800}
               delay={400}
@@ -929,7 +929,7 @@ export default function DashboardFloatingCards({
             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Primary/secondary sources</p>
             <AnimatedNumber
               value={monthlyIncome}
-              prefix="$"
+              prefix="₹"
               decimals={0}
               duration={1600}
               delay={500}
@@ -1137,7 +1137,7 @@ export default function DashboardFloatingCards({
             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Monthly breakdown</p>
             <AnimatedNumber
               value={monthlyExpenses}
-              prefix="$"
+              prefix="₹"
               decimals={2}
               duration={1600}
               delay={600}

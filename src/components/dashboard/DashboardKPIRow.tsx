@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Info, ChevronUp, BarChart3, TrendingUp, TrendingDown, ChevronDown, LogOut, Mail } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { formatCurrencyDecimals } from "@/utils/format";
 
 interface KPIItem {
   label: string;
@@ -28,13 +29,6 @@ interface DashboardKPIRowProps {
   user?: { name?: string | null; email?: string | null; image?: string | null };
 }
 
-function currency(n: number) {
-  return `$${n.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
-
 export default function DashboardKPIRow({
   netWorth,
   monthlyIncome,
@@ -52,7 +46,7 @@ export default function DashboardKPIRow({
   const items: KPIItem[] = [
     {
       label: "Total Net Worth",
-      value: currency(netWorth),
+      value: formatCurrencyDecimals(netWorth),
       bar: 75,
       barColor: "#D4AF37",
       glowColor: "rgba(212,175,55,0.15)",
@@ -60,7 +54,7 @@ export default function DashboardKPIRow({
     },
     {
       label: "Monthly Income",
-      value: currency(monthlyIncome),
+      value: formatCurrencyDecimals(monthlyIncome),
       bar: 60,
       barColor: "#2dd4bf",
       glowColor: "rgba(45,212,191,0.12)",
@@ -68,7 +62,7 @@ export default function DashboardKPIRow({
     },
     {
       label: "Monthly Expenses",
-      value: currency(monthlyExpenses),
+      value: formatCurrencyDecimals(monthlyExpenses),
       bar: 51,
       barColor: "#ef4444",
       glowColor: "rgba(239,68,68,0.12)",
@@ -110,7 +104,7 @@ export default function DashboardKPIRow({
     },
     {
       label: "Emergency Fund",
-      value: currency(emergencyFund),
+      value: formatCurrencyDecimals(emergencyFund),
       sub: "3 Months",
       bar: 85,
       barColor: "#60a5fa",

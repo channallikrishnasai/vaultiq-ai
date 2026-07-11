@@ -221,7 +221,7 @@ export function BillsClient({ user }: BillsClientProps) {
           <div className="flex items-center justify-between mb-4 border-b border-zinc-850 pb-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Timeline Obligations</h3>
             <span className="text-[10px] font-black text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">
-              Unpaid: ₹{unpaidTotal.toLocaleString()}
+              Unpaid: ₹{unpaidTotal.toLocaleString("en-IN")}
             </span>
           </div>
 
@@ -264,7 +264,7 @@ export function BillsClient({ user }: BillsClientProps) {
                     <div className="flex items-center gap-3 shrink-0">
                       <div className="text-right">
                         <span className="text-xs font-semibold text-zinc-200 block">
-                          ₹{b.amount.toLocaleString()}
+                          ₹{b.amount.toLocaleString("en-IN")}
                         </span>
                       </div>
 

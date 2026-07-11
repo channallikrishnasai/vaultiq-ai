@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, Bot, Loader2, Edit2 } from "lucide-react";
-import { formatCurrency } from "@/utils/formatCurrency";
+import { formatCurrency } from "@/utils/format";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { GenerateTwinPanel, RegenerateButton } from "@/components/financial-twin/GenerateTwinPanel";
 import { TwinSnapshotCard } from "@/components/financial-twin/TwinSnapshotCard";

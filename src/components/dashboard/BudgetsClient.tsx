@@ -287,7 +287,7 @@ export function BudgetsClient({ user: _user }: BudgetsClientProps) {
           <div className="flex items-center justify-between mb-4 border-b border-zinc-850 pb-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">Budget Envelopes</h3>
             <span className="text-[10px] font-mono text-zinc-500">
-              Total Budgeted: ₹{totalBudgeted.toLocaleString()} | Spent: ₹{totalSpent.toLocaleString()}
+              Total Budgeted: ₹{totalBudgeted.toLocaleString("en-IN")} | Spent: ₹{totalSpent.toLocaleString("en-IN")}
             </span>
           </div>
 
@@ -353,7 +353,7 @@ export function BudgetsClient({ user: _user }: BudgetsClientProps) {
                               </span>
                             </div>
                             <span className="text-[10px] text-zinc-500 mt-1 block">
-                              Spent: ₹{spent.toLocaleString()} / Limit: ₹{b.limit.toLocaleString()}
+                              Spent: ₹{spent.toLocaleString("en-IN")} / Limit: ₹{b.limit.toLocaleString("en-IN")}
                             </span>
                           </div>
                         )}

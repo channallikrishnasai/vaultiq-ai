@@ -357,7 +357,7 @@ export function GoalsClient({ user }: GoalsClientProps) {
                           ) : (
                             <>
                               <span className="text-xs font-semibold text-zinc-200 block">
-                                ₹{g.currentAmount.toLocaleString()} / ₹{g.targetAmount.toLocaleString()}
+                                ₹{g.currentAmount.toLocaleString("en-IN")} / ₹{g.targetAmount.toLocaleString("en-IN")}
                               </span>
                               <span
                                 className={`text-[9px] font-bold ${
