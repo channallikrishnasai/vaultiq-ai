@@ -9,6 +9,7 @@ import LeftNav from "@/components/dashboard/LeftNav";
 import GlobalAIChat from "@/components/dashboard/GlobalAIChat";
 import ApiKeysWidget from "@/components/dashboard/ApiKeysWidget";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import QueryProvider from "@/components/providers/query-provider";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -30,6 +31,7 @@ export default function RootLayout({
       <body className="flex h-screen overflow-hidden bg-[#050505] text-foreground">
         <LanguageProvider>
           <ThemeProvider>
+            <QueryProvider>
             <AuthSessionProvider>
               <LearningProgressProvider>
                 {/* Icon-only slim sidebar — always visible globally */}
@@ -42,6 +44,7 @@ export default function RootLayout({
                 <ToastProvider />
               </LearningProgressProvider>
             </AuthSessionProvider>
+            </QueryProvider>
           </ThemeProvider>
         </LanguageProvider>
       </body>

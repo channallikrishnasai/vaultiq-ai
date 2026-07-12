@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { GoalType } from "@/generated/prisma/enums";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 
 interface Goal {
   id: string;
@@ -53,6 +54,7 @@ export function GoalModal({ isOpen, onClose, onSuccess, goal }: GoalModalProps) 
   const [deadline, setDeadline] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { addGoal, editGoal } = useDashboardMutations();
 
   const isEditing = !!goal;
 
@@ -111,18 +113,10 @@ export function GoalModal({ isOpen, onClose, onSuccess, goal }: GoalModalProps) 
         deadline: deadline ? new Date(deadline).toISOString() : null,
       };
 
-      const url = isEditing ? `/api/goals/${goal.id}` : "/api/goals";
-      const method = isEditing ? "PATCH" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await res.json();
-      if (!result.success) {
-        throw new Error(result.error?.message || "Failed to save goal");
+      if (isEditing) {
+        await editGoal(goal.id, payload);
+      } else {
+        await addGoal(payload);
       }
 
       const tConfig = GOAL_TYPE_CONFIG[type];

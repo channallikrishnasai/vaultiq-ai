@@ -6,6 +6,7 @@ import {
   Target, Plus, Trash2, Calendar, Award, Info, RefreshCw, Edit2, Check, X
 } from "lucide-react";
 import { toast } from "sonner";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 
 interface Goal {
   id: string;
@@ -27,6 +28,7 @@ interface GoalsClientProps {
 export function GoalsClient({ user }: GoalsClientProps) {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addGoal, editGoal, deleteGoal } = useDashboardMutations();
 
   // Form fields
   const [name, setName] = useState<string>("");
@@ -74,27 +76,12 @@ export function GoalsClient({ user }: GoalsClientProps) {
     }
 
     try {
-      const res = await fetch("/api/goals", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          targetAmount: target,
-          currentAmount: current,
-          type,
-          deadline: new Date(deadline),
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        toast.success("Goal set successfully!");
-        setName("");
-        setTargetAmount("");
-        setCurrentAmount("");
-        fetchGoals();
-      } else {
-        toast.error(json.message || "Failed to set goal");
-      }
+      await addGoal({ name, targetAmount: target, currentAmount: current, type, deadline: new Date(deadline).toISOString() });
+      toast.success("Goal set successfully!");
+      setName("");
+      setTargetAmount("");
+      setCurrentAmount("");
+      fetchGoals();
     } catch {
       toast.error("Network error saving goal");
     }
@@ -102,14 +89,9 @@ export function GoalsClient({ user }: GoalsClientProps) {
 
   const handleDeleteGoal = async (id: string) => {
     try {
-      const res = await fetch(`/api/goals/${id}`, { method: "DELETE" });
-      const json = await res.json();
-      if (json.success) {
-        toast.success("Goal deleted");
-        fetchGoals();
-      } else {
-        toast.error("Failed to delete goal");
-      }
+      await deleteGoal(id);
+      toast.success("Goal deleted");
+      fetchGoals();
     } catch {
       toast.error("Error deleting goal");
     }
@@ -133,24 +115,10 @@ export function GoalsClient({ user }: GoalsClientProps) {
     }
 
     try {
-      const res = await fetch(`/api/goals/${g.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: editName,
-          targetAmount: target,
-          currentAmount: current,
-          type: editType,
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        toast.success("Goal updated successfully!");
-        setEditingId(null);
-        fetchGoals();
-      } else {
-        toast.error(json.message || "Failed to update goal");
-      }
+      await editGoal(g.id, { name: editName, targetAmount: target, currentAmount: current, type: editType });
+      toast.success("Goal updated successfully!");
+      setEditingId(null);
+      fetchGoals();
     } catch {
       toast.error("Error saving goal edits");
     }

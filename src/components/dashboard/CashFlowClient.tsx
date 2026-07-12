@@ -10,6 +10,7 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend
 } from "recharts";
 import { toast } from "sonner";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 
 interface Transaction {
   id: string;
@@ -47,6 +48,7 @@ interface CashFlowClientProps {
 export function CashFlowClient({ user }: CashFlowClientProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addExpense, editExpense, deleteExpense, addIncome, editIncome, deleteIncome } = useDashboardMutations();
 
   // Form fields
   const [type, setType] = useState<"income" | "expense">("expense");
@@ -113,44 +115,30 @@ export function CashFlowClient({ user }: CashFlowClientProps) {
       return;
     }
 
-    const endpoint = type === "expense" ? "/api/expenses" : "/api/incomes";
-
     try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: parsedAmount,
-          category,
-          notes,
-          date: new Date(date),
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        toast.success(`${type === "expense" ? "Expense" : "Income"} logged successfully!`);
-        setAmount("");
-        setNotes("");
-        fetchData();
+      if (type === "expense") {
+        await addExpense({ amount: parsedAmount, category, notes, date: new Date(date).toISOString() });
       } else {
-        toast.error(json.message || "Failed to log transaction");
+        await addIncome({ amount: parsedAmount, category, notes, date: new Date(date).toISOString() });
       }
+      toast.success(`${type === "expense" ? "Expense" : "Income"} logged successfully!`);
+      setAmount("");
+      setNotes("");
+      fetchData();
     } catch {
       toast.error("Network error logging transaction");
     }
   };
 
   const handleDelete = async (id: string, itemType: "income" | "expense") => {
-    const endpoint = itemType === "expense" ? `/api/expenses/${id}` : `/api/incomes/${id}`;
     try {
-      const res = await fetch(endpoint, { method: "DELETE" });
-      const json = await res.json();
-      if (json.success) {
-        toast.success("Transaction deleted");
-        fetchData();
+      if (itemType === "expense") {
+        await deleteExpense(id);
       } else {
-        toast.error("Failed to delete transaction");
+        await deleteIncome(id);
       }
+      toast.success("Transaction deleted");
+      fetchData();
     } catch {
       toast.error("Error deleting transaction");
     }
@@ -170,25 +158,15 @@ export function CashFlowClient({ user }: CashFlowClientProps) {
       return;
     }
 
-    const endpoint = t.type === "expense" ? `/api/expenses/${t.id}` : `/api/incomes/${t.id}`;
     try {
-      const res = await fetch(endpoint, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: parsedAmount,
-          category: editCategory,
-          notes: editNotes,
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        toast.success("Transaction updated");
-        setEditingId(null);
-        fetchData();
+      if (t.type === "expense") {
+        await editExpense(t.id, { amount: parsedAmount, category: editCategory, notes: editNotes });
       } else {
-        toast.error("Failed to update transaction");
+        await editIncome(t.id, { amount: parsedAmount, category: editCategory, notes: editNotes });
       }
+      toast.success("Transaction updated");
+      setEditingId(null);
+      fetchData();
     } catch {
       toast.error("Error updating transaction");
     }

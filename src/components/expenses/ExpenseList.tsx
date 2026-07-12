@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ExpenseModal } from "./ExpenseModal";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 
 interface Expense {
   id: string;
@@ -37,6 +38,7 @@ export function ExpenseList({ expenses = [] }: ExpenseListProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { deleteExpense } = useDashboardMutations();
 
   const handleEdit = (expense: Expense) => {
     setEditingExpense(expense);
@@ -47,9 +49,7 @@ export function ExpenseList({ expenses = [] }: ExpenseListProps) {
     if (!confirm("Delete this expense? This cannot be undone.")) return;
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/expenses/${id}`, { method: "DELETE" });
-      const result = await res.json();
-      if (!result.success) throw new Error(result.error?.message || "Delete failed");
+      await deleteExpense(id);
       toast.success("Expense deleted");
       router.refresh();
     } catch (err: any) {

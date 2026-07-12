@@ -6,6 +6,7 @@ import { X, Wallet, Tag, FileText, Calendar, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 
 interface Expense {
   id: string;
@@ -31,6 +32,7 @@ export function ExpenseModal({ isOpen, onClose, onSuccess, expense }: ExpenseMod
   const [date, setDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { addExpense, editExpense } = useDashboardMutations();
 
   const isEditing = !!expense;
 
@@ -79,18 +81,10 @@ export function ExpenseModal({ isOpen, onClose, onSuccess, expense }: ExpenseMod
         date: new Date(date).toISOString(),
       };
 
-      const url = isEditing ? `/api/expenses/${expense.id}` : "/api/expenses";
-      const method = isEditing ? "PATCH" : "POST";
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await res.json();
-      if (!result.success) {
-        throw new Error(result.error?.message || "Failed to save expense");
+      if (isEditing) {
+        await editExpense(expense.id, payload);
+      } else {
+        await addExpense(payload);
       }
 
       toast.success(isEditing ? "Expense updated" : "Expense added", {

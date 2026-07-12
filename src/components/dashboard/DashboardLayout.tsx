@@ -9,16 +9,17 @@ import DashboardKPIRow from "./DashboardKPIRow";
 import FlashOverlay from "./FlashOverlay";
 import DashboardParticles from "./DashboardParticles";
 import LightRays from "./LightRays";
-import { DashboardData } from "@/types/dashboard";
+import DashboardIntelligence from "./DashboardIntelligence";
 import { useOrb } from "@/contexts/OrbContext";
+import { useDashboardContext } from "@/contexts/DashboardContext";
 
 interface DashboardLayoutProps {
-  data: DashboardData;
   userId: string;
   user: { name?: string | null; email?: string | null; image?: string | null };
 }
 
-export default function DashboardLayout({ data, userId, user }: DashboardLayoutProps) {
+export default function DashboardLayout({ userId, user }: DashboardLayoutProps) {
+  const { data } = useDashboardContext();
   const { uiReady, orbState, thinkingStage, setThinkingStage } = useOrb();
   const stageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -242,6 +243,13 @@ export default function DashboardLayout({ data, userId, user }: DashboardLayoutP
 
       {/* ── Flash overlay for AI thinking animation ── */}
       <FlashOverlay />
+
+      {/* ── Intelligence Panel — bottom left ── */}
+      {uiReady && (
+        <div className="absolute bottom-4 left-4 z-10 w-[340px]">
+          <DashboardIntelligence />
+        </div>
+      )}
 
       {/* ── Orb glow halo — bright golden core ── */}
       {uiReady && (

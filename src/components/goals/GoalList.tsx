@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { GoalModal } from "./GoalModal";
 import { GoalType } from "@/generated/prisma/enums";
+import { useDashboardMutations } from "@/hooks/useDashboardMutations";
 
 interface Goal {
   id: string;
@@ -58,6 +59,7 @@ export function GoalList({ goals = [] }: GoalListProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { deleteGoal } = useDashboardMutations();
 
   const handleEdit = (goal: Goal) => {
     setEditingGoal(goal);
@@ -68,9 +70,7 @@ export function GoalList({ goals = [] }: GoalListProps) {
     if (!confirm("Delete this goal? This cannot be undone.")) return;
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/goals/${id}`, { method: "DELETE" });
-      const result = await res.json();
-      if (!result.success) throw new Error(result.error?.message || "Delete failed");
+      await deleteGoal(id);
       toast.success("Goal deleted");
       router.refresh();
     } catch (err: any) {
