@@ -2,6 +2,247 @@ import { randomUUID } from "crypto";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getAIProvider } from "@/services/ai";
 import { buildFinancialContext, formatFinancialContext } from "./financial-context.service";
+import {
+  runFullAnalysis,
+  generateMonthlyReport,
+  simulateScenario,
+  type WhatIfScenario,
+} from "./analysis";
+
+const ANALYSIS_KEYWORDS = [
+  "analyze", "analysis", "review my finances", "financial review",
+  "monthly report", "report", "health check", "financial health",
+  "strengths", "weaknesses", "risks", "recommendations",
+  "what if", "what-if", "simulation", "scenario",
+  "what happens if", "how would", "project", "forecast",
+];
+
+function detectAnalysisIntent(message: string): {
+  type: "full_analysis" | "monthly_report" | "simulation" | "none";
+  params?: WhatIfScenario;
+} {
+  const lower = message.toLowerCase();
+
+  if (lower.includes("what if") || lower.includes("what happens if") || lower.includes("how would")) {
+    return {
+      type: "simulation",
+      params: parseWhatIfScenario(message),
+    };
+  }
+
+  if (lower.includes("monthly report") || lower.includes("generate report") || lower.includes("my report")) {
+    return { type: "monthly_report" };
+  }
+
+  if (ANALYSIS_KEYWORDS.some((k) => lower.includes(k))) {
+    return { type: "full_analysis" };
+  }
+
+  return { type: "none" };
+}
+
+function parseWhatIfScenario(message: string): WhatIfScenario {
+  const lower = message.toLowerCase();
+
+  const incomeMatch = lower.match(/income\s+(?:becomes?|is|of|at)\s*(?:₹|rs\.?|inr)?\s*([\d,]+)/);
+  if (incomeMatch) {
+    const amount = parseInt(incomeMatch[1].replace(/,/g, ""), 10);
+    return {
+      type: "income_change",
+      description: `Income changes to ₹${amount.toLocaleString("en-IN")}`,
+      params: { customIncome: amount },
+    };
+  }
+
+  const incomePercentMatch = lower.match(/income\s+(?:increases?|goes?\s+up|rise|grow)\s*(?:by)?\s*(\d+)\s*%/) ;
+  if (incomePercentMatch) {
+    return {
+      type: "income_change",
+      description: `Income increases by ${incomePercentMatch[1]}%`,
+      params: { incomePercentChange: parseInt(incomePercentMatch[1], 10) },
+    };
+  }
+
+  const expenseIncreaseMatch = lower.match(/expenses?\s+(?:increases?|go\s+up|rises?|grow)\s*(?:by)?\s*(\d+)\s*%/);
+  if (expenseIncreaseMatch) {
+    return {
+      type: "expense_change",
+      description: `Expenses increase by ${expenseIncreaseMatch[1]}%`,
+      params: { expensePercentChange: parseInt(expenseIncreaseMatch[1], 10) },
+    };
+  }
+
+  const savingsMatch = lower.match(/save\s+(?:₹|rs\.?|inr)?\s*([\d,]+)\s*(?:\/|per|a)\s*month/);
+  if (savingsMatch) {
+    const amount = parseInt(savingsMatch[1].replace(/,/g, ""), 10);
+    return {
+      type: "savings_target",
+      description: `Save ₹${amount.toLocaleString("en-IN")} per month`,
+      params: { savingsTarget: amount },
+    };
+  }
+
+  const bikeMatch = lower.match(/buy\s+(?:a\s+)?(?:bike|motorcycle|scooter|car|vehicle)/);
+  if (bikeMatch) {
+    return {
+      type: "new_expense",
+      description: "Purchase a vehicle (estimated ₹80,000 EMI over 36 months)",
+      params: { newExpenseAmount: 25000, newExpenseCategory: "Vehicle EMI" },
+    };
+  }
+
+  const loanMatch = lower.match(/(?:take|get|have)\s+(?:a\s+)?(?:₹|rs\.?|inr)?\s*([\d,]+)\s*(?:lakh|lac|l)\s*loan/);
+  if (loanMatch) {
+    const amount = parseInt(loanMatch[1].replace(/,/g, ""), 10) * 100000;
+    return {
+      type: "new_loan",
+      description: `Take a ₹${(amount / 100000).toFixed(0)} lakh loan`,
+      params: { loanAmount: amount, loanInterestRate: 10, loanTenureMonths: 60 },
+    };
+  }
+
+  const customExpenseMatch = lower.match(/(?:spend|expense|cost)\s+(?:₹|rs\.?|inr)?\s*([\d,]+)/);
+  if (customExpenseMatch) {
+    const amount = parseInt(customExpenseMatch[1].replace(/,/g, ""), 10);
+    return {
+      type: "new_expense",
+      description: `Additional expense of ₹${amount.toLocaleString("en-IN")}`,
+      params: { newExpenseAmount: amount },
+    };
+  }
+
+  return {
+    type: "expense_change",
+    description: "Expenses increase by 20%",
+    params: { expensePercentChange: 20 },
+  };
+}
+
+function formatAnalysisForAI(analysis: ReturnType<typeof runFullAnalysis>): string {
+  const lines: string[] = [];
+  lines.push("=== FULL FINANCIAL ANALYSIS ===");
+  lines.push(`Summary: ${analysis.summary}`);
+  lines.push("");
+
+  if (analysis.strengths.length > 0) {
+    lines.push("STRENGTHS:");
+    analysis.strengths.slice(0, 5).forEach((s) => lines.push(`  + ${s.title}: ${s.detail}`));
+    lines.push("");
+  }
+
+  if (analysis.weaknesses.length > 0) {
+    lines.push("WEAKNESSES:");
+    analysis.weaknesses.slice(0, 5).forEach((w) => lines.push(`  - ${w.title}: ${w.detail}`));
+    lines.push("");
+  }
+
+  if (analysis.risks.length > 0) {
+    lines.push("RISKS:");
+    analysis.risks.slice(0, 5).forEach((r) => lines.push(`  ! ${r.title}: ${r.detail}`));
+    lines.push("");
+  }
+
+  lines.push("RECOMMENDATIONS (prioritized):");
+  analysis.recommendations.slice(0, 7).forEach((r) => {
+    lines.push(`  [P${r.priority}] ${r.action}`);
+    lines.push(`    Reason: ${r.reason}`);
+    lines.push(`    Impact: ${r.impact}`);
+  });
+  lines.push("");
+
+  if (analysis.projections.length > 0) {
+    lines.push("PROJECTIONS:");
+    analysis.projections.forEach((p) => {
+      lines.push(`  ${p.label}: ₹${p.current.toLocaleString("en-IN")} → ₹${p.projected.toLocaleString("en-IN")} (${p.timeframe})`);
+    });
+    lines.push("");
+  }
+
+  lines.push("ACTION PLAN:");
+  analysis.actionPlan.forEach((a) => lines.push(`  ${a}`));
+
+  return lines.join("\n");
+}
+
+function formatReportForAI(report: ReturnType<typeof generateMonthlyReport>): string {
+  const lines: string[] = [];
+  lines.push("=== MONTHLY FINANCIAL REPORT ===");
+  lines.push(`Period: ${report.period}`);
+  lines.push("");
+  lines.push("SUMMARY:");
+  lines.push(`  Income: ₹${report.summary.totalIncome.toLocaleString("en-IN")}`);
+  lines.push(`  Expenses: ₹${report.summary.totalExpenses.toLocaleString("en-IN")}`);
+  lines.push(`  Net Savings: ₹${report.summary.netSavings.toLocaleString("en-IN")}`);
+  lines.push(`  Savings Rate: ${report.summary.savingsRate}%`);
+  lines.push(`  Health Score: ${report.summary.healthScore}/100 (${report.summary.healthGrade})`);
+  lines.push("");
+
+  lines.push("ACHIEVEMENTS:");
+  report.achievements.forEach((a) => lines.push(`  + ${a}`));
+  lines.push("");
+
+  if (report.concerns.length > 0) {
+    lines.push("CONCERNS:");
+    report.concerns.forEach((c) => lines.push(`  - ${c}`));
+    lines.push("");
+  }
+
+  if (report.goalStatus.length > 0) {
+    lines.push("GOAL STATUS:");
+    report.goalStatus.forEach((g) => {
+      lines.push(`  ${g.name}: ${g.progress}% ${g.onTrack ? "(on track)" : "(behind)"}`);
+    });
+    lines.push("");
+  }
+
+  lines.push("HEALTH BREAKDOWN:");
+  report.healthBreakdown.forEach((h) => {
+    lines.push(`  ${h.factor}: ${h.score}/${h.maxScore} — ${h.tip}`);
+  });
+  lines.push("");
+
+  if (report.recommendations.length > 0) {
+    lines.push("RECOMMENDATIONS:");
+    report.recommendations.forEach((r) => {
+      lines.push(`  [P${r.priority}] ${r.action}`);
+    });
+    lines.push("");
+  }
+
+  lines.push("NEXT MONTH PRIORITIES:");
+  report.nextMonthPriorities.forEach((p) => lines.push(`  * ${p}`));
+
+  return lines.join("\n");
+}
+
+function formatSimulationForAI(sim: ReturnType<typeof simulateScenario>): string {
+  const lines: string[] = [];
+  lines.push("=== WHAT-IF SIMULATION ===");
+  lines.push(`Scenario: ${sim.description}`);
+  lines.push("");
+  lines.push("CHANGES:");
+  if (sim.summary.incomeChange !== 0) {
+    lines.push(`  Income: ${sim.summary.incomeChange > 0 ? "+" : ""}₹${sim.summary.incomeChange.toLocaleString("en-IN")}`);
+  }
+  if (sim.summary.expenseChange !== 0) {
+    lines.push(`  Expenses: ${sim.summary.expenseChange > 0 ? "+" : ""}₹${sim.summary.expenseChange.toLocaleString("en-IN")}`);
+  }
+  lines.push(`  Net Savings: ${sim.summary.savingsChange > 0 ? "+" : ""}₹${sim.summary.savingsChange.toLocaleString("en-IN")}`);
+  lines.push("");
+
+  if (sim.findings.length > 0) {
+    lines.push("IMPACT:");
+    sim.findings.forEach((f) => lines.push(`  ${f.severity === "critical" ? "!!" : f.severity === "warning" ? "!" : f.severity === "positive" ? "+" : "-"} ${f.title}`));
+    lines.push("");
+  }
+
+  if (sim.recommendations.length > 0) {
+    lines.push("RECOMMENDATIONS:");
+    sim.recommendations.forEach((r) => lines.push(`  ${r.action}`));
+  }
+
+  return lines.join("\n");
+}
 
 const SYSTEM_PROMPT = `You are VaultIQ AI, India's AI-powered financial guardian and personal financial advisor.
 
@@ -24,6 +265,9 @@ When asked about finances:
 3. Compare against benchmarks (20% savings rule, 6-month emergency fund, etc.)
 4. Provide actionable next steps
 5. Use Indian financial context (SIPs, PPF, EPF, NPS, mutual funds, etc.)
+
+When analysis data is provided, format your response as a clear, structured financial advisor report.
+Use the strengths, weaknesses, risks, and recommendations to give a comprehensive assessment.
 
 When asked about non-financial topics, answer normally but briefly redirect to financial matters if relevant.
 
@@ -61,23 +305,44 @@ export const chatService = {
       console.error("[chatService] Failed to read history:", historyError);
     }
 
-    // 3. Build financial context and format it for the system prompt
+    // 3. Build financial context and run analysis
     let financialContextStr = "";
+    let analysisStr = "";
+    const intent = detectAnalysisIntent(message);
+
     try {
       const ctx = await buildFinancialContext(userId);
       financialContextStr = formatFinancialContext(ctx);
+
+      if (intent.type === "full_analysis") {
+        const analysis = runFullAnalysis(ctx);
+        analysisStr = formatAnalysisForAI(analysis);
+      } else if (intent.type === "monthly_report") {
+        const report = generateMonthlyReport(ctx);
+        analysisStr = formatReportForAI(report);
+      } else if (intent.type === "simulation" && intent.params) {
+        const sim = simulateScenario(ctx, intent.params);
+        analysisStr = formatSimulationForAI(sim);
+      }
     } catch (err) {
       console.error("[chatService] Failed to build financial context:", err);
       financialContextStr = "Financial data not available.";
     }
 
-    // 4. Generate AI response with financial context
+    // 4. Generate AI response with financial context and analysis
     const ai = getAIProvider();
     let response: string;
 
     try {
+      const systemContent = [
+        SYSTEM_PROMPT,
+        "\n\n=== FINANCIAL PROFILE ===",
+        financialContextStr,
+        analysisStr ? "\n\n=== ANALYSIS DATA ===\n" + analysisStr : "",
+      ].join("");
+
       response = await ai.chat([
-        { role: "system", content: SYSTEM_PROMPT + "\n\n" + financialContextStr },
+        { role: "system", content: systemContent },
         ...(history || []).map((h) => ({
           role: h.role as "user" | "assistant" | "system",
           content: h.content,
