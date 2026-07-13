@@ -4,11 +4,22 @@ import { registerSchema } from "@/validations/auth";
 import { userRepository } from "@/repositories/user.repository";
 import { successResponse } from "@/lib/api-response";
 import { handleApiError } from "@/lib/api-handler";
+import { checkRateLimit, getRateLimitHeaders, RATE_LIMITS } from "@/lib/rate-limit";
 
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
+    const forwarded = request.headers.get("x-forwarded-for");
+    const ip = forwarded?.split(",")[0] ?? "unknown";
+    const rateLimitResult = checkRateLimit(`register:${ip}`, RATE_LIMITS.register);
+    if (!rateLimitResult.allowed) {
+      return Response.json({ error: "Too many requests. Please try again later." }, {
+        status: 429,
+        headers: getRateLimitHeaders(rateLimitResult),
+      });
+    }
+
     const body = await request.json();
     const data = registerSchema.parse(body);
 

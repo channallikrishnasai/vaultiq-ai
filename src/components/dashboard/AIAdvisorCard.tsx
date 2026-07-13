@@ -1,5 +1,9 @@
 "use client";
 
+// TODO: THREE.Clock.getElapsedTime() is deprecated upstream in @react-three/fiber.
+// Replace with manual delta-based timing: useFrame((state, delta) => { elapsed += delta; })
+// Tracked in Phase 6.7 — requires R3F API change across 4 call sites in this file.
+
 /**
  * VaultIQ AI Advisor — JARVIS-Level 3D Experience
  * 

@@ -2,6 +2,7 @@
 
 import { Compass, ArrowUpRight, Plus } from "lucide-react";
 import Link from "next/link";
+import { formatCurrency } from "@/utils/format";
 
 interface PortfolioCardProps {
   portfolio: {
@@ -21,14 +22,6 @@ interface PortfolioCardProps {
     }[];
     isEmpty: boolean;
   };
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 export default function PortfolioCard({ portfolio }: PortfolioCardProps) {

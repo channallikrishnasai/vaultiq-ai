@@ -5,6 +5,7 @@ import { Target, Shield, TrendingUp, Home, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { fadeInUp } from "@/lib/motion";
+import { formatCurrency } from "@/utils/format";
 
 interface GoalsCardProps {
   goals: {
@@ -25,14 +26,6 @@ const iconMap: Record<string, LucideIcon> = {
   Home,
   Target,
 };
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
 
 export default function GoalsCard({ goals, totalGoals = 0 }: GoalsCardProps) {
   const hasGoals = goals.length > 0;

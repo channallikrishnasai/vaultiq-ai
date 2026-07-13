@@ -1,9 +1,8 @@
 import { Resend } from "resend";
+import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
 
-const resendApiKey = process.env.RESEND_API_KEY;
-const emailFrom = process.env.EMAIL_FROM;
-const appUrl = process.env.APP_URL ?? "http://localhost:3000";
-const isDev = process.env.NODE_ENV !== "production";
+const TAG = "Email";
 
 export interface EmailResult {
   sent: boolean;
@@ -11,34 +10,20 @@ export interface EmailResult {
 }
 
 function getResendClient(): Resend | null {
-  if (!resendApiKey) {
-    console.warn(
-      "[Email] RESEND_API_KEY is not set. Emails will not be sent. " +
-        "Set RESEND_API_KEY in your environment variables to enable email delivery.",
-    );
+  if (!env.RESEND_API_KEY) {
+    logger.warn(TAG, "RESEND_API_KEY is not set. Emails will not be sent.");
     return null;
   }
-  return new Resend(resendApiKey);
+  return new Resend(env.RESEND_API_KEY);
 }
 
 export function isEmailConfigured(): boolean {
-  return !!resendApiKey;
+  return !!env.RESEND_API_KEY;
 }
 
 function logDevVerificationUrl(email: string, token: string) {
-  const verifyUrl = `${appUrl}/verify-email?token=${token}`;
-  console.log("");
-  console.log("╔══════════════════════════════════════════════════════════╗");
-  console.log("║           DEVELOPMENT MODE — EMAIL NOT SENT             ║");
-  console.log("╠══════════════════════════════════════════════════════════╣");
-  console.log(`║  To:   ${email.padEnd(47)}║`);
-  console.log("║                                                          ║");
-  console.log("║  Verification URL:                                      ║");
-  console.log(`║  ${verifyUrl.substring(0, 55).padEnd(55)}║`);
-  console.log("║                                                          ║");
-  console.log(`║  Token: ${token.substring(0, 48).padEnd(48)}║`);
-  console.log("╚══════════════════════════════════════════════════════════╝");
-  console.log("");
+  const verifyUrl = `${env.APP_URL}/verify-email?token=${token}`;
+  logger.info(TAG, `Dev mode — verification URL for ${email}: ${verifyUrl}`);
 }
 
 export async function sendVerificationEmail(
@@ -48,15 +33,15 @@ export async function sendVerificationEmail(
   const resend = getResendClient();
 
   if (!resend) {
-    if (isDev) {
+    if (env.NODE_ENV !== "production") {
       logDevVerificationUrl(email, token);
       return { sent: false, devMode: true };
     }
     return { sent: false, devMode: false };
   }
 
-  const from = emailFrom ?? "VaultIQ <onboarding@resend.dev>";
-  const verifyUrl = `${appUrl}/verify-email?token=${token}`;
+  const from = env.EMAIL_FROM ?? "VaultIQ <onboarding@resend.dev>";
+  const verifyUrl = `${env.APP_URL}/verify-email?token=${token}`;
 
   try {
     const response = await resend.emails.send({
@@ -85,18 +70,18 @@ export async function sendVerificationEmail(
       `,
     });
     if (response.error) {
-      console.error("[Email] Resend API error:", response.error);
-      if (isDev) {
+      logger.error(TAG, "Resend API error", response.error);
+      if (env.NODE_ENV !== "production") {
         logDevVerificationUrl(email, token);
         return { sent: false, devMode: true };
       }
       return { sent: false, devMode: false };
     }
-    console.log("[Email] Verification email sent to", email);
+    logger.info(TAG, `Verification email sent to ${email}`);
     return { sent: true, devMode: false };
   } catch (error) {
-    console.error("[Email] Failed to send verification email:", error);
-    if (isDev) {
+    logger.error(TAG, "Failed to send verification email", error);
+    if (env.NODE_ENV !== "production") {
       logDevVerificationUrl(email, token);
       return { sent: false, devMode: true };
     }
@@ -111,27 +96,16 @@ export async function sendPasswordResetEmail(
   const resend = getResendClient();
 
   if (!resend) {
-    if (isDev) {
-      const resetUrl = `${appUrl}/reset-password?token=${token}`;
-      console.log("");
-      console.log("╔══════════════════════════════════════════════════════════╗");
-      console.log("║           DEVELOPMENT MODE — EMAIL NOT SENT             ║");
-      console.log("╠══════════════════════════════════════════════════════════╣");
-      console.log(`║  To:   ${email.padEnd(47)}║`);
-      console.log("║                                                          ║");
-      console.log("║  Password Reset URL:                                    ║");
-      console.log(`║  ${resetUrl.substring(0, 55).padEnd(55)}║`);
-      console.log("║                                                          ║");
-      console.log(`║  Token: ${token.substring(0, 48).padEnd(48)}║`);
-      console.log("╚══════════════════════════════════════════════════════════╝");
-      console.log("");
+    if (env.NODE_ENV !== "production") {
+      const resetUrl = `${env.APP_URL}/reset-password?token=${token}`;
+      logger.info(TAG, `Dev mode — password reset URL for ${email}: ${resetUrl}`);
       return { sent: false, devMode: true };
     }
     return { sent: false, devMode: false };
   }
 
-  const from = emailFrom ?? "VaultIQ <onboarding@resend.dev>";
-  const resetUrl = `${appUrl}/reset-password?token=${token}`;
+  const from = env.EMAIL_FROM ?? "VaultIQ <onboarding@resend.dev>";
+  const resetUrl = `${env.APP_URL}/reset-password?token=${token}`;
 
   try {
     const response = await resend.emails.send({
@@ -160,27 +134,19 @@ export async function sendPasswordResetEmail(
       `,
     });
     if (response.error) {
-      console.error("[Email] Resend API error:", response.error);
-      if (isDev) {
-        console.log("");
-        console.log("[Email] DEVELOPMENT MODE — Password reset URL:");
-        console.log("[Email]", resetUrl);
-        console.log("[Email] Token:", token);
-        console.log("");
+      logger.error(TAG, "Resend API error", response.error);
+      if (env.NODE_ENV !== "production") {
+        logger.info(TAG, `Dev mode — password reset URL: ${resetUrl}`);
         return { sent: false, devMode: true };
       }
       return { sent: false, devMode: false };
     }
-    console.log("[Email] Password reset email sent to", email);
+    logger.info(TAG, `Password reset email sent to ${email}`);
     return { sent: true, devMode: false };
   } catch (error) {
-    console.error("[Email] Failed to send password reset email:", error);
-    if (isDev) {
-      console.log("");
-      console.log("[Email] DEVELOPMENT MODE — Password reset URL:");
-      console.log("[Email]", resetUrl);
-      console.log("[Email] Token:", token);
-      console.log("");
+    logger.error(TAG, "Failed to send password reset email", error);
+    if (env.NODE_ENV !== "production") {
+      logger.info(TAG, `Dev mode — password reset URL: ${resetUrl}`);
       return { sent: false, devMode: true };
     }
     return { sent: false, devMode: false };

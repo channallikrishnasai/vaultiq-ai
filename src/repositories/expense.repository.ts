@@ -17,7 +17,7 @@ export const expenseRepository = {
     data: { userId, ...data },
   });
 
-  const profile = await prisma.profile.update({
+  await prisma.profile.update({
     where: { userId },
     data: {
       xp: {
@@ -25,8 +25,6 @@ export const expenseRepository = {
       },
     },
   });
-
-  console.log("[XP] Updated profile xp:", profile.xp);
 
   return expense;
 },

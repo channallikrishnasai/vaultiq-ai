@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Wallet, TrendingUp, TrendingDown, PiggyBank, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { staggerContainer, fadeInUp } from "@/lib/motion";
+import { formatCurrency } from "@/utils/format";
 
 interface KPICardsProps {
   netWorth: number;
@@ -12,14 +13,6 @@ interface KPICardsProps {
   monthlyIncome: number;
   monthlyExpenses: number;
   savingsRate: number;
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 function formatPercent(n: number): string {

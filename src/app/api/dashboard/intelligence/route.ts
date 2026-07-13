@@ -1,21 +1,14 @@
-import { auth } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { generateIntelligence } from "@/services/ai/intelligence.service";
+import { handleApiError } from "@/lib/api-handler";
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    const session = await requireAuth();
     const intelligence = await generateIntelligence(session.user.id);
     return NextResponse.json(intelligence);
   } catch (error) {
-    console.error("[Intelligence API]", error);
-    return NextResponse.json(
-      { error: "Failed to generate intelligence" },
-      { status: 500 },
-    );
+    return handleApiError(error);
   }
 }

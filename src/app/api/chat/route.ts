@@ -1,20 +1,19 @@
 import { NextRequest } from "next/server";
-import { requireAuth, auth } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { chatMessageSchema } from "@/validations/chat";
 import { chatService } from "@/services/ai/chat.service";
+import { checkRateLimit, getRateLimitHeaders, RATE_LIMITS } from "@/lib/rate-limit";
+import { handleApiError } from "@/lib/api-handler";
+import { UnauthorizedError } from "@/lib/errors";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await requireAuth();
 
     const { searchParams } = new URL(request.url);
     const conversationId = searchParams.get("conversation_id");
 
     if (conversationId) {
-      // Load messages for a specific conversation
       const messages = await chatService.getHistory(
         session.user.id,
         conversationId
@@ -22,21 +21,27 @@ export async function GET(request: NextRequest) {
       return Response.json({ messages });
     }
 
-    // List all conversations
     const conversations = await chatService.getSessions(session.user.id);
     return Response.json({ conversations });
   } catch (error: any) {
-    if (error?.name === "UnauthorizedError") {
+    if (error instanceof UnauthorizedError || error?.name === "UnauthorizedError") {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.error("[chat] GET error:", error);
-    return Response.json({ error: "Server error" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const session = await requireAuth();
+    const rateLimitResult = checkRateLimit(`chat:${session.user.id}`, RATE_LIMITS.chat);
+    if (!rateLimitResult.allowed) {
+      return Response.json({ error: "Too many requests. Please try again later." }, {
+        status: 429,
+        headers: getRateLimitHeaders(rateLimitResult),
+      });
+    }
+
     const body = await request.json();
     const data = chatMessageSchema.parse(body);
     const result = await chatService.sendMessage(
@@ -45,7 +50,6 @@ export async function POST(request: NextRequest) {
       data.sessionId
     );
 
-    // Return as SSE stream for AIChat component compatibility
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       start(controller) {
@@ -63,20 +67,16 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    if (error?.name === "UnauthorizedError") {
+    if (error instanceof UnauthorizedError || error?.name === "UnauthorizedError") {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.error("[chat] POST error:", error);
-    return Response.json({ error: "Server error" }, { status: 500 });
+    return handleApiError(error);
   }
 }
 
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return Response.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await requireAuth();
 
     const { searchParams } = new URL(request.url);
     const conversationId = searchParams.get("conversation_id");
@@ -89,10 +89,9 @@ export async function DELETE(request: NextRequest) {
 
     return Response.json({ ok: true });
   } catch (error: any) {
-    if (error?.name === "UnauthorizedError") {
+    if (error instanceof UnauthorizedError || error?.name === "UnauthorizedError") {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
-    console.error("[chat] DELETE error:", error);
-    return Response.json({ error: "Server error" }, { status: 500 });
+    return handleApiError(error);
   }
 }

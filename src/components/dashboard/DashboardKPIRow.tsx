@@ -294,11 +294,11 @@ export default function DashboardKPIRow({
                               onClick={async () => { await signOut({ callbackUrl: "/" }); }}
                               style={{
                                 display: "flex", alignItems: "center", gap: 6, width: "100%",
-                                padding: "8px 10px", borderRadius: 6, background: "transparent",
+                                padding: "8px 10px", borderRadius: 6, background: "rgba(0,0,0,0)",
                                 border: "none", cursor: "pointer", color: "rgba(255,255,255,0.5)", fontSize: 11,
                               }}
                               onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; e.currentTarget.style.color = "#ef4444"; }}
-                              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0)"; e.currentTarget.style.color = "rgba(255,255,255,0.5)"; }}
                             >
                               <LogOut size={12} />
                               Log Out

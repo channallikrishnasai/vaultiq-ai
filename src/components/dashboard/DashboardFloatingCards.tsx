@@ -340,7 +340,7 @@ function CardHeader({
           color: "rgba(255,255,255,0.25)",
           cursor: "pointer",
           border: "none",
-          background: "transparent",
+          background: "rgba(0,0,0,0)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -665,7 +665,7 @@ export default function DashboardFloatingCards({
           <button
             onClick={() => toggleMinimize("fraudShield")}
             className="p-0.5 hover:bg-white/10 rounded transition-colors"
-            style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", cursor: "pointer", border: "none", background: "transparent", display: "flex", alignItems: "center", justifyContent: "center" }}
+            style={{ fontSize: 8, color: "rgba(255,255,255,0.25)", cursor: "pointer", border: "none", background: "rgba(0,0,0,0)", display: "flex", alignItems: "center", justifyContent: "center" }}
           >
             {minimized["fraudShield"] ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
           </button>
@@ -1483,10 +1483,10 @@ export default function DashboardFloatingCards({
                     onClick={() => setShowHistory(h => !h)}
                     style={{
                       width: 26, height: 26, borderRadius: "50%",
-                      background: showHistory ? "rgba(212,175,55,0.15)" : "transparent",
+                      background: showHistory ? "rgba(212,175,55,0.15)" : "rgba(0,0,0,0)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       cursor: "pointer",
-                      border: showHistory ? "1px solid rgba(212,175,55,0.25)" : "1px solid transparent",
+                      border: showHistory ? "1px solid rgba(212,175,55,0.25)" : "1px solid rgba(0,0,0,0)",
                       transition: "all 0.2s",
                     }}
                     title="Chat History"
@@ -1623,7 +1623,7 @@ export default function DashboardFloatingCards({
                     onKeyDown={e => e.key === "Enter" && sendChatMessage(chatInput)}
                     placeholder="Ask your AI Financial Advisor anything..."
                     disabled={chatThinking}
-                    style={{ flex: 1, fontSize: 10.5, color: "rgba(255,255,255,0.85)", background: "transparent", border: "none", outline: "none", padding: "6px 0", letterSpacing: "0.01em" }}
+                    style={{ flex: 1, fontSize: 10.5, color: "rgba(255,255,255,0.85)", background: "rgba(0,0,0,0)", border: "none", outline: "none", padding: "6px 0", letterSpacing: "0.01em" }}
                   />
 
                   {chatMessages.length === 0 && !chatThinking && (
@@ -1760,7 +1760,7 @@ export default function DashboardFloatingCards({
                       transition: "background 0.2s",
                     }}
                     onMouseEnter={e => e.currentTarget.style.background = "rgba(212,175,55,0.04)"}
-                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                    onMouseLeave={e => e.currentTarget.style.background = "rgba(0,0,0,0)"}
                   >
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 4 }}>
                       <p style={{ fontSize: 10, fontWeight: 600, color: "rgba(255,255,255,0.65)", lineHeight: 1.4, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

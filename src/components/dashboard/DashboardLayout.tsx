@@ -1,17 +1,18 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import DashboardScene from "./DashboardScene";
-import NeuralNetwork from "./NeuralNetwork";
-import DashboardFloatingCards from "./DashboardFloatingCards";
+import dynamic from "next/dynamic";
 import DashboardKPIRow from "./DashboardKPIRow";
 import FlashOverlay from "./FlashOverlay";
 import DashboardParticles from "./DashboardParticles";
 import LightRays from "./LightRays";
-import DashboardIntelligence from "./DashboardIntelligence";
 import { useOrb } from "@/contexts/OrbContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
+
+const DashboardScene = dynamic(() => import("./DashboardScene"), { ssr: false });
+const NeuralNetwork = dynamic(() => import("./NeuralNetwork"), { ssr: false });
+const DashboardFloatingCards = dynamic(() => import("./DashboardFloatingCards"), { ssr: false });
+const DashboardIntelligence = dynamic(() => import("./DashboardIntelligence"), { ssr: false });
 
 interface DashboardLayoutProps {
   userId: string;

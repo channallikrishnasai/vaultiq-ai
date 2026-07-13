@@ -1,4 +1,4 @@
-import { auth } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { buildFinancialContext } from "@/services/ai/financial-context.service";
 import {
@@ -7,33 +7,41 @@ import {
   simulateScenario,
   type WhatIfScenario,
 } from "@/services/ai/analysis";
+import { checkRateLimit, getRateLimitHeaders, RATE_LIMITS } from "@/lib/rate-limit";
+import { handleApiError } from "@/lib/api-handler";
 
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    const session = await requireAuth();
+
+    const rateLimitResult = checkRateLimit(`analysis:${session.user.id}`, RATE_LIMITS.analysis);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json({ error: "Too many requests." }, {
+        status: 429,
+        headers: getRateLimitHeaders(rateLimitResult),
+      });
+    }
+
     const ctx = await buildFinancialContext(session.user.id);
     const analysis = runFullAnalysis(ctx);
     return NextResponse.json(analysis);
   } catch (error) {
-    console.error("[Analysis API]", error);
-    return NextResponse.json(
-      { error: "Failed to run analysis" },
-      { status: 500 },
-    );
+    return handleApiError(error);
   }
 }
 
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    const session = await requireAuth();
+
+    const rateLimitResult = checkRateLimit(`analysis:${session.user.id}`, RATE_LIMITS.analysis);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json({ error: "Too many requests." }, {
+        status: 429,
+        headers: getRateLimitHeaders(rateLimitResult),
+      });
+    }
+
     const body = await request.json();
     const { type, scenario } = body as {
       type: "full_analysis" | "monthly_report" | "simulation";
@@ -68,10 +76,6 @@ export async function POST(request: Request) {
         );
     }
   } catch (error) {
-    console.error("[Analysis API]", error);
-    return NextResponse.json(
-      { error: "Failed to process analysis request" },
-      { status: 500 },
-    );
+    return handleApiError(error);
   }
 }

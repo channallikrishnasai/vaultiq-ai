@@ -1,6 +1,7 @@
 "use client";
 
 import { Brain } from "lucide-react";
+import { formatCurrency } from "@/utils/format";
 
 interface ExpenseSummaryCardProps {
   expenses: {
@@ -12,14 +13,6 @@ interface ExpenseSummaryCardProps {
       percent: number;
     }[];
   };
-}
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 export default function ExpenseSummaryCard({ expenses }: ExpenseSummaryCardProps) {

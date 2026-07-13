@@ -35,9 +35,11 @@ export function GoalsClient({ user }: GoalsClientProps) {
   const [targetAmount, setTargetAmount] = useState<string>("");
   const [currentAmount, setCurrentAmount] = useState<string>("");
   const [type, setType] = useState<string>("SAVINGS");
-  const [deadline, setDeadline] = useState<string>(
-    new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
-  );
+  const [deadline, setDeadline] = useState<string>("");
+
+  useEffect(() => {
+    setDeadline(new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]);
+  }, []);
 
   // Editing state
   const [editingId, setEditingId] = useState<string | null>(null);

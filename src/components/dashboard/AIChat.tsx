@@ -8,6 +8,9 @@ import {
   Plus, History, Trash2,
 } from "lucide-react";
 import { globalOrb } from "@/lib/global-orb";
+import { logger } from "@/lib/logger";
+
+const TAG = "AIChat";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -173,7 +176,7 @@ export default function AIChat({
         })));
       }
     } catch (e) {
-      console.error("[chat] loadSessions error:", e);
+      logger.error(TAG, "loadSessions error", e);
     }
   }, []);
 
@@ -193,7 +196,7 @@ export default function AIChat({
         setShowSessions(false);
       }
     } catch (e) {
-      console.error("[chat] loadSession error:", e);
+      logger.error(TAG, "loadSession error", e);
     }
     setLoadingHistory(false);
   }, []);
@@ -233,7 +236,7 @@ export default function AIChat({
           }
         }
       } catch (e) {
-        console.error("[chat] load error:", e);
+        logger.error(TAG, "load error", e);
       }
     };
     loadAndRestore();
@@ -494,7 +497,7 @@ export default function AIChat({
             <button
               onClick={startNewChat}
               style={{
-                background: "transparent",
+                background: "rgba(0,0,0,0)",
                 border: "none",
                 color: "rgba(255,255,255,0.4)",
                 cursor: "pointer",
@@ -515,7 +518,7 @@ export default function AIChat({
                 if (!showSessions) loadSessions();
               }}
               style={{
-                background: showSessions ? "rgba(212,175,55,0.1)" : "transparent",
+                background: showSessions ? "rgba(212,175,55,0.1)" : "rgba(0,0,0,0)",
                 border: "none",
                 color: showSessions ? "#D4AF37" : "rgba(255,255,255,0.4)",
                 cursor: "pointer",
@@ -533,7 +536,7 @@ export default function AIChat({
             <button
               onClick={() => handleMinimize(true)}
               style={{
-                background: "transparent",
+                background: "rgba(0,0,0,0)",
                 border: "none",
                 color: "rgba(255,255,255,0.4)",
                 cursor: "pointer",
@@ -552,7 +555,7 @@ export default function AIChat({
               <button
                 onClick={() => setIsClosed(true)}
                 style={{
-                  background: "transparent",
+                  background: "rgba(0,0,0,0)",
                   border: "none",
                   color: "rgba(255,255,255,0.4)",
                   cursor: "pointer",
@@ -598,9 +601,12 @@ export default function AIChat({
                   </p>
                 ) : (
                   sessions.map((s) => (
-                    <motion.button
+                    <motion.div
                       key={s.session_id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => loadSession(s.session_id)}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); loadSession(s.session_id); } }}
                       whileHover={{ background: "rgba(212,175,55,0.06)" }}
                       style={{
                         display: "flex",
@@ -608,7 +614,7 @@ export default function AIChat({
                         justifyContent: "space-between",
                         width: "100%",
                         padding: "7px 16px",
-                        background: sessionIdRef.current === s.session_id ? "rgba(212,175,55,0.08)" : "transparent",
+                        background: sessionIdRef.current === s.session_id ? "rgba(212,175,55,0.08)" : "rgba(0,0,0,0)",
                         border: "none",
                         cursor: "pointer",
                         textAlign: "left",
@@ -629,7 +635,7 @@ export default function AIChat({
                       <button
                         onClick={(e) => deleteSession(s.session_id, e)}
                         style={{
-                          background: "transparent",
+                          background: "rgba(0,0,0,0)",
                           border: "none",
                           color: "rgba(255,255,255,0.2)",
                           cursor: "pointer",
@@ -643,7 +649,7 @@ export default function AIChat({
                       >
                         <Trash2 size={11} />
                       </button>
-                    </motion.button>
+                    </motion.div>
                   ))
                 )}
               </div>
@@ -969,7 +975,7 @@ export default function AIChat({
         <button
           onClick={startNewChat}
           style={{
-            background: "transparent",
+            background: "rgba(0,0,0,0)",
             border: "none",
             color: "rgba(255,255,255,0.3)",
             cursor: "pointer",

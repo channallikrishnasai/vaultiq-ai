@@ -28,11 +28,14 @@ export function BillsClient({ user }: BillsClientProps) {
   const [bills, setBills] = useState<Bill[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Client-side timestamp to avoid hydration mismatch
+  const [now, setNow] = useState<number>(0);
+
   // Form fields
   const [name, setName] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [category, setCategory] = useState<string>("Subscription");
-  const [dueDate, setDueDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [dueDate, setDueDate] = useState<string>("");
 
   const fetchBills = useCallback(async () => {
     setLoading(true);
@@ -50,6 +53,8 @@ export function BillsClient({ user }: BillsClientProps) {
   }, []);
 
   useEffect(() => {
+    setNow(Date.now());
+    setDueDate(new Date().toISOString().split("T")[0]);
     fetchBills();
   }, [fetchBills]);
 
@@ -233,7 +238,7 @@ export function BillsClient({ user }: BillsClientProps) {
           ) : (
             <div className="flex-1 overflow-y-auto space-y-3 pr-1 max-h-[500px] scrollbar-thin">
               {bills.map((b) => {
-                const isOverdue = !b.paid && new Date(b.dueDate).getTime() < Date.now();
+                const isOverdue = !b.paid && now > 0 && new Date(b.dueDate).getTime() < now;
 
                 return (
                   <div

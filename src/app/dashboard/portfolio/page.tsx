@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   TrendingUp, TrendingDown, RefreshCw, BarChart2,
@@ -126,21 +126,21 @@ export default function PortfolioPage() {
   // Mock chart points based on current selected stock
   const activeStock = market.find(s => s.symbol === selectedStock);
   const currentPrice = activeStock?.price || 100;
-  const generateChartData = () => {
+  const chartData = useMemo(() => {
+    if (!mounted) return [];
     const data = [];
     let price = currentPrice * 0.95;
     for (let i = 0; i < 20; i++) {
       price = price * (1 + (Math.random() * 0.04 - 0.02));
       data.push({
-        time: `${10 + Math.floor(i/2)}:${(i%2)*30 === 0 ? "00" : "30"}`,
+        time: `${10 + Math.floor(i / 2)}:${(i % 2) * 30 === 0 ? "00" : "30"}`,
         Price: +price.toFixed(2),
         EMA: +(price * (1 + Math.sin(i / 3) * 0.01)).toFixed(2),
-        RSI: Math.floor(40 + Math.sin(i/2)*20 + Math.random()*10),
+        RSI: Math.floor(40 + Math.sin(i / 2) * 20 + Math.random() * 10),
       });
     }
     return data;
-  };
-  const chartData = generateChartData();
+  }, [mounted, currentPrice]);
 
   // Compute holdings from trades
   const calculateHoldings = () => {

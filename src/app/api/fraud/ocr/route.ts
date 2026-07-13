@@ -1,10 +1,22 @@
 import { requireAuth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { handleApiError } from "@/lib/api-handler";
+import { env } from "@/lib/env";
+import { checkRateLimit, getRateLimitHeaders, RATE_LIMITS } from "@/lib/rate-limit";
+import { UnauthorizedError } from "@/lib/errors";
 
 export async function POST(request: Request) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
+
+    const rateLimitResult = checkRateLimit(`fraud:${session.user.id}`, RATE_LIMITS.fraud);
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json({ error: "Too many requests." }, {
+        status: 429,
+        headers: getRateLimitHeaders(rateLimitResult),
+      });
+    }
+
     const body = await request.json();
     const { image } = body;
 
@@ -12,7 +24,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "No image provided" }, { status: 400 });
     }
 
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = env.GROQ_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ success: false, error: "AI service not configured" }, { status: 500 });
     }
@@ -54,6 +66,9 @@ export async function POST(request: Request) {
     const extractedText = data.choices[0].message.content.trim();
     return NextResponse.json({ success: true, data: { text: extractedText } });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return handleApiError(error);
   }
 }

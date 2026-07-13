@@ -1,9 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-
-const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+import { env } from "@/lib/env";
 
 export async function GET(request: Request) {
+  if (env.NODE_ENV !== "development") {
+    return NextResponse.json({ error: "Not available" }, { status: 404 });
+  }
+
   const { searchParams } = new URL(request.url);
   const email = searchParams.get("email");
 
@@ -13,7 +16,6 @@ export async function GET(request: Request) {
 
   const normalizedEmail = email.toLowerCase().trim();
 
-  // Find the most recent unused token for this email
   const token = await prisma.verificationToken.findFirst({
     where: {
       identifier: normalizedEmail,
@@ -29,7 +31,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const verificationUrl = `${appUrl}/verify-email?token=${token.token}`;
+  const verificationUrl = `${env.APP_URL}/verify-email?token=${token.token}`;
 
   return NextResponse.json({
     email: normalizedEmail,

@@ -1,9 +1,15 @@
 import { ZodError } from "zod";
 import { AppError } from "@/lib/errors";
 import { errorResponse } from "@/lib/api-response";
+import { logger } from "@/lib/logger";
+
+const TAG = "API";
 
 export function handleApiError(error: unknown) {
   if (error instanceof AppError) {
+    if (error.statusCode >= 500) {
+      logger.error(TAG, `${error.code}: ${error.message}`, error);
+    }
     return errorResponse(
       error.code,
       error.message,
@@ -18,7 +24,7 @@ export function handleApiError(error: unknown) {
     });
   }
 
-  console.error("[API Error]", error);
+  logger.error(TAG, "Unhandled API error", error);
   return errorResponse(
     "INTERNAL_ERROR",
     "An unexpected error occurred",

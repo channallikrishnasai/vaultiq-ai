@@ -1,9 +1,25 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-export function useCountUp(end: number, duration = 1200, delay = 0) {
-  const [value, setValue] = useState(0);
+export function AnimatedNumber({
+  value,
+  prefix = "",
+  suffix = "",
+  decimals = 0,
+  duration = 1400,
+  delay = 0,
+  style = {},
+}: {
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  duration?: number;
+  delay?: number;
+  style?: React.CSSProperties;
+}) {
+  const [displayed, setDisplayed] = useState(0);
   const frameRef = useRef<number>(0);
 
   useEffect(() => {
@@ -13,28 +29,23 @@ export function useCountUp(end: number, duration = 1200, delay = 0) {
         const elapsed = now - start;
         const progress = Math.min(elapsed / duration, 1);
         const eased = 1 - Math.pow(1 - progress, 3);
-        setValue(eased * end);
+        setDisplayed(eased * value);
         if (progress < 1) {
           frameRef.current = requestAnimationFrame(animate);
         }
       };
       frameRef.current = requestAnimationFrame(animate);
     }, delay);
-
     return () => {
       clearTimeout(timer);
       cancelAnimationFrame(frameRef.current);
     };
-  }, [end, duration, delay]);
+  }, [value, duration, delay]);
 
-  return value;
-}
-
-export function useCountUpFormatted(end: number, duration = 1200, delay = 0, prefix = "", suffix = "", decimals = 0) {
-  const raw = useCountUp(end, duration, delay);
-  const formatted = raw.toLocaleString("en-IN", {
+  const formatted = displayed.toLocaleString("en-IN", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
-  return `${prefix}${formatted}${suffix}`;
+
+  return <span style={style}>{prefix}{formatted}{suffix}</span>;
 }

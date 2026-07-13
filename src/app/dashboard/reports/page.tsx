@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { ReportsClient } from "@/components/dashboard/ReportsClient";
+import ReportsClientWrapper from "@/components/dashboard/ReportsClientWrapper";
 import { prisma } from "@/lib/prisma";
 
 export default async function ReportsPage() {
@@ -14,5 +14,5 @@ export default async function ReportsPage() {
 
   if (!user) redirect("/sign-in");
 
-  return <ReportsClient user={user} />;
+  return <ReportsClientWrapper user={user} />;
 }

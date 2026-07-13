@@ -1,6 +1,9 @@
 import { randomUUID } from "crypto";
-import { supabaseAdmin } from "@/lib/supabase";
+import { requireSupabaseAdmin } from "@/lib/supabase";
 import { getAIProvider } from "@/services/ai";
+import { logger } from "@/lib/logger";
+
+const TAG = "Chat";
 import { buildFinancialContext, formatFinancialContext } from "./financial-context.service";
 import {
   runFullAnalysis,
@@ -277,8 +280,10 @@ export const chatService = {
   async sendMessage(userId: string, message: string, sessionId?: string) {
     const sid = sessionId ?? randomUUID();
 
+    const db = requireSupabaseAdmin();
+
     // 1. Save user message to Supabase
-    const { error: userInsertError } = await supabaseAdmin
+    const { error: userInsertError } = await db
       .from("chat_messages")
       .insert({
         user_id: userId,
@@ -288,12 +293,12 @@ export const chatService = {
       });
 
     if (userInsertError) {
-      console.error("[chatService] Failed to save user message:", userInsertError);
+      logger.error(TAG, "Failed to save user message", userInsertError);
       throw new Error("Failed to save message");
     }
 
     // 2. Read conversation history from Supabase (last 10 messages for AI context)
-    const { data: history, error: historyError } = await supabaseAdmin
+    const { data: history, error: historyError } = await db
       .from("chat_messages")
       .select("role, content")
       .eq("user_id", userId)
@@ -302,7 +307,7 @@ export const chatService = {
       .limit(10);
 
     if (historyError) {
-      console.error("[chatService] Failed to read history:", historyError);
+      logger.error(TAG, "Failed to read history", historyError);
     }
 
     // 3. Build financial context and run analysis
@@ -325,7 +330,7 @@ export const chatService = {
         analysisStr = formatSimulationForAI(sim);
       }
     } catch (err) {
-      console.error("[chatService] Failed to build financial context:", err);
+      logger.error(TAG, "Failed to build financial context", err);
       financialContextStr = "Financial data not available.";
     }
 
@@ -349,13 +354,13 @@ export const chatService = {
         })),
       ]);
     } catch (aiError) {
-      console.error("[chatService] AI generation failed:", aiError);
+      logger.error(TAG, "AI generation failed", aiError);
       response = "I'm having trouble generating a response right now. Please try again.";
     }
 
     // 5. Save assistant response to Supabase (only if we have a real response)
     if (response) {
-      const { error: assistantInsertError } = await supabaseAdmin
+      const { error: assistantInsertError } = await db
         .from("chat_messages")
         .insert({
           user_id: userId,
@@ -365,7 +370,7 @@ export const chatService = {
         });
 
       if (assistantInsertError) {
-        console.error("[chatService] Failed to save assistant message:", assistantInsertError);
+        logger.error(TAG, "Failed to save assistant message", assistantInsertError);
       }
     }
 
@@ -374,7 +379,8 @@ export const chatService = {
   },
 
   async getHistory(userId: string, sessionId?: string, limit = 50) {
-    let query = supabaseAdmin
+    const db = requireSupabaseAdmin();
+    let query = db
       .from("chat_messages")
       .select("role, content, created_at")
       .eq("user_id", userId)
@@ -389,7 +395,7 @@ export const chatService = {
     const { data, error } = await query;
 
     if (error) {
-      console.error("[chatService] Failed to get history:", error);
+      logger.error(TAG, "Failed to get history", error);
       return [];
     }
 
@@ -397,14 +403,15 @@ export const chatService = {
   },
 
   async getSessions(userId: string) {
-    const { data, error } = await supabaseAdmin
+    const db = requireSupabaseAdmin();
+    const { data, error } = await db
       .from("chat_messages")
       .select("conversation_id, content, role, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("[chatService] Failed to get sessions:", error);
+      logger.error(TAG, "Failed to get sessions", error);
       return [];
     }
 
@@ -433,26 +440,28 @@ export const chatService = {
   },
 
   async deleteSession(userId: string, sessionId: string) {
-    const { error } = await supabaseAdmin
+    const db = requireSupabaseAdmin();
+    const { error } = await db
       .from("chat_messages")
       .delete()
       .eq("user_id", userId)
       .eq("conversation_id", sessionId);
 
     if (error) {
-      console.error("[chatService] Failed to delete session:", error);
+      logger.error(TAG, "Failed to delete session", error);
       throw new Error("Failed to delete conversation");
     }
   },
 
   async deleteAllSessions(userId: string) {
-    const { error } = await supabaseAdmin
+    const db = requireSupabaseAdmin();
+    const { error } = await db
       .from("chat_messages")
       .delete()
       .eq("user_id", userId);
 
     if (error) {
-      console.error("[chatService] Failed to delete all sessions:", error);
+      logger.error(TAG, "Failed to delete all sessions", error);
       throw new Error("Failed to delete conversations");
     }
   },

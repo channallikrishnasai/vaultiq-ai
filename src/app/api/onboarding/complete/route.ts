@@ -1,33 +1,33 @@
-import { auth } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { onboardingCompleteSchema } from "@/validations/onboarding";
 import { financialTwinService } from "@/services/financial-twin/twin.service";
 import { financialTwinRepository } from "@/repositories/financial-twin.repository";
 import type { Prisma } from "@/generated/prisma/client";
+import { handleApiError } from "@/lib/api-handler";
+import { logger } from "@/lib/logger";
+
+const TAG = "Onboarding";
 
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = await request.json();
-  const parsed = onboardingCompleteSchema.safeParse(body);
-
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
-      { status: 400 },
-    );
-  }
-
-  const data = parsed.data;
-  const userId = session.user.id;
-
   try {
+    const session = await requireAuth();
+
+    const body = await request.json();
+    const parsed = onboardingCompleteSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
+        { status: 400 },
+      );
+    }
+
+    const data = parsed.data;
+    const userId = session.user.id;
+
     await prisma.$transaction(async (tx) => {
-      // 1. Upsert profile with onboarding fields
       await tx.profile.upsert({
         where: { userId },
         update: {
@@ -49,7 +49,6 @@ export async function POST(request: Request) {
         },
       });
 
-      // 2. Create the financial goal
       await tx.goal.create({
         data: {
           userId,
@@ -61,7 +60,6 @@ export async function POST(request: Request) {
         },
       });
 
-      // 3. Create initial income record for current month
       const now = new Date();
       await tx.income.create({
         data: {
@@ -73,7 +71,6 @@ export async function POST(request: Request) {
         },
       });
 
-      // 4. Optionally seed an initial expense record from monthly expenses
       if (data.monthlyExpenses > 0) {
         await tx.expense.create({
           data: {
@@ -87,7 +84,6 @@ export async function POST(request: Request) {
       }
     });
 
-    // 5. Create AI Profile for personalized chat responses
     const riskLabels: Record<string, string> = {
       VERY_CONSERVATIVE: "Very Conservative",
       CONSERVATIVE: "Conservative",
@@ -127,7 +123,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // 6. Generate and persist Financial Twin from updated profile data
     try {
       const twin = await financialTwinService.generate(userId, {
         riskAppetite: data.riskAppetite,
@@ -148,10 +143,7 @@ export async function POST(request: Request) {
       data: { redirectUrl: "/dashboard" },
     });
   } catch (error) {
-    console.error("Onboarding completion error:", error);
-    return NextResponse.json(
-      { error: "Failed to complete onboarding" },
-      { status: 500 },
-    );
+    logger.error(TAG, "Onboarding completion error", error);
+    return handleApiError(error);
   }
 }

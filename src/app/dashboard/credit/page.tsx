@@ -1,10 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import {
   Percent, ShieldCheck, TrendingUp
 } from "lucide-react";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
+
+const ResponsiveContainer = dynamic(() => import("recharts").then(m => m.ResponsiveContainer), { ssr: false });
+const AreaChart = dynamic(() => import("recharts").then(m => m.AreaChart), { ssr: false });
+const Area = dynamic(() => import("recharts").then(m => m.Area), { ssr: false });
+const XAxis = dynamic(() => import("recharts").then(m => m.XAxis), { ssr: false });
+const YAxis = dynamic(() => import("recharts").then(m => m.YAxis), { ssr: false });
+const Tooltip = dynamic(() => import("recharts").then(m => m.Tooltip), { ssr: false });
 
 const SCORE_HISTORY = [
   { m: "Jan", s: 780 },
@@ -17,8 +24,10 @@ const SCORE_HISTORY = [
 
 export default function CreditPage() {
   const [score] = useState<number>(812);
+  const [mounted, setMounted] = useState(false);
 
-  // Credit Factors
+  useEffect(() => { setMounted(true); }, []);
+
   const factors = [
     { name: "Payment History", status: "Excellent", impact: "High", percent: 99, color: "bg-emerald-500" },
     { name: "Credit Utilization", status: "Good (14%)", impact: "High", percent: 86, color: "bg-emerald-400" },
@@ -88,7 +97,8 @@ export default function CreditPage() {
             <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-3 flex items-center gap-1.5">
               <TrendingUp size={12} className="text-[#f59e0b]" /> Historical Score Progression
             </h3>
-            <div className="h-35 w-full">
+            <div className="h-[140px] w-full">
+              {mounted && (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={SCORE_HISTORY}>
                   <defs>
@@ -103,6 +113,7 @@ export default function CreditPage() {
                   <Area type="monotone" dataKey="s" stroke="#fb923c" strokeWidth={1.5} fillOpacity={1} fill="url(#scoreGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>

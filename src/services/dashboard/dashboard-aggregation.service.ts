@@ -148,8 +148,7 @@ export async function aggregateDashboardData(userId: string): Promise<DashboardD
 
   const monthlyIncome = profile?.income ?? 0;
   const savingsBalance = goals.reduce((sum, g) => sum + g.current, 0);
-  const debt = savingsBalance > 0 || portfolio.totalValue > 0 ? 20_000 : 0;
-  const netWorth = computeNetWorth(savingsBalance, portfolio.totalValue, debt);
+  const netWorth = computeNetWorth(savingsBalance, portfolio.totalValue, 0);
   const savingsRate = computeSavingsRate(monthlyIncome, totalExpenses);
   const twinSnapshot = activeTwin?.snapshot as { netWorth?: number } | null;
 

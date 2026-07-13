@@ -61,27 +61,14 @@ export function computeHealthScore(metrics: HealthMetrics): HealthScoreResult {
   const protectScore = Math.min(100, Math.round(Math.min(emergencyMonths / 6, 1) * 100));
   const expenseRatio =
     metrics.monthlyIncome > 0 ? metrics.monthlyExpenses / metrics.monthlyIncome : 1;
-  const spendScore = Math.min(100, Math.max(0, Math.round((1 - expenseRatio) * 100 + 30)));
+  const spendScore = Math.min(100, Math.max(0, Math.round((1 - expenseRatio) * 100)));
   const planScore = Math.min(100, Math.round(metrics.goalProgressAvg));
-
-  const breakdown: HealthBreakdownItem[] = [
-    { name: "Savings", value: savingsScore },
-    { name: "Debt", value: debtScore },
-    { name: "Invest", value: investScore },
-    { name: "Protect", value: protectScore },
-    { name: "Spend", value: spendScore },
-    { name: "Plan", value: planScore },
-  ];
-
-  const score = Math.round(
-    breakdown.reduce((sum, item) => sum + item.value, 0) / breakdown.length,
-  );
 
   const factors = [
     {
       name: "Savings Rate",
-      score: Math.round(savingsScore * 0.25),
-      maxScore: 25,
+      score: savingsScore,
+      maxScore: 100,
       tip:
         savingsRate < 0.2
           ? "Aim to save at least 20% of income"
@@ -89,8 +76,8 @@ export function computeHealthScore(metrics: HealthMetrics): HealthScoreResult {
     },
     {
       name: "Debt Management",
-      score: Math.round(debtScore * 0.25),
-      maxScore: 25,
+      score: debtScore,
+      maxScore: 100,
       tip:
         metrics.debt > metrics.savingsBalance
           ? "Prioritize paying down high-interest debt"
@@ -98,8 +85,8 @@ export function computeHealthScore(metrics: HealthMetrics): HealthScoreResult {
     },
     {
       name: "Investments",
-      score: Math.round(investScore * 0.25),
-      maxScore: 25,
+      score: investScore,
+      maxScore: 100,
       tip:
         metrics.investments < metrics.monthlyIncome * 3
           ? "Start or increase SIP investments for long-term growth"
@@ -107,14 +94,41 @@ export function computeHealthScore(metrics: HealthMetrics): HealthScoreResult {
     },
     {
       name: "Emergency Fund",
-      score: Math.round(protectScore * 0.25),
-      maxScore: 25,
+      score: protectScore,
+      maxScore: 100,
       tip:
         emergencyMonths < 3
           ? "Build 3–6 months of expenses as emergency fund"
           : `${emergencyMonths.toFixed(1)} months covered — solid safety net`,
     },
+    {
+      name: "Spending Control",
+      score: spendScore,
+      maxScore: 100,
+      tip:
+        expenseRatio > 0.9
+          ? "Expenses consume most of your income — look for cuts"
+          : `Spending ${Math.round(expenseRatio * 100)}% of income — room to optimize`,
+    },
+    {
+      name: "Goal Planning",
+      score: planScore,
+      maxScore: 100,
+      tip:
+        metrics.goalProgressAvg < 30
+          ? "Set clear financial goals and track progress"
+          : `Goal progress averaging ${Math.round(metrics.goalProgressAvg)}% — stay consistent`,
+    },
   ];
+
+  const score = Math.round(
+    factors.reduce((sum, f) => sum + f.score, 0) / factors.length,
+  );
+
+  const breakdown: HealthBreakdownItem[] = factors.map((f) => ({
+    name: f.name,
+    value: f.score,
+  }));
 
   return {
     score,

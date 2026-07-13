@@ -1,4 +1,8 @@
 import Groq from "groq-sdk";
+import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
+
+const TAG = "AI";
 
 // ---------------------------------------------------------------------------
 // Interfaces
@@ -45,16 +49,13 @@ export class GroqProvider implements AIService {
 
   constructor() {
     this.client = new Groq({
-      apiKey: process.env.GROQ_API_KEY,
+      apiKey: env.GROQ_API_KEY,
     });
   }
 
   async chat(messages: AIMessage[]): Promise<string> {
-    const apiKey = process.env.GROQ_API_KEY;
-
-    // Fallback 1: No API key
-    if (!apiKey) {
-      console.warn("[GroqProvider] GROQ_API_KEY missing. Falling back to MockAIProvider.");
+    if (!env.GROQ_API_KEY) {
+      logger.warn(TAG, "GROQ_API_KEY missing. Falling back to MockAIProvider.");
       return new MockAIProvider().chat(messages);
     }
 
@@ -72,15 +73,13 @@ export class GroqProvider implements AIService {
       const content = chatCompletion.choices[0]?.message?.content ?? "";
 
       if (!content) {
-        console.warn("[GroqProvider] Empty response from Groq. Falling back to MockAIProvider.");
+        logger.warn(TAG, "Empty response from Groq. Falling back to MockAIProvider.");
         return new MockAIProvider().chat(messages);
       }
 
       return content;
     } catch (error) {
-      // Fallback 2: API error
-      console.error("[GroqProvider] API error:", error);
-      console.warn("[GroqProvider] Falling back to MockAIProvider due to API error.");
+      logger.error(TAG, "Groq API error, falling back to MockAIProvider", error);
       return new MockAIProvider().chat(messages);
     }
   }
@@ -92,7 +91,7 @@ export class GroqProvider implements AIService {
 
 export class OpenAIProvider implements AIService {
   async chat(messages: AIMessage[]): Promise<string> {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = env.OPENAI_API_KEY;
     if (!apiKey) {
       return new MockAIProvider().chat(messages);
     }
@@ -117,11 +116,7 @@ export class OpenAIProvider implements AIService {
 // ---------------------------------------------------------------------------
 
 export function getAIProvider(): AIService {
-  const provider = process.env.AI_PROVIDER ?? "mock";
-
-  console.log("AI_PROVIDER =", provider);
-  console.log("GROQ KEY EXISTS =", !!process.env.GROQ_API_KEY);
-  console.log("USING PROVIDER =", provider === "groq" ? "Groq" : provider === "openai" ? "OpenAI" : "Mock");
+  const provider = env.AI_PROVIDER;
 
   if (provider === "groq") {
     return new GroqProvider();

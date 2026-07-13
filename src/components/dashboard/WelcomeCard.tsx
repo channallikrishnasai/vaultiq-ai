@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { ArrowUpRight, Plus, TrendingUp, Wallet } from "lucide-react";
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+import { formatCurrency } from "@/utils/format";
 
 interface WelcomeCardProps {
   user: {

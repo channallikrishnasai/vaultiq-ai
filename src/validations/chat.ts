@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const chatMessageSchema = z.object({
-  message: z.string().min(1, "Message is required"),
+  message: z.string().min(1, "Message is required").max(4000, "Message must be 4000 characters or less"),
   sessionId: z.string().optional(),
 });
 

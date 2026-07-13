@@ -6,16 +6,17 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/lib/auth.config";
 import { UnauthorizedError } from "@/lib/errors";
+import { env } from "@/lib/env";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   providers: [
-    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
       ? [
           Google({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
             allowDangerousEmailAccountLinking: true,
           }),
         ]
@@ -47,9 +48,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        // Block unverified users. Return null so no session is created.
-        // The client checks /api/auth/email-status BEFORE signIn to show
-        // the specific "email not verified" message.
         if (!user.emailVerified) {
           return null;
         }
@@ -63,7 +61,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
+  secret: env.NEXTAUTH_SECRET,
 });
 
 export async function requireAuth() {

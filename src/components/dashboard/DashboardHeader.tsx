@@ -130,7 +130,7 @@ export default function DashboardHeader({ user, visible = true }: DashboardHeade
             display: "flex",
             alignItems: "center",
             gap: 10,
-            background: open ? "rgba(255,255,255,0.06)" : "transparent",
+            background: open ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0)",
             border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: 10,
             padding: "6px 10px",
@@ -225,7 +225,7 @@ export default function DashboardHeader({ user, visible = true }: DashboardHeade
                       width: "100%",
                       padding: "10px 12px",
                       borderRadius: 8,
-                      background: "transparent",
+                      background: "rgba(0,0,0,0)",
                       border: "none",
                       cursor: "pointer",
                       color: "rgba(255,255,255,0.6)",
@@ -237,7 +237,7 @@ export default function DashboardHeader({ user, visible = true }: DashboardHeade
                       e.currentTarget.style.color = "#ef4444";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.background = "rgba(0,0,0,0)";
                       e.currentTarget.style.color = "rgba(255,255,255,0.6)";
                     }}
                   >
