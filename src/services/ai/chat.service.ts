@@ -1,27 +1,33 @@
 import { randomUUID } from "crypto";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getAIProvider } from "@/services/ai";
-import { prisma } from "@/lib/prisma";
+import { buildFinancialContext, formatFinancialContext } from "./financial-context.service";
 
-const SYSTEM_PROMPT = `You are VaultIQ AI, India's AI-powered financial guardian.
+const SYSTEM_PROMPT = `You are VaultIQ AI, India's AI-powered financial guardian and personal financial advisor.
 
-You help users with:
-- SIPs
-- Mutual Funds
-- Stocks
-- Budgeting
-- Saving Money
-- Financial Planning
-- Taxes
-- Loans
-- Credit Scores
-- Fraud Detection
-- Scam Prevention
+You are NOT a generic chatbot. You have full access to the user's financial profile including:
+- Income, expenses, savings rate, and net cash flow
+- Financial goals, targets, and progress
+- Emergency fund status
+- Investment portfolio and holdings
+- Financial health score and breakdown
+- Budgets and category-level spending
+- Financial twin projections and recommendations
+- Fraud alerts
 
-Always answer the user's question directly.
-Give practical and accurate financial guidance.
-Use Indian examples and INR currency.
-Keep answers helpful and easy to understand.`;
+Use this data to give specific, actionable advice. Always reference the user's actual numbers when giving advice.
+For example: "Your savings rate is 22%, which is above the recommended 20%" rather than generic "save more".
+
+When asked about finances:
+1. Always reference the user's actual data from the Financial Profile
+2. Give specific INR amounts and percentages
+3. Compare against benchmarks (20% savings rule, 6-month emergency fund, etc.)
+4. Provide actionable next steps
+5. Use Indian financial context (SIPs, PPF, EPF, NPS, mutual funds, etc.)
+
+When asked about non-financial topics, answer normally but briefly redirect to financial matters if relevant.
+
+Always be direct and data-driven. Never make up numbers - only use what's in the Financial Profile.`;
 
 export const chatService = {
   async sendMessage(userId: string, message: string, sessionId?: string) {
@@ -42,46 +48,36 @@ export const chatService = {
       throw new Error("Failed to save message");
     }
 
-    // 2. Read conversation history from Supabase (last 6 messages for AI context)
+    // 2. Read conversation history from Supabase (last 10 messages for AI context)
     const { data: history, error: historyError } = await supabaseAdmin
       .from("chat_messages")
       .select("role, content")
       .eq("user_id", userId)
       .eq("conversation_id", sid)
       .order("created_at", { ascending: true })
-      .limit(6);
+      .limit(10);
 
     if (historyError) {
       console.error("[chatService] Failed to read history:", historyError);
     }
 
-    // 3. Fetch AI Profile for personalized responses
-    let personalContext = "";
+    // 3. Build financial context and format it for the system prompt
+    let financialContextStr = "";
     try {
-      const aiProfile = await prisma.aiProfile.findUnique({ where: { userId } });
-      if (aiProfile) {
-        const goals = aiProfile.financialGoals as { goalName?: string; targetAmount?: number } | null;
-        personalContext = `
-User context:
-- Occupation: ${aiProfile.occupation || "Not specified"}
-- Monthly income: ₹${aiProfile.monthlyIncome?.toLocaleString("en-IN") || "Not specified"}
-- Monthly expenses: ₹${aiProfile.monthlyExpenses?.toLocaleString("en-IN") || "Not specified"}
-- Risk appetite: ${aiProfile.riskTolerance || "Balanced"}
-- Financial goal: ${goals?.goalName || "Not specified"}
-- Target amount: ₹${goals?.targetAmount?.toLocaleString("en-IN") || "Not specified"}
-Tailor your advice to their specific financial situation and goals.`;
-      }
-    } catch {
-      // AiProfile fetch is best-effort; use generic prompt if it fails
+      const ctx = await buildFinancialContext(userId);
+      financialContextStr = formatFinancialContext(ctx);
+    } catch (err) {
+      console.error("[chatService] Failed to build financial context:", err);
+      financialContextStr = "Financial data not available.";
     }
 
-    // 4. Generate AI response
+    // 4. Generate AI response with financial context
     const ai = getAIProvider();
     let response: string;
 
     try {
       response = await ai.chat([
-        { role: "system", content: SYSTEM_PROMPT + personalContext },
+        { role: "system", content: SYSTEM_PROMPT + "\n\n" + financialContextStr },
         ...(history || []).map((h) => ({
           role: h.role as "user" | "assistant" | "system",
           content: h.content,
@@ -92,7 +88,7 @@ Tailor your advice to their specific financial situation and goals.`;
       response = "I'm having trouble generating a response right now. Please try again.";
     }
 
-    // 4. Save assistant response to Supabase (only if we have a real response)
+    // 5. Save assistant response to Supabase (only if we have a real response)
     if (response) {
       const { error: assistantInsertError } = await supabaseAdmin
         .from("chat_messages")
@@ -108,7 +104,7 @@ Tailor your advice to their specific financial situation and goals.`;
       }
     }
 
-    // 5. Return response
+    // 6. Return response
     return { sessionId: sid, message: response };
   },
 
