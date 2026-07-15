@@ -21,25 +21,21 @@ function formatMessage(level: LogLevel, tag: string, message: string): string {
 export const logger = {
   debug(tag: string, message: string, data?: unknown) {
     if (!shouldLog("debug")) return;
-    // eslint-disable-next-line no-console
     console.debug(formatMessage("debug", tag, message), data ?? "");
   },
 
   info(tag: string, message: string, data?: unknown) {
     if (!shouldLog("info")) return;
-    // eslint-disable-next-line no-console
     console.log(formatMessage("info", tag, message), data ?? "");
   },
 
   warn(tag: string, message: string, data?: unknown) {
     if (!shouldLog("warn")) return;
-    // eslint-disable-next-line no-console
     console.warn(formatMessage("warn", tag, message), data ?? "");
   },
 
   error(tag: string, message: string, error?: unknown) {
     if (!shouldLog("error")) return;
-    // eslint-disable-next-line no-console
     console.error(formatMessage("error", tag, message), error instanceof Error ? error.message : error ?? "");
   },
 };

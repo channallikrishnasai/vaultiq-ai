@@ -532,7 +532,7 @@ export default function DashboardFloatingCards({
     } finally {
       setChatThinking(false);
     }
-  }, [chatThinking, setOrbState]);
+  }, [chatMessages, chatThinking, setOrbState]);
 
   const toggleMinimize = (key: string) => {
     setMinimized((prev) => ({ ...prev, [key]: !prev[key] }));

@@ -94,7 +94,7 @@ export default function FinancePage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   // Adjust default category based on selected transaction type
   useEffect(() => {
