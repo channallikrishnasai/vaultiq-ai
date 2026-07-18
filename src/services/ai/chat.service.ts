@@ -6,6 +6,7 @@ import { logger } from "@/lib/logger";
 const TAG = "Chat";
 import { buildFinancialContext, formatFinancialContext } from "./financial-context.service";
 import { marketContextService } from "./market-context.service";
+import { investmentAdvisorService } from "@/services/investment/investment-advisor.service";
 import {
   runFullAnalysis,
   generateMonthlyReport,
@@ -21,13 +22,33 @@ const ANALYSIS_KEYWORDS = [
   "what happens if", "how would", "project", "forecast",
 ];
 
+const INVESTMENT_KEYWORDS = [
+  "what should i invest in", "how is my portfolio", "am i diversified",
+  "should i buy", "should i sell", "portfolio advice", "investment advice",
+  "what should i improve", "portfolio health", "portfolio score",
+  "investment recommendation", "rebalance", "portfolio warning",
+  "investment opportunity", "sip advice", "portfolio analysis",
+  "how is my investment", "investment review", "portfolio review",
+  "should i increase sip", "should i reduce", "diversification",
+  "portfolio risk", "goal alignment", "investment health",
+  "what if i invest", "what if i increase sip", "simulate investment",
+];
+
+function detectInvestmentIntent(message: string): boolean {
+  const lower = message.toLowerCase();
+  return INVESTMENT_KEYWORDS.some(k => lower.includes(k));
+}
+
 function detectAnalysisIntent(message: string): {
-  type: "full_analysis" | "monthly_report" | "simulation" | "none";
+  type: "full_analysis" | "monthly_report" | "simulation" | "investment" | "none";
   params?: WhatIfScenario;
 } {
   const lower = message.toLowerCase();
 
   if (lower.includes("what if") || lower.includes("what happens if") || lower.includes("how would")) {
+    if (lower.includes("invest") || lower.includes("sip") || lower.includes("portfolio")) {
+      return { type: "investment" };
+    }
     return {
       type: "simulation",
       params: parseWhatIfScenario(message),
@@ -36,6 +57,10 @@ function detectAnalysisIntent(message: string): {
 
   if (lower.includes("monthly report") || lower.includes("generate report") || lower.includes("my report")) {
     return { type: "monthly_report" };
+  }
+
+  if (detectInvestmentIntent(message)) {
+    return { type: "investment" };
   }
 
   if (ANALYSIS_KEYWORDS.some((k) => lower.includes(k))) {
@@ -248,6 +273,86 @@ function formatSimulationForAI(sim: ReturnType<typeof simulateScenario>): string
   return lines.join("\n");
 }
 
+function formatInvestmentAdviceForAI(advice: Awaited<ReturnType<typeof investmentAdvisorService.getInvestmentAdvice>>): string {
+  const lines: string[] = [];
+  lines.push("=== INVESTMENT ADVISOR ANALYSIS ===");
+  lines.push(`Portfolio Health: ${advice.health.grade} (${advice.health.overall}/100)`);
+  lines.push(`Summary: ${advice.portfolioSummary}`);
+  lines.push("");
+
+  lines.push("HEALTH SCORE BREAKDOWN:");
+  advice.health.breakdown.forEach(b => {
+    lines.push(`  ${b.name}: ${b.score}/100 (weight: ${(b.weight * 100).toFixed(0)}%, contribution: ${b.contribution.toFixed(1)})`);
+  });
+  lines.push("");
+
+  if (advice.warnings.length > 0) {
+    lines.push(`WARNINGS (${advice.warnings.length}):`);
+    advice.warnings.slice(0, 5).forEach(w => {
+      lines.push(`  [${w.severity.toUpperCase()}] ${w.title}`);
+      lines.push(`    ${w.description}`);
+      lines.push(`    Impact: ${w.impact}`);
+    });
+    lines.push("");
+  }
+
+  if (advice.recommendations.length > 0) {
+    lines.push(`RECOMMENDATIONS (${advice.recommendations.length}):`);
+    advice.recommendations.slice(0, 6).forEach(r => {
+      lines.push(`  [${r.priority.toUpperCase()}] ${r.title} (${r.confidence}% confidence)`);
+      lines.push(`    Why: ${r.reason}`);
+      lines.push(`    Benefits: ${r.benefits[0]}`);
+      lines.push(`    Risks: ${r.risks[0]}`);
+      if (r.action?.amount) {
+        lines.push(`    Action: ₹${r.action.amount.toLocaleString("en-IN")}${r.action.frequency === "monthly" ? "/month" : ""}`);
+      }
+    });
+    lines.push("");
+  }
+
+  if (advice.opportunities.length > 0) {
+    lines.push(`OPPORTUNITIES (${advice.opportunities.length}):`);
+    advice.opportunities.slice(0, 4).forEach(o => {
+      lines.push(`  ${o.title} (potential: ${o.potential}/10, risk: ${o.risk}/10)`);
+      lines.push(`    ${o.action}`);
+    });
+    lines.push("");
+  }
+
+  if (advice.actionItems.length > 0) {
+    lines.push("PRIORITY ACTION ITEMS:");
+    advice.actionItems.forEach(a => lines.push(`  * ${a}`));
+  }
+
+  return lines.join("\n");
+}
+
+function formatSimulationInputForInvestment(message: string): { monthlyInvestment?: number; monthlyIncrease?: number; priceChange?: { symbol: string; percentChange: number }; marketGrowth?: { annualReturn: number; years: number } } | null {
+  const lower = message.toLowerCase();
+
+  const sipMatch = lower.match(/(?:invest|sip)\s+(?:₹|rs\.?|inr)?\s*([\d,]+)\s*(?:\/|per|a)\s*month/);
+  if (sipMatch) {
+    return { monthlyInvestment: parseInt(sipMatch[1].replace(/,/g, ""), 10) };
+  }
+
+  const increaseMatch = lower.match(/increase\s+sip\s+(?:by)?\s*(?:₹|rs\.?|inr)?\s*([\d,]+)/);
+  if (increaseMatch) {
+    return { monthlyIncrease: parseInt(increaseMatch[1].replace(/,/g, ""), 10) };
+  }
+
+  const fallMatch = lower.match(/(?:if|when)\s+(\w+)\s+falls?\s+(\d+)\s*%/);
+  if (fallMatch) {
+    return { priceChange: { symbol: fallMatch[1].toUpperCase(), percentChange: -parseInt(fallMatch[2], 10) } };
+  }
+
+  const growthMatch = lower.match(/(?:if|when)\s+(?:nifty|sensex|market)\s+(?:grows?|rises?|increases?)\s+(\d+)\s*%/);
+  if (growthMatch) {
+    return { marketGrowth: { annualReturn: parseInt(growthMatch[1], 10), years: 5 } };
+  }
+
+  return null;
+}
+
 const SYSTEM_PROMPT = `You are VaultIQ AI, India's AI-powered financial guardian and personal financial advisor.
 
 You are NOT a generic chatbot. You have full access to the user's financial profile including:
@@ -327,6 +432,7 @@ export const chatService = {
     let financialContextStr = "";
     let analysisStr = "";
     let marketContextStr = "";
+    let investmentStr = "";
     const intent = detectAnalysisIntent(message);
 
     try {
@@ -342,6 +448,21 @@ export const chatService = {
       } else if (intent.type === "simulation" && intent.params) {
         const sim = simulateScenario(ctx, intent.params);
         analysisStr = formatSimulationForAI(sim);
+      } else if (intent.type === "investment") {
+        const simInput = formatSimulationInputForInvestment(message);
+        if (simInput) {
+          const simulation = await investmentAdvisorService.runSimulation(userId, simInput);
+          const advice = await investmentAdvisorService.getInvestmentAdvice({ userId });
+          investmentStr = formatInvestmentAdviceForAI(advice);
+          investmentStr += "\n\n=== SIMULATION RESULT ===\n";
+          investmentStr += `Current: ₹${simulation.currentPortfolioValue.toLocaleString("en-IN")} → Simulated: ₹${simulation.simulatedPortfolioValue.toLocaleString("en-IN")}\n`;
+          investmentStr += `Expected CAGR: ${simulation.expectedCAGR}%\n`;
+          investmentStr += `Future Values: 1Y ₹${simulation.futureValue.oneYear.toLocaleString("en-IN")} | 5Y ₹${simulation.futureValue.fiveYear.toLocaleString("en-IN")} | 10Y ₹${simulation.futureValue.tenYear.toLocaleString("en-IN")}\n`;
+          investmentStr += simulation.summary;
+        } else {
+          const advice = await investmentAdvisorService.getInvestmentAdvice({ userId });
+          investmentStr = formatInvestmentAdviceForAI(advice);
+        }
       }
     } catch (err) {
       logger.error(TAG, "Failed to build financial context", err);
@@ -373,6 +494,7 @@ export const chatService = {
         financialContextStr,
         marketContextStr ? "\n\n" + marketContextStr : "",
         analysisStr ? "\n\n=== ANALYSIS DATA ===\n" + analysisStr : "",
+        investmentStr ? "\n\n=== INVESTMENT ADVISOR ===\n" + investmentStr : "",
       ].join("");
 
       response = await ai.chat([
