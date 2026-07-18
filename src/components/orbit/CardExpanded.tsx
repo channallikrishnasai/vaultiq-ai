@@ -216,6 +216,12 @@ export default function CardExpanded({ card, data }: CardExpandedProps) {
   const { dismissCard, setAnimating, activeCard } = useOrbitStore();
   const panelRef = useRef<HTMLDivElement>(null);
 
+  const handleDismiss = useCallback(() => {
+    dismissCard();
+    // The store sets animating=true; we clear it after exit animation
+    setTimeout(() => setAnimating(false), 500);
+  }, [dismissCard, setAnimating]);
+
   // Keyboard dismiss
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -223,7 +229,7 @@ export default function CardExpanded({ card, data }: CardExpandedProps) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  });
+  }, [handleDismiss]);
 
   // Click-outside dismiss
   const handleBackdropClick = useCallback(
@@ -232,14 +238,8 @@ export default function CardExpanded({ card, data }: CardExpandedProps) {
         handleDismiss();
       }
     },
-    [],
+    [handleDismiss],
   );
-
-  const handleDismiss = useCallback(() => {
-    dismissCard();
-    // The store sets animating=true; we clear it after exit animation
-    setTimeout(() => setAnimating(false), 500);
-  }, [dismissCard, setAnimating]);
 
   return (
     <AnimatePresence>
