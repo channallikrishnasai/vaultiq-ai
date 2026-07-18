@@ -12,6 +12,7 @@ const config: Config = {
     "src/lib/finance-utils.ts",
     "src/lib/financial-health.ts",
     "src/lib/twin-utils.ts",
+    "src/services/market/**/*.ts",
   ],
 };
 

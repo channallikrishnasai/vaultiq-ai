@@ -5,6 +5,7 @@ import { logger } from "@/lib/logger";
 
 const TAG = "Chat";
 import { buildFinancialContext, formatFinancialContext } from "./financial-context.service";
+import { marketContextService } from "./market-context.service";
 import {
   runFullAnalysis,
   generateMonthlyReport,
@@ -259,6 +260,8 @@ You are NOT a generic chatbot. You have full access to the user's financial prof
 - Financial twin projections and recommendations
 - Fraud alerts
 
+You also have access to LIVE MARKET DATA when the user asks about stocks, indices, commodities, or investments.
+
 Use this data to give specific, actionable advice. Always reference the user's actual numbers when giving advice.
 For example: "Your savings rate is 22%, which is above the recommended 20%" rather than generic "save more".
 
@@ -269,12 +272,22 @@ When asked about finances:
 4. Provide actionable next steps
 5. Use Indian financial context (SIPs, PPF, EPF, NPS, mutual funds, etc.)
 
+When LIVE MARKET DATA is provided:
+1. Always use the ACTUAL prices and data from the market data section - NEVER make up or hallucinate prices
+2. Reference the data source (Live/Cached/Mock) when relevant
+3. Combine market data with the user's financial profile for personalized advice
+4. If the user asks about a stock they hold, cross-reference with their portfolio holdings
+5. Provide context about the stock's trend, P/E ratio, market cap when available
+6. For indices (NIFTY, SENSEX), provide market overview context
+7. For commodities (Gold, Silver), relate to the user's investment goals
+
 When analysis data is provided, format your response as a clear, structured financial advisor report.
 Use the strengths, weaknesses, risks, and recommendations to give a comprehensive assessment.
 
 When asked about non-financial topics, answer normally but briefly redirect to financial matters if relevant.
 
-Always be direct and data-driven. Never make up numbers - only use what's in the Financial Profile.`;
+Always be direct and data-driven. Never make up numbers - only use what's in the Financial Profile or Live Market Data.
+If market data shows "Mock" as the source, mention that the data is simulated and not real-time.`;
 
 export const chatService = {
   async sendMessage(userId: string, message: string, sessionId?: string) {
@@ -313,6 +326,7 @@ export const chatService = {
     // 3. Build financial context and run analysis
     let financialContextStr = "";
     let analysisStr = "";
+    let marketContextStr = "";
     const intent = detectAnalysisIntent(message);
 
     try {
@@ -334,6 +348,20 @@ export const chatService = {
       financialContextStr = "Financial data not available.";
     }
 
+    // 3b. Detect market intent and fetch market data
+    try {
+      const marketData = await marketContextService.buildMarketContext(message);
+      if (marketData.intentDetected) {
+        marketContextStr = marketContextService.formatMarketContext(marketData);
+        if (marketData.quotes.length > 0) {
+          logger.info(TAG, `Market data fetched: ${marketData.quotes.length} quotes, source: ${marketData.dataSource}`);
+        }
+      }
+    } catch (err) {
+      logger.error(TAG, "Failed to fetch market context", err);
+      // Market context failure should never block the chat response
+    }
+
     // 4. Generate AI response with financial context and analysis
     const ai = getAIProvider();
     let response: string;
@@ -343,6 +371,7 @@ export const chatService = {
         SYSTEM_PROMPT,
         "\n\n=== FINANCIAL PROFILE ===",
         financialContextStr,
+        marketContextStr ? "\n\n" + marketContextStr : "",
         analysisStr ? "\n\n=== ANALYSIS DATA ===\n" + analysisStr : "",
       ].join("");
 
