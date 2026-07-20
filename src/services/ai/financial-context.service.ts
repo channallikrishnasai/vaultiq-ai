@@ -57,7 +57,7 @@ export interface FinancialContext {
     label: string;
     factors: { name: string; score: number; maxScore: number; tip: string }[];
   };
-  portfolio: {
+  virtualPortfolio: {
     totalValue: number;
     cashBalance: number;
     invested: number;
@@ -86,6 +86,22 @@ export interface FinancialContext {
     monthlyNet: number;
     emergencyMonths: number;
   };
+  watchlist: {
+    items: {
+      symbol: string;
+      companyName: string | null;
+      sector: string | null;
+      isFavorite: boolean;
+      currentPrice: number | null;
+      changePercent: number | null;
+    }[];
+    alerts: {
+      symbol: string;
+      type: string;
+      threshold: number;
+      status: string;
+    }[];
+  };
 }
 
 export async function buildFinancialContext(userId: string): Promise<FinancialContext> {
@@ -106,6 +122,8 @@ export async function buildFinancialContext(userId: string): Promise<FinancialCo
     fraudReports,
     activeTwin,
     aiProfile,
+    watchlistItems,
+    activeAlerts,
   ] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
@@ -159,6 +177,15 @@ export async function buildFinancialContext(userId: string): Promise<FinancialCo
       select: { name: true, snapshot: true, projections: true, recommendations: true },
     }),
     prisma.aiProfile.findUnique({ where: { userId } }),
+    prisma.watchlist.findMany({
+      where: { userId },
+      select: { symbol: true, companyName: true, sector: true, isFavorite: true },
+      orderBy: [{ isFavorite: "desc" }, { createdAt: "desc" }],
+    }),
+    prisma.alert.findMany({
+      where: { userId, status: "ACTIVE" },
+      select: { symbol: true, type: true, threshold: true, status: true },
+    }),
   ]);
 
   // ── Income ─────────────────────────────────────────────────────────────────
@@ -250,8 +277,8 @@ export async function buildFinancialContext(userId: string): Promise<FinancialCo
   // ── Health Score ───────────────────────────────────────────────────────────
   const healthScore = await healthScoreService.calculate(userId);
 
-  // ── Portfolio ──────────────────────────────────────────────────────────────
-  let portfolio: FinancialContext["portfolio"] = null;
+  // ── Virtual Trading Portfolio (Paper Trading) ─────────────────────────────
+  let virtualPortfolio: FinancialContext["virtualPortfolio"] = null;
   if (portfolioRaw) {
     const trades = await prisma.trade.findMany({
       where: { portfolioId: portfolioRaw.id },
@@ -261,7 +288,7 @@ export async function buildFinancialContext(userId: string): Promise<FinancialCo
     });
     const invested = trades.reduce((s, t) => s + t.totalAmount, 0);
     const total = portfolioRaw.totalValue || portfolioRaw.cashBalance + invested;
-    portfolio = {
+    virtualPortfolio = {
       totalValue: total,
       cashBalance: portfolioRaw.cashBalance,
       invested,
@@ -295,13 +322,13 @@ export async function buildFinancialContext(userId: string): Promise<FinancialCo
 
   // ── Twin ───────────────────────────────────────────────────────────────────
   const riskAppetite = (profile?.riskAppetite as RiskAppetite) ?? "MODERATE";
-  const netWorth = totalSaved + (portfolio?.totalValue ?? 0);
+  const netWorth = totalSaved + 0; // Exclude virtual portfolio from net worth
   const twinProjections = computeProjections(netWorth, riskAppetite);
   const twinRecs = generateTwinRecommendations({
     savingsRate,
     debt: 0,
     savings: totalSaved,
-    investments: portfolio?.totalValue ?? 0,
+    investments: 0, // Virtual portfolio not included as real investments
     monthlyExpenses: currentMonthExpenseTotal,
     emergencyFundCurrent: emergencyCurrent,
     emergencyFundTarget: emergencyTarget,
@@ -358,7 +385,7 @@ export async function buildFinancialContext(userId: string): Promise<FinancialCo
       label: healthScore.label,
       factors: healthScore.factors,
     },
-    portfolio,
+    virtualPortfolio,
     budgets: budgetData,
     fraud: {
       totalScans: allFraudReports.length,
@@ -378,6 +405,22 @@ export async function buildFinancialContext(userId: string): Promise<FinancialCo
     cashFlow: {
       monthlyNet,
       emergencyMonths: Math.round(emergencyMonths * 10) / 10,
+    },
+    watchlist: {
+      items: watchlistItems.map((item) => ({
+        symbol: item.symbol,
+        companyName: item.companyName,
+        sector: item.sector,
+        isFavorite: item.isFavorite,
+        currentPrice: null,
+        changePercent: null,
+      })),
+      alerts: activeAlerts.map((alert) => ({
+        symbol: alert.symbol,
+        type: alert.type,
+        threshold: alert.threshold,
+        status: alert.status,
+      })),
     },
   };
 }
@@ -448,13 +491,14 @@ export function formatFinancialContext(ctx: FinancialContext): string {
   });
   lines.push("");
 
-  if (ctx.portfolio) {
-    lines.push("=== PORTFOLIO ===");
-    lines.push(`Total Value: ₹${ctx.portfolio.totalValue.toLocaleString("en-IN")}`);
-    lines.push(`Cash: ₹${ctx.portfolio.cashBalance.toLocaleString("en-IN")}`);
-    lines.push(`Invested: ₹${ctx.portfolio.invested.toLocaleString("en-IN")}`);
-    if (ctx.portfolio.topHoldings.length > 0) {
-      lines.push(`Top Holdings: ${ctx.portfolio.topHoldings.map((h) => `${h.symbol} (₹${h.value.toLocaleString("en-IN")})`).join(", ")}`);
+  if (ctx.virtualPortfolio) {
+    lines.push("=== VIRTUAL TRADING PORTFOLIO (PAPER TRADING) ===");
+    lines.push("NOTE: This is simulated trading data from the Virtual Trading Lab, NOT real investments.");
+    lines.push(`Total Value: ₹${ctx.virtualPortfolio.totalValue.toLocaleString("en-IN")}`);
+    lines.push(`Cash: ₹${ctx.virtualPortfolio.cashBalance.toLocaleString("en-IN")}`);
+    lines.push(`Invested (Simulated): ₹${ctx.virtualPortfolio.invested.toLocaleString("en-IN")}`);
+    if (ctx.virtualPortfolio.topHoldings.length > 0) {
+      lines.push(`Top Holdings: ${ctx.virtualPortfolio.topHoldings.map((h) => `${h.symbol} (₹${h.value.toLocaleString("en-IN")})`).join(", ")}`);
     }
     lines.push("");
   }
@@ -477,6 +521,28 @@ export function formatFinancialContext(ctx: FinancialContext): string {
   }
   lines.push("");
 
+  if (ctx.watchlist.items.length > 0) {
+    lines.push("=== WATCHLIST ===");
+    lines.push(`Total Stocks: ${ctx.watchlist.items.length}`);
+    const favorites = ctx.watchlist.items.filter((i) => i.isFavorite);
+    if (favorites.length > 0) {
+      lines.push(`Favorites: ${favorites.map((i) => i.symbol).join(", ")}`);
+    }
+    ctx.watchlist.items.forEach((item) => {
+      const sector = item.sector ? ` [${item.sector}]` : "";
+      lines.push(`  - ${item.symbol}${sector}: ${item.companyName ?? "N/A"}`);
+    });
+    lines.push("");
+  }
+
+  if (ctx.watchlist.alerts.length > 0) {
+    lines.push("=== ACTIVE ALERTS ===");
+    ctx.watchlist.alerts.forEach((alert) => {
+      lines.push(`  - ${alert.symbol}: ${alert.type} @ ${alert.threshold}`);
+    });
+    lines.push("");
+  }
+
   lines.push("=== FINANCIAL TWIN ===");
   lines.push(`Twin Active: ${ctx.twin.exists ? "Yes" : "No"}`);
   if (ctx.twin.exists) lines.push(`Twin Name: ${ctx.twin.name}`);
@@ -493,9 +559,10 @@ export function formatFinancialContext(ctx: FinancialContext): string {
   }
   lines.push("");
 
-  lines.push("=== NET WORTH ===");
-  lines.push(`Net Worth: ₹${(ctx.savings.totalSaved + (ctx.portfolio?.totalValue ?? 0)).toLocaleString("en-IN")}`);
+  lines.push("=== NET WORTH (Real Assets Only) ===");
+  lines.push(`Net Worth: ₹${ctx.savings.totalSaved.toLocaleString("en-IN")}`);
   lines.push(`Debt: ₹0`);
+  lines.push("Note: Virtual Trading Portfolio is excluded from net worth calculations.");
 
   return lines.join("\n");
 }

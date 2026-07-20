@@ -39,6 +39,8 @@ export type WatchlistMinAggregateOutputType = {
   userId: string | null
   symbol: string | null
   companyName: string | null
+  sector: string | null
+  isFavorite: boolean | null
   targetPrice: number | null
   notes: string | null
   createdAt: Date | null
@@ -50,6 +52,8 @@ export type WatchlistMaxAggregateOutputType = {
   userId: string | null
   symbol: string | null
   companyName: string | null
+  sector: string | null
+  isFavorite: boolean | null
   targetPrice: number | null
   notes: string | null
   createdAt: Date | null
@@ -61,6 +65,8 @@ export type WatchlistCountAggregateOutputType = {
   userId: number
   symbol: number
   companyName: number
+  sector: number
+  isFavorite: number
   targetPrice: number
   notes: number
   createdAt: number
@@ -82,6 +88,8 @@ export type WatchlistMinAggregateInputType = {
   userId?: true
   symbol?: true
   companyName?: true
+  sector?: true
+  isFavorite?: true
   targetPrice?: true
   notes?: true
   createdAt?: true
@@ -93,6 +101,8 @@ export type WatchlistMaxAggregateInputType = {
   userId?: true
   symbol?: true
   companyName?: true
+  sector?: true
+  isFavorite?: true
   targetPrice?: true
   notes?: true
   createdAt?: true
@@ -104,6 +114,8 @@ export type WatchlistCountAggregateInputType = {
   userId?: true
   symbol?: true
   companyName?: true
+  sector?: true
+  isFavorite?: true
   targetPrice?: true
   notes?: true
   createdAt?: true
@@ -202,6 +214,8 @@ export type WatchlistGroupByOutputType = {
   userId: string
   symbol: string
   companyName: string | null
+  sector: string | null
+  isFavorite: boolean
   targetPrice: number | null
   notes: string | null
   createdAt: Date
@@ -236,6 +250,8 @@ export type WatchlistWhereInput = {
   userId?: Prisma.StringFilter<"Watchlist"> | string
   symbol?: Prisma.StringFilter<"Watchlist"> | string
   companyName?: Prisma.StringNullableFilter<"Watchlist"> | string | null
+  sector?: Prisma.StringNullableFilter<"Watchlist"> | string | null
+  isFavorite?: Prisma.BoolFilter<"Watchlist"> | boolean
   targetPrice?: Prisma.FloatNullableFilter<"Watchlist"> | number | null
   notes?: Prisma.StringNullableFilter<"Watchlist"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Watchlist"> | Date | string
@@ -248,6 +264,8 @@ export type WatchlistOrderByWithRelationInput = {
   userId?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
   companyName?: Prisma.SortOrderInput | Prisma.SortOrder
+  sector?: Prisma.SortOrderInput | Prisma.SortOrder
+  isFavorite?: Prisma.SortOrder
   targetPrice?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -264,6 +282,8 @@ export type WatchlistWhereUniqueInput = Prisma.AtLeast<{
   userId?: Prisma.StringFilter<"Watchlist"> | string
   symbol?: Prisma.StringFilter<"Watchlist"> | string
   companyName?: Prisma.StringNullableFilter<"Watchlist"> | string | null
+  sector?: Prisma.StringNullableFilter<"Watchlist"> | string | null
+  isFavorite?: Prisma.BoolFilter<"Watchlist"> | boolean
   targetPrice?: Prisma.FloatNullableFilter<"Watchlist"> | number | null
   notes?: Prisma.StringNullableFilter<"Watchlist"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Watchlist"> | Date | string
@@ -276,6 +296,8 @@ export type WatchlistOrderByWithAggregationInput = {
   userId?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
   companyName?: Prisma.SortOrderInput | Prisma.SortOrder
+  sector?: Prisma.SortOrderInput | Prisma.SortOrder
+  isFavorite?: Prisma.SortOrder
   targetPrice?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -295,6 +317,8 @@ export type WatchlistScalarWhereWithAggregatesInput = {
   userId?: Prisma.StringWithAggregatesFilter<"Watchlist"> | string
   symbol?: Prisma.StringWithAggregatesFilter<"Watchlist"> | string
   companyName?: Prisma.StringNullableWithAggregatesFilter<"Watchlist"> | string | null
+  sector?: Prisma.StringNullableWithAggregatesFilter<"Watchlist"> | string | null
+  isFavorite?: Prisma.BoolWithAggregatesFilter<"Watchlist"> | boolean
   targetPrice?: Prisma.FloatNullableWithAggregatesFilter<"Watchlist"> | number | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Watchlist"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Watchlist"> | Date | string
@@ -305,6 +329,8 @@ export type WatchlistCreateInput = {
   id?: string
   symbol: string
   companyName?: string | null
+  sector?: string | null
+  isFavorite?: boolean
   targetPrice?: number | null
   notes?: string | null
   createdAt?: Date | string
@@ -317,6 +343,8 @@ export type WatchlistUncheckedCreateInput = {
   userId: string
   symbol: string
   companyName?: string | null
+  sector?: string | null
+  isFavorite?: boolean
   targetPrice?: number | null
   notes?: string | null
   createdAt?: Date | string
@@ -327,6 +355,8 @@ export type WatchlistUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   targetPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -339,6 +369,8 @@ export type WatchlistUncheckedUpdateInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   targetPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -350,6 +382,8 @@ export type WatchlistCreateManyInput = {
   userId: string
   symbol: string
   companyName?: string | null
+  sector?: string | null
+  isFavorite?: boolean
   targetPrice?: number | null
   notes?: string | null
   createdAt?: Date | string
@@ -360,6 +394,8 @@ export type WatchlistUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   targetPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -371,6 +407,8 @@ export type WatchlistUncheckedUpdateManyInput = {
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   targetPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -397,6 +435,8 @@ export type WatchlistCountOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
+  sector?: Prisma.SortOrder
+  isFavorite?: Prisma.SortOrder
   targetPrice?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -412,6 +452,8 @@ export type WatchlistMaxOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
+  sector?: Prisma.SortOrder
+  isFavorite?: Prisma.SortOrder
   targetPrice?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -423,6 +465,8 @@ export type WatchlistMinOrderByAggregateInput = {
   userId?: Prisma.SortOrder
   symbol?: Prisma.SortOrder
   companyName?: Prisma.SortOrder
+  sector?: Prisma.SortOrder
+  isFavorite?: Prisma.SortOrder
   targetPrice?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -479,6 +523,8 @@ export type WatchlistCreateWithoutUserInput = {
   id?: string
   symbol: string
   companyName?: string | null
+  sector?: string | null
+  isFavorite?: boolean
   targetPrice?: number | null
   notes?: string | null
   createdAt?: Date | string
@@ -489,6 +535,8 @@ export type WatchlistUncheckedCreateWithoutUserInput = {
   id?: string
   symbol: string
   companyName?: string | null
+  sector?: string | null
+  isFavorite?: boolean
   targetPrice?: number | null
   notes?: string | null
   createdAt?: Date | string
@@ -528,6 +576,8 @@ export type WatchlistScalarWhereInput = {
   userId?: Prisma.StringFilter<"Watchlist"> | string
   symbol?: Prisma.StringFilter<"Watchlist"> | string
   companyName?: Prisma.StringNullableFilter<"Watchlist"> | string | null
+  sector?: Prisma.StringNullableFilter<"Watchlist"> | string | null
+  isFavorite?: Prisma.BoolFilter<"Watchlist"> | boolean
   targetPrice?: Prisma.FloatNullableFilter<"Watchlist"> | number | null
   notes?: Prisma.StringNullableFilter<"Watchlist"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Watchlist"> | Date | string
@@ -538,6 +588,8 @@ export type WatchlistCreateManyUserInput = {
   id?: string
   symbol: string
   companyName?: string | null
+  sector?: string | null
+  isFavorite?: boolean
   targetPrice?: number | null
   notes?: string | null
   createdAt?: Date | string
@@ -548,6 +600,8 @@ export type WatchlistUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   targetPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -558,6 +612,8 @@ export type WatchlistUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   targetPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -568,6 +624,8 @@ export type WatchlistUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   symbol?: Prisma.StringFieldUpdateOperationsInput | string
   companyName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sector?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isFavorite?: Prisma.BoolFieldUpdateOperationsInput | boolean
   targetPrice?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -581,6 +639,8 @@ export type WatchlistSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   userId?: boolean
   symbol?: boolean
   companyName?: boolean
+  sector?: boolean
+  isFavorite?: boolean
   targetPrice?: boolean
   notes?: boolean
   createdAt?: boolean
@@ -593,6 +653,8 @@ export type WatchlistSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   userId?: boolean
   symbol?: boolean
   companyName?: boolean
+  sector?: boolean
+  isFavorite?: boolean
   targetPrice?: boolean
   notes?: boolean
   createdAt?: boolean
@@ -605,6 +667,8 @@ export type WatchlistSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   userId?: boolean
   symbol?: boolean
   companyName?: boolean
+  sector?: boolean
+  isFavorite?: boolean
   targetPrice?: boolean
   notes?: boolean
   createdAt?: boolean
@@ -617,13 +681,15 @@ export type WatchlistSelectScalar = {
   userId?: boolean
   symbol?: boolean
   companyName?: boolean
+  sector?: boolean
+  isFavorite?: boolean
   targetPrice?: boolean
   notes?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type WatchlistOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "symbol" | "companyName" | "targetPrice" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["watchlist"]>
+export type WatchlistOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "symbol" | "companyName" | "sector" | "isFavorite" | "targetPrice" | "notes" | "createdAt" | "updatedAt", ExtArgs["result"]["watchlist"]>
 export type WatchlistInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -644,6 +710,8 @@ export type $WatchlistPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     userId: string
     symbol: string
     companyName: string | null
+    sector: string | null
+    isFavorite: boolean
     targetPrice: number | null
     notes: string | null
     createdAt: Date
@@ -1076,6 +1144,8 @@ export interface WatchlistFieldRefs {
   readonly userId: Prisma.FieldRef<"Watchlist", 'String'>
   readonly symbol: Prisma.FieldRef<"Watchlist", 'String'>
   readonly companyName: Prisma.FieldRef<"Watchlist", 'String'>
+  readonly sector: Prisma.FieldRef<"Watchlist", 'String'>
+  readonly isFavorite: Prisma.FieldRef<"Watchlist", 'Boolean'>
   readonly targetPrice: Prisma.FieldRef<"Watchlist", 'Float'>
   readonly notes: Prisma.FieldRef<"Watchlist", 'String'>
   readonly createdAt: Prisma.FieldRef<"Watchlist", 'DateTime'>

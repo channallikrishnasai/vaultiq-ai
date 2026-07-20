@@ -56,10 +56,13 @@ export interface DashboardData {
   healthScore: DashboardHealthScore;
   expenses: DashboardExpenses;
   portfolio: DashboardPortfolio;
+  virtualPortfolio: DashboardPortfolio;
   goals: DashboardGoal[];
   expensesList: any[];
   goalsList: any[];
   goalsTotal: number;
+  emergencyFund: number;
+  emergencyFundTarget: number;
   fraudStats: { scanCount: number; highRiskCount: number };
   twinStats: {
     hasTwin: boolean;

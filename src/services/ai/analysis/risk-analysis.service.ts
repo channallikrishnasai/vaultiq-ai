@@ -1,7 +1,7 @@
 import type { FinancialContext, RiskAnalysis, Finding, Recommendation } from "./types";
 
 export function analyzeRisks(ctx: FinancialContext): RiskAnalysis {
-  const { emergencyFund, cashFlow, fraud, portfolio, expenses, profile } = ctx;
+  const { emergencyFund, cashFlow, fraud, virtualPortfolio, expenses, profile } = ctx;
   const monthlyIncome = profile?.monthlyIncome ?? 0;
   const currentMonthExpenses = expenses.currentMonth;
 
@@ -159,27 +159,27 @@ function assessIncomeRisk(ctx: FinancialContext): Finding {
 }
 
 function assessInvestmentRisk(ctx: FinancialContext): Finding {
-  const { portfolio } = ctx;
+  const { virtualPortfolio } = ctx;
 
-  if (!portfolio) {
+  if (!virtualPortfolio) {
     return {
       category: "risk",
       severity: "neutral",
-      title: "No investments detected",
-      detail: "Without investments, wealth doesn't grow. Consider starting with SIPs.",
+      title: "No virtual investments detected",
+      detail: "No Virtual Trading Portfolio found. Practice investment strategies with simulated money.",
     };
   }
 
-  const { allocation } = portfolio;
-  const equityPercent = allocation.find((a) => a.name === "Equity")?.percent ?? 0;
-  const cashPercent = allocation.find((a) => a.name === "Cash")?.percent ?? 100;
+  const { allocation } = virtualPortfolio;
+  const equityPercent = allocation.find((a: { name: string; percent: number }) => a.name === "Equity")?.percent ?? 0;
+  const cashPercent = allocation.find((a: { name: string; percent: number }) => a.name === "Cash")?.percent ?? 100;
 
   if (cashPercent > 70) {
     return {
       category: "risk",
       severity: "warning",
-      title: "Too much cash in portfolio",
-      detail: `${cashPercent}% of portfolio is in cash. Inflation erodes cash value.`,
+      title: "Too much cash in virtual portfolio",
+      detail: `${cashPercent}% of your virtual portfolio is in cash. Practice deploying capital in the Virtual Trading Lab.`,
       metric: `${cashPercent}% cash`,
       benchmark: "<30% cash",
     };

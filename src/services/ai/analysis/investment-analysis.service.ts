@@ -1,10 +1,10 @@
 import type { FinancialContext, InvestmentAnalysis, Recommendation } from "./types";
 
 export function analyzeInvestments(ctx: FinancialContext): InvestmentAnalysis {
-  const { portfolio, profile } = ctx;
+  const { virtualPortfolio, profile } = ctx;
   const riskAppetite = profile?.riskAppetite ?? "MODERATE";
 
-  if (!portfolio) {
+  if (!virtualPortfolio) {
     return {
       hasPortfolio: false,
       totalValue: 0,
@@ -18,16 +18,16 @@ export function analyzeInvestments(ctx: FinancialContext): InvestmentAnalysis {
         {
           priority: 2,
           category: "investment",
-          action: "Start building an investment portfolio",
-          reason: "No portfolio found. Investing is essential for long-term wealth creation.",
-          impact: "Potential for wealth growth above inflation",
-          effort: "medium",
+          action: "Start building a Virtual Trading Portfolio",
+          reason: "No virtual portfolio found. The Virtual Trading Lab is for practicing investment strategies with simulated money.",
+          impact: "Practice investment strategies without real risk",
+          effort: "low",
         },
       ],
     };
   }
 
-  const { totalValue, cashBalance, invested, allocation, topHoldings } = portfolio;
+  const { totalValue, cashBalance, invested, allocation, topHoldings } = virtualPortfolio;
   const totalHoldings = topHoldings.length;
   const equityPercent = allocation.find((a) => a.name === "Equity")?.percent ?? 0;
   const cashPercent = allocation.find((a) => a.name === "Cash")?.percent ?? 100;
@@ -55,22 +55,22 @@ export function analyzeInvestments(ctx: FinancialContext): InvestmentAnalysis {
   if (cashPercent > 50) {
     recommendations.push({
       priority: 2,
-      category: "investment",
-      action: "Deploy excess cash into investments",
-      reason: `${cashPercent}% of portfolio is in cash, losing value to inflation.`,
-      impact: "Potential for 8-12% annual returns vs 3-4% inflation erosion",
-      effort: "medium",
+      category: "virtual_investment",
+      action: "Deploy excess virtual cash into simulated investments",
+      reason: `${cashPercent}% of your virtual portfolio is in cash, losing value to inflation. This is simulated practice.`,
+      impact: "Practice deploying capital in the Virtual Trading Lab",
+      effort: "low",
     });
   }
 
   if (diversification === "poor") {
     recommendations.push({
       priority: 3,
-      category: "investment",
-      action: "Diversify portfolio with at least 3-5 different holdings",
-      reason: "Concentrated portfolio increases risk.",
-      impact: "Reduces single-asset risk",
-      effort: "medium",
+      category: "virtual_investment",
+      action: "Diversify virtual portfolio with at least 3-5 different holdings",
+      reason: "Concentrated virtual portfolio increases risk. Practice diversification strategies.",
+      impact: "Learn risk management through virtual trading",
+      effort: "low",
     });
   }
 
@@ -78,21 +78,21 @@ export function analyzeInvestments(ctx: FinancialContext): InvestmentAnalysis {
     const direction = riskAlignment === "conservative" ? "more aggressive" : "more conservative";
     recommendations.push({
       priority: 3,
-      category: "investment",
-      action: `Adjust portfolio to be ${direction} (align with ${riskAppetite} risk appetite)`,
-      reason: `Current allocation doesn't match your ${riskAppetite} risk profile.`,
-      impact: "Better risk-adjusted returns",
-      effort: "medium",
+      category: "virtual_investment",
+      action: `Adjust virtual portfolio to be ${direction} (align with ${riskAppetite} risk appetite)`,
+      reason: `Current virtual allocation doesn't match your ${riskAppetite} risk profile. Practice risk-adjusted investing.`,
+      impact: "Learn portfolio rebalancing strategies",
+      effort: "low",
     });
   }
 
   if (totalValue < 50000) {
     recommendations.push({
       priority: 4,
-      category: "investment",
-      action: "Consider SIPs for systematic wealth building",
-      reason: "Small portfolio benefits most from regular investing.",
-      impact: "Rupee cost averaging reduces timing risk",
+      category: "virtual_investment",
+      action: "Practice systematic investing with virtual SIPs",
+      reason: "Small virtual portfolio benefits from regular investing practice.",
+      impact: "Learn rupee cost averaging strategies",
       effort: "low",
     });
   }

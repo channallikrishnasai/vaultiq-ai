@@ -34,9 +34,24 @@ const INVESTMENT_KEYWORDS = [
   "what if i invest", "what if i increase sip", "simulate investment",
 ];
 
+const WATCHLIST_KEYWORDS = [
+  "my watchlist", "watchlist", "my stocks", "my favourite stocks",
+  "which stock performed best", "best stock in my watchlist",
+  "any alerts", "price alerts", "show alerts",
+  "reliance today", "tcs update", "how is reliance",
+  "biggest losers", "top gainers", "market movers",
+  "add to watchlist", "remove from watchlist",
+  "which stock should i add", "stock recommendations",
+];
+
 function detectInvestmentIntent(message: string): boolean {
   const lower = message.toLowerCase();
   return INVESTMENT_KEYWORDS.some(k => lower.includes(k));
+}
+
+function detectWatchlistIntent(message: string): boolean {
+  const lower = message.toLowerCase();
+  return WATCHLIST_KEYWORDS.some(k => lower.includes(k));
 }
 
 function detectAnalysisIntent(message: string): {
@@ -113,10 +128,11 @@ function parseWhatIfScenario(message: string): WhatIfScenario {
 
   const bikeMatch = lower.match(/buy\s+(?:a\s+)?(?:bike|motorcycle|scooter|car|vehicle)/);
   if (bikeMatch) {
+    const estimatedEmi = 15000;
     return {
       type: "new_expense",
-      description: "Purchase a vehicle (estimated ₹80,000 EMI over 36 months)",
-      params: { newExpenseAmount: 25000, newExpenseCategory: "Vehicle EMI" },
+      description: "Purchase a vehicle (estimated EMI over 36 months)",
+      params: { newExpenseAmount: estimatedEmi, newExpenseCategory: "Vehicle EMI" },
     };
   }
 
@@ -359,16 +375,55 @@ You are NOT a generic chatbot. You have full access to the user's financial prof
 - Income, expenses, savings rate, and net cash flow
 - Financial goals, targets, and progress
 - Emergency fund status
-- Investment portfolio and holdings
 - Financial health score and breakdown
 - Budgets and category-level spending
 - Financial twin projections and recommendations
 - Fraud alerts
+- Watchlist and price alerts
+
+CRITICAL DISTINCTION - REAL vs VIRTUAL DATA:
+- The portfolio/holdings data in the Financial Profile is from the "Virtual Trading Lab" (paper trading) - it is NOT real investments
+- This virtual portfolio is for learning and practice only - it does not represent actual holdings or real money
+- Never refer to virtual portfolio data as "real investments" or "actual holdings"
+- When discussing investments, clearly distinguish between virtual portfolio data and real financial decisions
+- For net worth calculations, only use real assets (savings, emergency fund, goals) - exclude virtual portfolio
+- If the user asks about "my investments" or "my portfolio", clarify that the Virtual Trading Lab is for practice and ask if they want to discuss real investment strategies
 
 You also have access to LIVE MARKET DATA when the user asks about stocks, indices, commodities, or investments.
 
-Use this data to give specific, actionable advice. Always reference the user's actual numbers when giving advice.
-For example: "Your savings rate is 22%, which is above the recommended 20%" rather than generic "save more".
+RESPONSE FORMAT - Premium Financial Assistant:
+Always use structured, readable formatting:
+- Use bullet points for lists
+- Use bold for key values (amounts, percentages, stock symbols)
+- Use clear section headers with relevant emojis
+- Keep responses concise: 150-250 words by default
+- If user asks for "detailed" or "explain", provide longer responses
+- End with 2-3 follow-up suggestions
+
+Example structure:
+📊 **Quick Summary**
+[Key insight in 1-2 lines]
+
+📈 **Market Data**
+[Bullet points with live data]
+
+💼 **Financial Snapshot**
+[User's actual numbers]
+
+🎯 **Recommendation**
+[Actionable advice]
+
+⚠️ **Risks**
+[Key concerns]
+
+✅ **Next Actions**
+[Specific steps]
+
+When asked about watchlist:
+1. Reference the user's watchlist from the Financial Profile
+2. Provide insights on top movers, opportunities, and risks
+3. Suggest actions based on their watchlist composition
+4. Cross-reference with live market data when available
 
 When asked about finances:
 1. Always reference the user's actual data from the Financial Profile
@@ -376,18 +431,20 @@ When asked about finances:
 3. Compare against benchmarks (20% savings rule, 6-month emergency fund, etc.)
 4. Provide actionable next steps
 5. Use Indian financial context (SIPs, PPF, EPF, NPS, mutual funds, etc.)
+6. For any virtual portfolio data, always add a disclaimer that it's simulated/paper trading
 
 When LIVE MARKET DATA is provided:
 1. Always use the ACTUAL prices and data from the market data section - NEVER make up or hallucinate prices
 2. Reference the data source (Live/Cached/Mock) when relevant
 3. Combine market data with the user's financial profile for personalized advice
-4. If the user asks about a stock they hold, cross-reference with their portfolio holdings
+4. If the user asks about a stock they hold in the Virtual Trading Lab, cross-reference with their virtual portfolio holdings but remind them it's simulated
 5. Provide context about the stock's trend, P/E ratio, market cap when available
 6. For indices (NIFTY, SENSEX), provide market overview context
 7. For commodities (Gold, Silver), relate to the user's investment goals
 
 When analysis data is provided, format your response as a clear, structured financial advisor report.
 Use the strengths, weaknesses, risks, and recommendations to give a comprehensive assessment.
+Always distinguish between real financial health (savings, expenses, goals) and virtual trading performance.
 
 When asked about non-financial topics, answer normally but briefly redirect to financial matters if relevant.
 
@@ -434,6 +491,7 @@ export const chatService = {
     let marketContextStr = "";
     let investmentStr = "";
     const intent = detectAnalysisIntent(message);
+    const isWatchlistQuery = detectWatchlistIntent(message);
 
     try {
       const ctx = await buildFinancialContext(userId);
@@ -495,6 +553,7 @@ export const chatService = {
         marketContextStr ? "\n\n" + marketContextStr : "",
         analysisStr ? "\n\n=== ANALYSIS DATA ===\n" + analysisStr : "",
         investmentStr ? "\n\n=== INVESTMENT ADVISOR ===\n" + investmentStr : "",
+        isWatchlistQuery ? "\n\n=== WATCHLIST CONTEXT ===\nThe user is asking about their watchlist. Reference the watchlist data in the Financial Profile. Provide insights on top movers, opportunities, and risks." : "",
       ].join("");
 
       response = await ai.chat([

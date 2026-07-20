@@ -98,10 +98,27 @@ export const marketService = {
       return cached;
     }
 
-    const provider = marketProviderService.getActiveProvider();
-    const results = await provider.search(trimmed);
-    marketCacheService.setSearch(trimmed, results);
-    return results;
+    try {
+      const provider = marketProviderService.getActiveProvider();
+      const results = await provider.search(trimmed);
+      marketCacheService.setSearch(trimmed, results);
+      return results;
+    } catch (error) {
+      logger.warn(TAG, `Search failed for "${trimmed}", falling back to mock: ${error instanceof Error ? error.message : String(error)}`);
+
+      try {
+        const mockProvider = marketProviderService.getProvider("mock");
+        if (mockProvider) {
+          const fallbackResults = await mockProvider.search(trimmed);
+          marketCacheService.setSearch(trimmed, fallbackResults);
+          return fallbackResults;
+        }
+      } catch (fallbackError) {
+        logger.error(TAG, `Mock fallback also failed: ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`);
+      }
+
+      return [];
+    }
   },
 
   async getBatchQuotes(request: BatchQuoteRequest): Promise<BatchQuoteResponse> {

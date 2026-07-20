@@ -74,11 +74,7 @@ const EXPLOSION_DATA = Array.from({ length: 150 }, (_, i) => {
   };
 });
 
-const NEWS_ITEMS = [
-  { text: "NIFTY 50 hits 52-week high on FII inflows", time: "2m ago", sentiment: "#34d399" },
-  { text: "RBI holds repo rate — debt funds rally", time: "18m ago", sentiment: "#f59e0b" },
-  { text: "Gold +1.8% — your allocation gains ₹22K", time: "1h ago", sentiment: "#60a5fa" },
-];
+const NEWS_ITEMS: { text: string; time: string; sentiment: string }[] = [];
 
 const PROMPTS = [
   { icon: Landmark, label: "Prepay home loan?" },
@@ -542,7 +538,7 @@ export default function AIAdvisorCard({
           <p className="text-[9px] uppercase tracking-[0.12em] text-amber-400/60 mb-1.5">Portfolio</p>
           <p className="text-2xl font-semibold text-amber-300 leading-none">{formatINR(profile.portfolioValue)}</p>
           <p className="text-[11px] text-white/35 mt-1">{profile.riskAppetite ?? "Moderate"}</p>
-          <AnimBar value={68} color="linear-gradient(90deg,#60a5fa,#D4AF37)" delay={0.2} />
+          <AnimBar value={goalPct} color="linear-gradient(90deg,#60a5fa,#D4AF37)" delay={0.2} />
         </HoloPanel>
 
         {/* Bottom-left: Goal */}
@@ -594,7 +590,7 @@ export default function AIAdvisorCard({
                 <motion.div key="welcome" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                   <p className="text-[10px] text-amber-400/50 tracking-wider uppercase mb-1">VaultIQ AI</p>
                   <p className="text-[12px] text-white/55 leading-relaxed">
-                    Your financial intelligence is online. Portfolio up 12.4% YTD. Ask me anything.
+                    Your financial intelligence is online. Ask me anything about your finances.
                   </p>
                 </motion.div>
               )}

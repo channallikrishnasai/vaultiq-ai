@@ -16,7 +16,7 @@ export async function aggregateDashboardData(userId: string): Promise<DashboardD
 
   const profile = await prisma.profile.findUnique({
     where: { userId },
-    select: { income: true, currency: true, riskAppetite: true, xp: true, streak: true },
+    select: { income: true, currency: true, riskAppetite: true, xp: true, streak: true, emergencyFundTarget: true },
   });
 
   const now = new Date();
@@ -103,7 +103,7 @@ export async function aggregateDashboardData(userId: string): Promise<DashboardD
     totalValue: 0,
     cashBalance: 0,
     change: 0,
-    changePercent: 2.4,
+    changePercent: 0,
     allocation: [] as { name: string; percent: number; color: string }[],
     topHoldings: [] as { name: string; value: number; change: number }[],
     isEmpty: true,
@@ -123,8 +123,8 @@ export async function aggregateDashboardData(userId: string): Promise<DashboardD
     portfolio = {
       totalValue: total,
       cashBalance: portfolioRaw.cashBalance,
-      change: Math.round(total * 0.024),
-      changePercent: 2.4,
+      change: 0,
+      changePercent: 0,
       allocation: [
         {
           name: "Equity",
@@ -140,7 +140,7 @@ export async function aggregateDashboardData(userId: string): Promise<DashboardD
       topHoldings: trades.map((t) => ({
         name: t.symbol,
         value: t.totalAmount,
-        change: 1.8,
+        change: 0,
       })),
       isEmpty: false,
     };
@@ -148,7 +148,10 @@ export async function aggregateDashboardData(userId: string): Promise<DashboardD
 
   const monthlyIncome = profile?.income ?? 0;
   const savingsBalance = goals.reduce((sum, g) => sum + g.current, 0);
-  const netWorth = computeNetWorth(savingsBalance, portfolio.totalValue, 0);
+  const emergencyGoal = goalsRaw.find((g) => g.type === "EMERGENCY");
+  const emergencyFund = emergencyGoal?.currentAmount ?? 0;
+  const emergencyFundTarget = profile?.emergencyFundTarget ?? (totalExpenses > 0 ? totalExpenses * 6 : 0);
+  const netWorth = computeNetWorth(savingsBalance, 0, 0);
   const savingsRate = computeSavingsRate(monthlyIncome, totalExpenses);
   const twinSnapshot = activeTwin?.snapshot as { netWorth?: number } | null;
 
@@ -177,6 +180,7 @@ export async function aggregateDashboardData(userId: string): Promise<DashboardD
     },
     expenses: { total: totalExpenses, categories },
     portfolio,
+    virtualPortfolio: portfolio,
     goals,
     expensesList: expensesList.map((e) => ({
       ...e,
@@ -189,6 +193,8 @@ export async function aggregateDashboardData(userId: string): Promise<DashboardD
       createdAt: g.createdAt.toISOString(),
     })),
     goalsTotal: goalsList.length,
+    emergencyFund,
+    emergencyFundTarget,
     fraudStats: {
       scanCount: fraudReports.length,
       highRiskCount: fraudReports.filter((r) => r.riskScore > 60).length,

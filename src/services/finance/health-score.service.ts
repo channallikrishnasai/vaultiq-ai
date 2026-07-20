@@ -51,7 +51,7 @@ export const healthScoreService = {
       monthlyIncome,
       monthlyExpenses,
       savingsBalance,
-      investments: portfolio?.totalValue ?? 0,
+      investments: 0,
       debt: 0,
       emergencyFundCurrent: emergencyGoal?.currentAmount ?? 0,
       emergencyFundTarget: emergencyGoal?.targetAmount ?? monthlyExpenses * 6,

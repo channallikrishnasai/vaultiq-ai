@@ -54,3 +54,36 @@ export const ChatRole = {
 } as const
 
 export type ChatRole = (typeof ChatRole)[keyof typeof ChatRole]
+
+
+export const AlertType = {
+  PRICE_ABOVE: 'PRICE_ABOVE',
+  PRICE_BELOW: 'PRICE_BELOW',
+  PERCENT_CHANGE: 'PERCENT_CHANGE',
+  VOLUME_SPIKE: 'VOLUME_SPIKE',
+  NEW_52W_HIGH: 'NEW_52W_HIGH',
+  NEW_52W_LOW: 'NEW_52W_LOW'
+} as const
+
+export type AlertType = (typeof AlertType)[keyof typeof AlertType]
+
+
+export const AlertStatus = {
+  ACTIVE: 'ACTIVE',
+  TRIGGERED: 'TRIGGERED',
+  DISMISSED: 'DISMISSED'
+} as const
+
+export type AlertStatus = (typeof AlertStatus)[keyof typeof AlertStatus]
+
+
+export const NotificationType = {
+  ALERT_TRIGGERED: 'ALERT_TRIGGERED',
+  MARKET_OPEN: 'MARKET_OPEN',
+  MARKET_CLOSE: 'MARKET_CLOSE',
+  GOAL_MILESTONE: 'GOAL_MILESTONE',
+  PORTFOLIO_UPDATE: 'PORTFOLIO_UPDATE',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]

@@ -79,6 +79,8 @@ model User {
   chatHistory             ChatHistory[]
   portfolios              Portfolio[]
   watchlists              Watchlist[]
+  alerts                  Alert[]
+  notifications           Notification[]
   financialTwins          FinancialTwin[]
   aiProfile               AiProfile?
 
@@ -356,8 +358,8 @@ model Portfolio {
   id           String   @id @default(cuid())
   userId       String
   name         String   @default("Main Portfolio")
-  cashBalance  Float    @default(100000)
-  totalValue   Float    @default(100000)
+  cashBalance  Float    @default(0)
+  totalValue   Float    @default(0)
   isDefault    Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -394,6 +396,8 @@ model Watchlist {
   userId      String
   symbol      String
   companyName String?
+  sector      String?
+  isFavorite  Boolean  @default(false)
   targetPrice Float?
   notes       String?
   createdAt   DateTime @default(now())
@@ -403,6 +407,76 @@ model Watchlist {
 
   @@unique([userId, symbol])
   @@index([userId])
+  @@index([userId, isFavorite])
+}
+
+// ---------------------------------------------------------------------------
+// Price Alerts
+// ---------------------------------------------------------------------------
+
+enum AlertType {
+  PRICE_ABOVE
+  PRICE_BELOW
+  PERCENT_CHANGE
+  VOLUME_SPIKE
+  NEW_52W_HIGH
+  NEW_52W_LOW
+}
+
+enum AlertStatus {
+  ACTIVE
+  TRIGGERED
+  DISMISSED
+}
+
+model Alert {
+  id          String      @id @default(cuid())
+  userId      String
+  symbol      String
+  companyName String?
+  type        AlertType
+  threshold   Float
+  status      AlertStatus @default(ACTIVE)
+  triggeredAt DateTime?
+  message     String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([userId, symbol])
+}
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+enum NotificationType {
+  ALERT_TRIGGERED
+  MARKET_OPEN
+  MARKET_CLOSE
+  GOAL_MILESTONE
+  PORTFOLIO_UPDATE
+  SYSTEM
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
 }
 
 // ---------------------------------------------------------------------------

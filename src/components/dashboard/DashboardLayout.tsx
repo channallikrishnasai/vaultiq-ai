@@ -6,6 +6,7 @@ import DashboardKPIRow from "./DashboardKPIRow";
 import FlashOverlay from "./FlashOverlay";
 import DashboardParticles from "./DashboardParticles";
 import LightRays from "./LightRays";
+import MarketPanel from "./MarketPanel";
 import { useOrb } from "@/contexts/OrbContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
 
@@ -56,7 +57,9 @@ export default function DashboardLayout({ userId, user }: DashboardLayoutProps) 
   }, [orbState, setThinkingStage]);
 
   return (
-    <div className="relative flex h-full w-full overflow-hidden" style={{ background: "#030201" }}>
+    <div className="flex h-full w-full overflow-hidden" style={{ background: "#030201" }}>
+      {/* ── Main Content Area (Orb + Cards) ── */}
+      <div className="flex-1 relative overflow-hidden">
       {/* ── BACKGROUND LAYER: Warm Golden Nebula ── */}
       <div className="absolute inset-0 -z-10" style={{ background: "#030201" }}>
         {/* Deep space base — warm dark */}
@@ -149,6 +152,8 @@ export default function DashboardLayout({ userId, user }: DashboardLayoutProps) 
             monthlyExpenses={data.monthlyExpenses}
             savingsRate={data.savingsRate}
             healthScore={data.healthScore.score}
+            emergencyFund={data.emergencyFund}
+            emergencyFundTarget={data.emergencyFundTarget}
             user={user}
           />
         </div>
@@ -233,9 +238,12 @@ export default function DashboardLayout({ userId, user }: DashboardLayoutProps) 
           healthScore={data.healthScore.score}
           goals={data.goals}
           portfolio={data.portfolio}
+          virtualPortfolio={data.virtualPortfolio}
           expenses={data.expenses}
           fraudStats={data.fraudStats}
           twinStats={data.twinStats}
+          emergencyFund={data.emergencyFund}
+          emergencyFundTarget={data.emergencyFundTarget}
           user={user}
           profile={data.profile}
           orbState={orbState}
@@ -340,6 +348,14 @@ export default function DashboardLayout({ userId, user }: DashboardLayoutProps) 
           100% { opacity: 0.75; transform: translate(-50%, -50%) scale(1.05); }
         }
       `}</style>
+      </div>
+
+      {/* ── Right Side: Market Panel ── */}
+      {uiReady && (
+        <div className="h-full z-10">
+          <MarketPanel />
+        </div>
+      )}
     </div>
   );
 }

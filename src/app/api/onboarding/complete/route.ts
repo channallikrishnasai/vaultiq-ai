@@ -28,13 +28,15 @@ export async function POST(request: Request) {
     const userId = session.user.id;
 
     await prisma.$transaction(async (tx) => {
+      const emergencyFundTarget = data.monthlyExpenses * 6;
+
       await tx.profile.upsert({
         where: { userId },
         update: {
           income: data.monthlyIncome,
           occupation: data.occupation,
           monthlyExpenses: data.monthlyExpenses,
-          emergencyFundTarget: data.emergencyFund,
+          emergencyFundTarget,
           riskAppetite: data.riskAppetite,
           onboardingCompleted: true,
         },
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
           income: data.monthlyIncome,
           occupation: data.occupation,
           monthlyExpenses: data.monthlyExpenses,
-          emergencyFundTarget: data.emergencyFund,
+          emergencyFundTarget,
           riskAppetite: data.riskAppetite,
           onboardingCompleted: true,
         },
@@ -59,6 +61,18 @@ export async function POST(request: Request) {
           deadline: data.targetDate ? new Date(data.targetDate) : null,
         },
       });
+
+      if (data.emergencyFund > 0) {
+        await tx.goal.create({
+          data: {
+            userId,
+            name: "Emergency Fund",
+            type: "EMERGENCY",
+            targetAmount: emergencyFundTarget,
+            currentAmount: data.emergencyFund,
+          },
+        });
+      }
 
       const now = new Date();
       await tx.income.create({

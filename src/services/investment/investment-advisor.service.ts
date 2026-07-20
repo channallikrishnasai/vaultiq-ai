@@ -330,8 +330,8 @@ class InvestmentAdvisorService {
 
   private generatePortfolioSummary(summary: PortfolioSummary, risk: RiskMetrics, health: InvestmentHealthScore): string {
     const parts: string[] = [];
-    parts.push(`Portfolio: ₹${summary.totalCurrentValue.toLocaleString("en-IN")}`);
-    parts.push(`Invested: ₹${summary.totalInvested.toLocaleString("en-IN")}`);
+    parts.push(`Virtual Trading Portfolio: ₹${summary.totalCurrentValue.toLocaleString("en-IN")}`);
+    parts.push(`Invested (Simulated): ₹${summary.totalInvested.toLocaleString("en-IN")}`);
     parts.push(`P&L: ${summary.totalPnLPercent >= 0 ? "+" : ""}${summary.totalPnLPercent.toFixed(1)}%`);
     parts.push(`Holdings: ${summary.holdingsCount}`);
     parts.push(`Health: ${health.grade} (${health.overall}/100)`);

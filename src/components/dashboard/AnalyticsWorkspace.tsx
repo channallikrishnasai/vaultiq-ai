@@ -9,13 +9,10 @@ import {
 } from "recharts";
 import { DashboardData } from "@/types/dashboard";
 
-// ── Static data matching the mockup ──────────────────────────────────────────
+// ── Dynamic data derived from user profile ─────────────────────────────────────
 
 const NOTIFS = [
-  { title: "New Deposits",         desc: "New Deposits in 12,500...",      time: "10m", dot: "#10b981", bg: "rgba(16,185,129,0.08)"  },
-  { title: "Investment Milestones",desc: "New deposit milestones...",       time: "1h",  dot: "#D4AF37", bg: "rgba(212,175,55,0.08)"  },
-  { title: "Fraud Alerts",         desc: "New alert/notice to fraud.",      time: "4h",  dot: "#ef4444", bg: "rgba(239,68,68,0.08)"   },
-  { title: "Goal Updates",         desc: "Goal updates for goal...",        time: "Now", dot: "#a78bfa", bg: "rgba(167,139,250,0.08)" },
+  { title: "Welcome",         desc: "Set up your financial profile to get started.",      time: "Now", dot: "#D4AF37", bg: "rgba(212,175,55,0.08)"  },
 ];
 
 const TABS = ["Portfolio","Spending","Cash Flow","Goals","Investments","Reports","AI Insights"];
@@ -35,6 +32,27 @@ function Label({ text }: { text: string }) {
 
 export default function AnalyticsWorkspace({ data }: { data: DashboardData }) {
   const [tab, setTab] = useState("Portfolio");
+
+  const PORT = data.portfolio.totalValue > 0
+    ? [{ m: "Now", v: data.portfolio.totalValue }]
+    : [{ m: "", v: 0 }];
+  const SPEND = data.expenses.categories.length > 0
+    ? data.expenses.categories.slice(0, 10).map((c) => ({ m: c.name.slice(0, 1), v: c.amount }))
+    : [{ m: "", v: 0 }];
+  const CASH = data.monthlyIncome > 0
+    ? [{ m: "Now", i: data.monthlyIncome, o: data.monthlyExpenses }]
+    : [{ m: "", i: 0, o: 0 }];
+  const PIE = data.portfolio.allocation.length > 0
+    ? data.portfolio.allocation.map((a) => ({ name: a.name, v: a.percent, c: a.color === "bg-teal-500" ? "#10b981" : a.color === "bg-emerald-500" ? "#34d399" : "#60a5fa" }))
+    : [{ name: "No Data", v: 100, c: "#3f3f46" }];
+  const HEAT = [{ r: "Income", d: [data.monthlyIncome > 0 ? 4 : 0, data.savingsRate > 20 ? 4 : data.savingsRate > 0 ? 2 : 0, data.healthScore.score > 70 ? 4 : data.healthScore.score > 0 ? 2 : 0, 0, 0, 0] }];
+  const INC = data.monthlyIncome > 0
+    ? [
+        { m: "Income", v: data.monthlyIncome, f: "#10b981" },
+        { m: "Expense", v: data.monthlyExpenses, f: "#ef4444" },
+        { m: "Savings", v: data.monthlyIncome - data.monthlyExpenses, f: "#60a5fa" },
+      ]
+    : [{ m: "Income", v: 0, f: "#10b981" }];
 
   const chart = () => {
     switch (tab) {
@@ -275,11 +293,18 @@ export default function AnalyticsWorkspace({ data }: { data: DashboardData }) {
           </div>
 
           <div className="space-y-1.5">
-            {[
-              { t:"Recommendations",    b:"Give one-line concisely actionable insights, annotated insights." },
-              { t:"AI recommendations", b:"Balance risk-to-return ratio. ETF momentum in sector rebalancing." },
-              { t:"Fraud updates",      b:"Phishing mentions are visible and actionable in shield entries."   },
-            ].map((item,i) => (
+            {(data.portfolio.totalValue > 0
+              ? [
+                  { t:"Portfolio Status",    b:`Total value: ₹${data.portfolio.totalValue.toLocaleString("en-IN")}. ${data.portfolio.changePercent >= 0 ? "Up" : "Down"} ${Math.abs(data.portfolio.changePercent)}% this period.` },
+                  { t:"Savings Rate", b:`Current rate: ${data.savingsRate}%. ${data.savingsRate >= 20 ? "Above recommended 20% target." : "Below recommended 20% target."}` },
+                  { t:"Goals Progress",      b:`${data.goalsTotal} goal(s) tracked. ${data.goals.length > 0 ? data.goals[0].name + " at " + data.goals[0].percent + "%" : "No goals set yet."}`   },
+                ]
+              : [
+                  { t:"Getting Started",    b:"Complete onboarding to populate your financial dashboard." },
+                  { t:"Add Investments", b:"Create a portfolio and add trades to track your investments." },
+                  { t:"Set Goals",      b:"Define savings goals to monitor your financial progress."   },
+                ]
+            ).map((item,i) => (
               <div
                 key={i}
                 className="rounded-lg p-2"

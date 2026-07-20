@@ -88,8 +88,8 @@ export function runFullAnalysis(ctx: FinancialContext): AnalysisResult {
   summaryParts.push(`Monthly Net: ₹${ctx.cashFlow.monthlyNet.toLocaleString("en-IN")}`);
   summaryParts.push(`Savings Rate: ${ctx.savings.savingsRate}%`);
   summaryParts.push(`Emergency Fund: ${ctx.emergencyFund.monthsCovered} months`);
-  if (ctx.portfolio) {
-    summaryParts.push(`Portfolio: ₹${ctx.portfolio.totalValue.toLocaleString("en-IN")}`);
+  if (ctx.virtualPortfolio) {
+    summaryParts.push(`Virtual Portfolio: ₹${ctx.virtualPortfolio.totalValue.toLocaleString("en-IN")}`);
   }
 
   return {
@@ -138,18 +138,18 @@ function generateProjections(ctx: FinancialContext): AnalysisResult["projections
 
   if (ctx.twin.projections) {
     projections.push({
-      label: "Net Worth (1 Year)",
-      current: ctx.savings.totalSaved + (ctx.portfolio?.totalValue ?? 0),
+      label: "Net Worth (1 Year) - Real Assets Only",
+      current: ctx.savings.totalSaved, // Exclude virtual portfolio
       projected: ctx.twin.projections.oneYear,
       timeframe: "1 year",
-      assumption: "Based on current savings rate and risk profile",
+      assumption: "Based on current savings rate and risk profile (excludes virtual trading portfolio)",
     });
     projections.push({
-      label: "Net Worth (5 Years)",
-      current: ctx.savings.totalSaved + (ctx.portfolio?.totalValue ?? 0),
+      label: "Net Worth (5 Years) - Real Assets Only",
+      current: ctx.savings.totalSaved, // Exclude virtual portfolio
       projected: ctx.twin.projections.fiveYear,
       timeframe: "5 years",
-      assumption: "Based on current savings rate and risk profile",
+      assumption: "Based on current savings rate and risk profile (excludes virtual trading portfolio)",
     });
   }
 

@@ -70,6 +70,8 @@ export const ModelName = {
   Portfolio: 'Portfolio',
   Trade: 'Trade',
   Watchlist: 'Watchlist',
+  Alert: 'Alert',
+  Notification: 'Notification',
   FinancialTwin: 'FinancialTwin',
   Bill: 'Bill',
   AiProfile: 'AiProfile'
@@ -349,6 +351,8 @@ export const WatchlistScalarFieldEnum = {
   userId: 'userId',
   symbol: 'symbol',
   companyName: 'companyName',
+  sector: 'sector',
+  isFavorite: 'isFavorite',
   targetPrice: 'targetPrice',
   notes: 'notes',
   createdAt: 'createdAt',
@@ -356,6 +360,37 @@ export const WatchlistScalarFieldEnum = {
 } as const
 
 export type WatchlistScalarFieldEnum = (typeof WatchlistScalarFieldEnum)[keyof typeof WatchlistScalarFieldEnum]
+
+
+export const AlertScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  symbol: 'symbol',
+  companyName: 'companyName',
+  type: 'type',
+  threshold: 'threshold',
+  status: 'status',
+  triggeredAt: 'triggeredAt',
+  message: 'message',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AlertScalarFieldEnum = (typeof AlertScalarFieldEnum)[keyof typeof AlertScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  type: 'type',
+  title: 'title',
+  message: 'message',
+  data: 'data',
+  isRead: 'isRead',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
 export const FinancialTwinScalarFieldEnum = {

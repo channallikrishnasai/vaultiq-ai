@@ -34,8 +34,8 @@ export function simulateScenario(
   const expenseChange = modified.expenses.currentMonth - ctx.expenses.currentMonth;
   const savingsChange = modified.cashFlow.monthlyNet - ctx.cashFlow.monthlyNet;
   const netWorthChange =
-    (modified.savings.totalSaved + (modified.portfolio?.totalValue ?? 0)) -
-    (ctx.savings.totalSaved + (ctx.portfolio?.totalValue ?? 0));
+    (modified.savings.totalSaved + (modified.virtualPortfolio?.totalValue ?? 0)) -
+    (ctx.savings.totalSaved + (ctx.virtualPortfolio?.totalValue ?? 0));
 
   return {
     scenario: scenario.type,

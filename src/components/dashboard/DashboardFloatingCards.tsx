@@ -370,9 +370,20 @@ interface Props {
     topHoldings: { name: string; value: number; change: number }[];
     isEmpty: boolean;
   };
+  virtualPortfolio?: {
+    totalValue: number;
+    cashBalance: number;
+    change: number;
+    changePercent: number;
+    allocation: { name: string; percent: number; color: string }[];
+    topHoldings: { name: string; value: number; change: number }[];
+    isEmpty: boolean;
+  };
   expenses?: { total: number; categories: { name: string; amount: number; color: string; percent: number }[] };
   fraudStats?: { scanCount: number; highRiskCount: number };
   twinStats?: { hasTwin: boolean; healthScore: number; netWorth: number; twinName: string | null };
+  emergencyFund?: number;
+  emergencyFundTarget?: number;
   user?: { name?: string | null; email?: string | null; image?: string | null };
   profile?: { income: number; currency: string | null; riskAppetite: string | null; xp: number; streak: number } | null;
   orbState?: string;
@@ -387,9 +398,12 @@ export default function DashboardFloatingCards({
   healthScore = 0,
   goals = [],
   portfolio = { totalValue: 0, cashBalance: 0, change: 0, changePercent: 0, allocation: EMPTY_PORT_ALLOC, topHoldings: [], isEmpty: true },
+  virtualPortfolio = { totalValue: 0, cashBalance: 0, change: 0, changePercent: 0, allocation: EMPTY_PORT_ALLOC, topHoldings: [], isEmpty: true },
   expenses = { total: 0, categories: [] },
   fraudStats = { scanCount: 0, highRiskCount: 0 },
   twinStats = { hasTwin: false, healthScore: 0, netWorth: 0, twinName: null },
+  emergencyFund = 0,
+  emergencyFundTarget = 0,
   user,
   profile,
   orbState = "idle",
@@ -582,7 +596,7 @@ export default function DashboardFloatingCards({
             <div style={{ height: 4, borderRadius: 4, background: "rgba(255,255,255,0.06)", overflow: "hidden", marginBottom: 3 }}>
               <motion.div
                 initial={{ width: 0 }}
-                animate={{ width: "68%" }}
+                animate={{ width: `${Math.min(100, ((profile?.xp ?? 0) % 1000) / 10)}%` }}
                 transition={{ duration: 1.5, delay: 0.5, ease: "easeOut" }}
                 style={{
                   height: "100%",
@@ -737,7 +751,7 @@ export default function DashboardFloatingCards({
         )}
       </Card>
 
-      {/* 5. PORTFOLIO — Left Bottom */}
+      {/* 5. VIRTUAL PORTFOLIO — Left Bottom */}
       <Card
         delay={0.38}
         accent="#10b981"
@@ -750,7 +764,7 @@ export default function DashboardFloatingCards({
         style={{ left: "19%", top: "79.5%" }}
       >
         <CardHeader
-          label="Portfolio"
+          label="Virtual Portfolio"
           accent="#10b981"
           icon={<PieIcon size={8} style={{ color: "#10b981" }} />}
           isMinimized={minimized["portfolio2"]}
@@ -814,7 +828,7 @@ export default function DashboardFloatingCards({
         />
         {!minimized["netWorth"] && (
           <>
-            <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Total assets</p>
+            <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 4 }}>Real assets only</p>
             <AnimatedNumber
               value={netWorth}
               prefix="₹"
@@ -850,7 +864,7 @@ export default function DashboardFloatingCards({
         )}
       </Card>
 
-      {/* 7. PORTFOLIO PERFORMANCE — Top Center */}
+      {/* 7. VIRTUAL TRADING PERFORMANCE — Top Center */}
       <Card
         delay={0.18}
         accent="#D4AF37"
@@ -863,7 +877,7 @@ export default function DashboardFloatingCards({
         style={{ left: "51.5%", top: "11.5%" }}
       >
         <CardHeader
-          label="Portfolio Performance"
+          label="Virtual Trading"
           icon={<TrendingUp size={8} style={{ color: "#D4AF37" }} />}
           isMinimized={minimized["portfolioPerf"]}
           onToggle={() => toggleMinimize("portfolioPerf")}
@@ -1044,7 +1058,7 @@ export default function DashboardFloatingCards({
               </ResponsiveContainer>
             </div>
             <p style={{ fontSize: 7, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>
-              Target: {savingsRate > 0 ? savingsRate : 50}%
+              Target: {savingsRate > 0 ? Math.min(savingsRate + 10, 100) : 0}%
             </p>
           </>
         )}
@@ -1076,7 +1090,7 @@ export default function DashboardFloatingCards({
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={[{ v: Math.round(savingsRate) || 0 }, { v: 100 - (Math.round(savingsRate) || 0) }]}
+                      data={[{ v: emergencyFundTarget > 0 ? Math.min(100, Math.round((emergencyFund / emergencyFundTarget) * 100)) : 0 }, { v: emergencyFundTarget > 0 ? Math.max(0, 100 - Math.round((emergencyFund / emergencyFundTarget) * 100)) : 100 }]}
                       dataKey="v"
                       innerRadius={14}
                       outerRadius={23}
@@ -1100,14 +1114,14 @@ export default function DashboardFloatingCards({
                     color: "#60a5fa",
                   }}
                 >
-                  {Math.round(savingsRate) || 0}%
+                  {emergencyFundTarget > 0 ? Math.min(100, Math.round((emergencyFund / emergencyFundTarget) * 100)) : 0}%
                 </span>
               </div>
               <div>
                 <p style={{ fontSize: 9, fontWeight: 700, color: "#f4f4f5", marginBottom: 2 }}>
-                  {fmt(portfolio.cashBalance)}
+                  {fmt(emergencyFund)}
                 </p>
-                <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)" }}>Month coverage</p>
+                <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)" }}>of {fmt(emergencyFundTarget)} goal</p>
               </div>
             </div>
           </>
@@ -1219,7 +1233,7 @@ export default function DashboardFloatingCards({
               <div style={{ position: "relative", width: 44, height: 44, flexShrink: 0 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={[{ v: Math.round(savingsRate) || 0 }, { v: 100 - (Math.round(savingsRate) || 0) }]} dataKey="v" innerRadius={12} outerRadius={20} startAngle={90} endAngle={-270}>
+                    <Pie data={[{ v: goalList.length > 0 ? Math.round(goalList.reduce((sum, g) => sum + g.percent, 0) / goalList.length) : 0 }, { v: goalList.length > 0 ? 100 - Math.round(goalList.reduce((sum, g) => sum + g.percent, 0) / goalList.length) : 100 }]} dataKey="v" innerRadius={12} outerRadius={20} startAngle={90} endAngle={-270}>
                       <Cell fill="#10b981" />
                       <Cell fill="rgba(255,255,255,0.05)" />
                     </Pie>
@@ -1237,7 +1251,7 @@ export default function DashboardFloatingCards({
                     color: "#10b981",
                   }}
                 >
-                  {Math.round(savingsRate) || 0}%
+                  {goalList.length > 0 ? Math.round(goalList.reduce((sum, g) => sum + g.percent, 0) / goalList.length) : 0}%
                 </span>
               </div>
             </div>
@@ -1312,7 +1326,7 @@ export default function DashboardFloatingCards({
         )}
       </Card>
 
-      {/* 15. INVESTMENT RETURNS — Bottom Right */}
+      {/* 15. VIRTUAL TRADING ALLOCATION — Bottom Right */}
       <Card
         delay={0.6}
         accent="#a78bfa"
@@ -1325,14 +1339,14 @@ export default function DashboardFloatingCards({
         style={{ left: "69.5%", top: "83.5%" }}
       >
         <CardHeader
-          label="Investment Returns"
+          label="Virtual Allocation"
           accent="#a78bfa"
           isMinimized={minimized["investmentReturns"]}
           onToggle={() => toggleMinimize("investmentReturns")}
         />
         {!minimized["investmentReturns"] && (
           <>
-            <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 5 }}>YTD performance</p>
+            <p style={{ fontSize: 7, color: "rgba(255,255,255,0.35)", marginBottom: 5 }}>Paper trading breakdown</p>
             <div style={{ height: 42 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={EMPTY_SPARK}>

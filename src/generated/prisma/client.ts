@@ -137,6 +137,16 @@ export type Trade = Prisma.TradeModel
  */
 export type Watchlist = Prisma.WatchlistModel
 /**
+ * Model Alert
+ * 
+ */
+export type Alert = Prisma.AlertModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
+/**
  * Model FinancialTwin
  * 
  */

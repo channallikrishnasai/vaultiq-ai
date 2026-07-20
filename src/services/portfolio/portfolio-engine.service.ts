@@ -300,28 +300,29 @@ export const portfolioEngineService = {
   ): string {
     const parts: string[] = [];
 
-    parts.push(`Your portfolio is currently valued at ₹${summary.totalCurrentValue.toLocaleString("en-IN")}.`);
+    parts.push(`Your Virtual Trading Portfolio (Paper Trading) is currently valued at ₹${summary.totalCurrentValue.toLocaleString("en-IN")}.`);
+    parts.push("NOTE: This is simulated trading data, not real investments.");
 
     if (summary.totalPnL >= 0) {
-      parts.push(`You have a total gain of ₹${summary.totalPnL.toLocaleString("en-IN")} (${summary.totalPnLPercent.toFixed(2)}%).`);
+      parts.push(`You have a total simulated gain of ₹${summary.totalPnL.toLocaleString("en-IN")} (${summary.totalPnLPercent.toFixed(2)}%).`);
     } else {
-      parts.push(`You have a total loss of ₹${Math.abs(summary.totalPnL).toLocaleString("en-IN")} (${Math.abs(summary.totalPnLPercent).toFixed(2)}%).`);
+      parts.push(`You have a total simulated loss of ₹${Math.abs(summary.totalPnL).toLocaleString("en-IN")} (${Math.abs(summary.totalPnLPercent).toFixed(2)}%).`);
     }
 
     if (summary.todayPnL >= 0) {
-      parts.push(`Today your portfolio gained ₹${summary.todayPnL.toLocaleString("en-IN")}.`);
+      parts.push(`Today your virtual portfolio gained ₹${summary.todayPnL.toLocaleString("en-IN")}.`);
     } else {
-      parts.push(`Today your portfolio lost ₹${Math.abs(summary.todayPnL).toLocaleString("en-IN")}.`);
+      parts.push(`Today your virtual portfolio lost ₹${Math.abs(summary.todayPnL).toLocaleString("en-IN")}.`);
     }
 
     parts.push(`Diversification is ${diversificationLevel}.`);
 
     if (risk.riskAlignment === "aggressive") {
-      parts.push("Your portfolio is more aggressive than your risk appetite allows.");
+      parts.push("Your virtual portfolio is more aggressive than your risk appetite allows.");
     } else if (risk.riskAlignment === "conservative") {
-      parts.push("Your portfolio is more conservative than needed for your goals.");
+      parts.push("Your virtual portfolio is more conservative than needed for your goals.");
     } else {
-      parts.push("Your risk profile is well-aligned with your portfolio.");
+      parts.push("Your risk profile is well-aligned with your virtual portfolio.");
     }
 
     if (performance.topGainers.length > 0) {
@@ -371,7 +372,7 @@ export const portfolioEngineService = {
       },
       goalAlignment: [],
       recommendedActions: [],
-      naturalLanguageSummary: "No portfolio data available. Start by adding investments to your portfolio.",
+      naturalLanguageSummary: "No Virtual Trading Portfolio data available. Start by adding simulated investments to your Virtual Trading Lab.",
       dataFreshness: "cached",
     };
   },

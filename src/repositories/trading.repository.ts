@@ -21,8 +21,8 @@ export const tradingRepository = {
       data: {
         userId,
         name: name ?? "Main Portfolio",
-        cashBalance: cashBalance ?? 100000,
-        totalValue: cashBalance ?? 100000,
+        cashBalance: cashBalance ?? 0,
+        totalValue: cashBalance ?? 0,
       },
     });
   },
@@ -65,15 +65,65 @@ export const tradingRepository = {
   getWatchlist(userId: string) {
     return prisma.watchlist.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ isFavorite: "desc" }, { createdAt: "desc" }],
     });
   },
 
-  addToWatchlist(userId: string, data: { symbol: string; companyName?: string; targetPrice?: number; notes?: string }) {
+  addToWatchlist(userId: string, data: { symbol: string; companyName?: string; sector?: string; targetPrice?: number; notes?: string }) {
     return prisma.watchlist.create({ data: { userId, ...data } });
   },
 
   removeFromWatchlist(id: string, userId: string) {
     return prisma.watchlist.deleteMany({ where: { id, userId } });
+  },
+
+  async toggleFavorite(id: string, userId: string) {
+    const item = await prisma.watchlist.findFirst({
+      where: { id, userId },
+      select: { isFavorite: true },
+    });
+    if (!item) return { count: 0 };
+    return prisma.watchlist.updateMany({
+      where: { id, userId },
+      data: { isFavorite: !item.isFavorite },
+    });
+  },
+
+  getAlerts(userId: string) {
+    return prisma.alert.findMany({
+      where: { userId },
+      orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+    });
+  },
+
+  getActiveAlerts(userId: string) {
+    return prisma.alert.findMany({
+      where: { userId, status: "ACTIVE" },
+      orderBy: { createdAt: "desc" },
+    });
+  },
+
+  createAlert(userId: string, data: { symbol: string; companyName?: string; type: string; threshold: number }) {
+    return prisma.alert.create({
+      data: { userId, ...data, type: data.type as "PRICE_ABOVE" | "PRICE_BELOW" | "PERCENT_CHANGE" | "VOLUME_SPIKE" | "NEW_52W_HIGH" | "NEW_52W_LOW" },
+    });
+  },
+
+  deleteAlert(id: string, userId: string) {
+    return prisma.alert.deleteMany({ where: { id, userId } });
+  },
+
+  getNotifications(userId: string, limit = 50) {
+    return prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+  },
+
+  getUnreadNotificationCount(userId: string) {
+    return prisma.notification.count({
+      where: { userId, isRead: false },
+    });
   },
 };

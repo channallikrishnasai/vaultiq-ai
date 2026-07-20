@@ -31,15 +31,7 @@ async function buildUserSnapshot(userId: string) {
   const annualExpenses = monthlyExpensesRaw * 12;
 
   const savings = goals.reduce((sum, g) => sum + g.currentAmount, 0);
-  let investments = portfolio?.totalValue ?? 0;
-
-  if (investments === 0 && portfolio) {
-    const trades = await prisma.trade.findMany({
-      where: { portfolioId: portfolio.id },
-      select: { totalAmount: true },
-    });
-    investments = portfolio.cashBalance + trades.reduce((sum, t) => sum + t.totalAmount, 0);
-  }
+  const investments = 0;
 
   const debt = 0;
 

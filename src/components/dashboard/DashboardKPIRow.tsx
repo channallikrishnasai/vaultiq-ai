@@ -26,6 +26,7 @@ interface DashboardKPIRowProps {
   portfolioReturn?: number;
   creditScore?: number;
   emergencyFund?: number;
+  emergencyFundTarget?: number;
   user?: { name?: string | null; email?: string | null; image?: string | null };
 }
 
@@ -38,43 +39,48 @@ export default function DashboardKPIRow({
   portfolioReturn = 0,
   creditScore = 0,
   emergencyFund = 0,
+  emergencyFundTarget = 0,
   user,
 }: DashboardKPIRowProps) {
   const [minimized, setMinimized] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
+  const maxNetWorthRef = Math.max(netWorth, monthlyIncome, 1);
+  const maxIncomeRef = Math.max(monthlyIncome, 1);
+  const maxExpenseRef = Math.max(monthlyExpenses, 1);
+
   const items: KPIItem[] = [
     {
       label: "Total Net Worth",
       value: formatCurrencyDecimals(netWorth),
-      bar: 75,
+      bar: maxNetWorthRef > 0 ? Math.min(100, Math.round((netWorth / maxNetWorthRef) * 100)) : 0,
       barColor: "#D4AF37",
       glowColor: "rgba(212,175,55,0.15)",
-      trend: "up",
+      trend: netWorth >= 0 ? "up" : "down",
     },
     {
       label: "Monthly Income",
       value: formatCurrencyDecimals(monthlyIncome),
-      bar: 60,
+      bar: maxIncomeRef > 0 ? Math.min(100, Math.round((monthlyIncome / maxIncomeRef) * 100)) : 0,
       barColor: "#2dd4bf",
       glowColor: "rgba(45,212,191,0.12)",
-      trend: "up",
+      trend: monthlyIncome > 0 ? "up" : "neutral",
     },
     {
       label: "Monthly Expenses",
       value: formatCurrencyDecimals(monthlyExpenses),
-      bar: 51,
+      bar: maxExpenseRef > 0 ? Math.min(100, Math.round((monthlyExpenses / maxExpenseRef) * 100)) : 0,
       barColor: "#ef4444",
       glowColor: "rgba(239,68,68,0.12)",
-      trend: "down",
+      trend: monthlyExpenses > 0 ? "down" : "neutral",
     },
     {
       label: "Savings Rate",
       value: `${savingsRate.toFixed(1)}%`,
-      bar: savingsRate,
+      bar: Math.min(100, Math.max(0, savingsRate)),
       barColor: "#facc15",
       glowColor: "rgba(250,204,21,0.12)",
-      trend: "up",
+      trend: savingsRate >= 20 ? "up" : savingsRate > 0 ? "neutral" : "down",
     },
     {
       label: "Debt Score",
@@ -85,14 +91,14 @@ export default function DashboardKPIRow({
       trend: "neutral",
     },
     {
-      label: "Portfolio Return",
+      label: "Virtual Return",
       value: `+${portfolioReturn}%`,
       sub: "YTD",
-      bar: 68,
+      bar: Math.min(100, Math.max(0, portfolioReturn)),
       barColor: "#10b981",
       valueColor: "#10b981",
       glowColor: "rgba(16,185,129,0.12)",
-      trend: "up",
+      trend: portfolioReturn >= 0 ? "up" : "down",
     },
     {
       label: "Financial Health",
@@ -100,16 +106,16 @@ export default function DashboardKPIRow({
       bar: healthScore,
       barColor: "#10b981",
       glowColor: "rgba(16,185,129,0.12)",
-      trend: "up",
+      trend: healthScore >= 60 ? "up" : healthScore > 0 ? "neutral" : "down",
     },
     {
       label: "Emergency Fund",
       value: formatCurrencyDecimals(emergencyFund),
       sub: "3 Months",
-      bar: 85,
+      bar: emergencyFundTarget > 0 ? Math.min(100, Math.round((emergencyFund / emergencyFundTarget) * 100)) : 0,
       barColor: "#60a5fa",
       glowColor: "rgba(96,165,250,0.12)",
-      trend: "up",
+      trend: emergencyFundTarget > 0 && emergencyFund >= emergencyFundTarget ? "up" : "neutral",
     },
   ];
 

@@ -26,7 +26,7 @@ export default function DashboardHUD({
   const goalPct =
     profile.portfolioValue && profile.goal?.targetAmount
       ? Math.min(100, Math.round((profile.portfolioValue / profile.goal.targetAmount) * 100))
-      : 41;
+      : 0;
 
   return (
     <>
@@ -100,16 +100,16 @@ export default function DashboardHUD({
                 marginBottom: 6,
               }}
             >
-              Portfolio
+              Virtual Portfolio
             </p>
             <p style={{ fontSize: 22, fontWeight: 600, color: "#E8C84A", lineHeight: 1 }}>
               {formatINR(profile.portfolioValue)}
             </p>
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>
-              +12.4% YTD · {profile.riskAppetite ?? "Moderate"}
+              {profile.portfolioValue != null && profile.portfolioValue > 0 ? "Paper trading active" : "No virtual trades"} · {profile.riskAppetite ?? "Moderate"}
             </p>
             <GlassBar
-              value={68}
+              value={goalPct}
               color="linear-gradient(90deg, #60a5fa, #D4AF37)"
               delay={0.1}
             />
@@ -155,7 +155,7 @@ export default function DashboardHUD({
               <span style={{ fontSize: 11, color: "rgba(255,255,255,0.25)" }}>target</span>
             </p>
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>
-              {formatINR(profile.portfolioValue)} saved · {goalPct}% done
+              {formatINR(profile.portfolioValue)} in virtual trades · {goalPct}% done
             </p>
             <GlassBar
               value={goalPct}
@@ -202,7 +202,7 @@ export default function DashboardHUD({
                 {formatINR(netWorth)}
               </p>
               <p style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>
-                All assets combined
+                Real assets combined
               </p>
             </GlassCard>
           </motion.div>

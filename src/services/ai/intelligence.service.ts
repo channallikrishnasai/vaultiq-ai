@@ -111,7 +111,7 @@ export async function generateIntelligence(userId: string): Promise<DashboardInt
   const actualIncome = currentMonthIncomes > 0 ? currentMonthIncomes : monthlyIncome;
   const savingsRate = computeSavingsRate(actualIncome, currentMonthExpenses);
   const savingsBalance = goals.reduce((sum, g) => sum + g.currentAmount, 0);
-  const investments = portfolio?.totalValue ?? 0;
+  const investments = 0;
   const emergencyGoal = goals.find((g) => g.type === "EMERGENCY");
   const emergencyCurrent = emergencyGoal?.currentAmount ?? 0;
   const emergencyTarget = emergencyGoal?.targetAmount ?? monthlyIncome * 6;
@@ -271,15 +271,15 @@ export async function generateIntelligence(userId: string): Promise<DashboardInt
     });
   }
 
-  if (portfolio && investments > 0) {
-    const cashPercent = portfolio.cashBalance / investments;
+  if (portfolio && portfolio.totalValue > 0) {
+    const cashPercent = portfolio.cashBalance / portfolio.totalValue;
     if (cashPercent > 0.6) {
       smartAlerts.push({
         id: "allocation-imbalance",
         type: "info",
-        title: "Investment allocation imbalance",
-        message: `${Math.round(cashPercent * 100)}% of your portfolio is in cash. Consider investing more for growth.`,
-        action: "Rebalance portfolio",
+        title: "Virtual portfolio allocation imbalance",
+        message: `${Math.round(cashPercent * 100)}% of your virtual portfolio is in cash. Consider practicing different allocation strategies.`,
+        action: "Rebalance virtual portfolio",
       });
     }
   }
@@ -297,7 +297,7 @@ export async function generateIntelligence(userId: string): Promise<DashboardInt
   // ── Health Explanation ──────────────────────────────────────────────────────
   const savingsScore = actualIncome > 0 ? (actualIncome - currentMonthExpenses) / actualIncome : 0;
   const debtRatio = monthlyIncome > 0 ? 0 / (monthlyIncome * 12) : 1;
-  const investScore = monthlyIncome > 0 ? investments / (monthlyIncome * 6) : 0;
+  const investScore = 0;
 
   const healthExplanation: HealthExplanation = {
     overall: `Your financial health is ${savingsScore >= 0.2 && investScore >= 0.5 ? "strong" : savingsScore >= 0.1 ? "moderate" : "needs attention"}.`,
@@ -428,9 +428,6 @@ export async function generateIntelligence(userId: string): Promise<DashboardInt
   else if (emergencyCurrent > 0) weaknesses.push("Emergency fund needs growth");
   else weaknesses.push("No emergency fund established");
 
-  if (investments > monthlyIncome * 3) strengths.push("Solid investment base");
-  else if (monthlyIncome > 0) weaknesses.push("Investments are below 3x monthly income");
-
   if (totalGoals > 0 && avgGoalProgress > 30) strengths.push("Active goal progress");
   else if (totalGoals === 0) weaknesses.push("No financial goals set");
 
@@ -456,8 +453,6 @@ export async function generateIntelligence(userId: string): Promise<DashboardInt
       nextAction = "Priority: Build your emergency fund to 3 months of expenses.";
     } else if (savingsRate < 20) {
       nextAction = "Focus on increasing your savings rate to 20%+.";
-    } else if (investments < monthlyIncome * 3) {
-      nextAction = "Consider starting a SIP to grow your investments.";
     } else if (behindGoals.length > 0) {
       nextAction = `Review progress on "${behindGoals[0].name}" and adjust contributions.`;
     } else {
@@ -479,7 +474,7 @@ export async function generateIntelligence(userId: string): Promise<DashboardInt
   const emptyStates: string[] = [];
   if (expenses.length === 0) emptyStates.push("Add your first expense to unlock spending insights.");
   if (goals.length === 0) emptyStates.push("Set a financial goal to start tracking your progress.");
-  if (!portfolio) emptyStates.push("Create a portfolio to monitor your investments.");
+  if (!portfolio) emptyStates.push("Create a virtual portfolio to practice trading strategies.");
   if (incomes.length === 0 && actualIncome === 0) emptyStates.push("Record your income to see a complete financial picture.");
 
   return {

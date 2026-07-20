@@ -112,29 +112,29 @@ export function generateRecommendations(
     }
   }
 
-  // ── Investment ─────────────────────────────────────────────────────────────
-  if (!ctx.portfolio) {
+  // ── Investment (Virtual Trading Portfolio) ────────────────────────────────
+  if (!ctx.virtualPortfolio) {
     addRec(
       2,
-      "investment",
-      "Start investing with SIPs of ₹5,000/month",
-      "No investments detected. Starting early maximizes compounding.",
-      "Long-term wealth creation",
-      "medium",
+      "virtual_investment",
+      "Start practicing with Virtual Trading Lab",
+      "No virtual portfolio found. Practice investment strategies with simulated money.",
+      "Learn investing without real risk",
+      "low",
     );
-  } else if (ctx.portfolio) {
+  } else if (ctx.virtualPortfolio) {
     const cashPercent =
-      ctx.portfolio.totalValue > 0
-        ? Math.round((ctx.portfolio.cashBalance / ctx.portfolio.totalValue) * 100)
+      ctx.virtualPortfolio.totalValue > 0
+        ? Math.round((ctx.virtualPortfolio.cashBalance / ctx.virtualPortfolio.totalValue) * 100)
         : 100;
     if (cashPercent > 50) {
       addRec(
         2,
-        "investment",
-        "Deploy excess cash into diversified investments",
-        `${cashPercent}% of portfolio is idle cash.`,
-      "Potential 8-12% returns vs inflation erosion",
-        "medium",
+        "virtual_investment",
+        "Deploy excess virtual cash into simulated investments",
+        `${cashPercent}% of your virtual portfolio is idle cash. Practice deploying capital.`,
+      "Learn capital deployment strategies",
+        "low",
       );
     }
   }
