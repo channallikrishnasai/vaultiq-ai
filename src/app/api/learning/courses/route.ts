@@ -1,24 +1,24 @@
 import { requireAuth } from "@/lib/auth";
-import { coursesService } from "@/services/learning/courses.service";
-import { learningRepository } from "@/repositories/learning.repository";
+import { prisma } from "@/lib/prisma";
 import { successResponse } from "@/lib/api-response";
 import { handleApiError } from "@/lib/api-handler";
 
 export async function GET() {
   try {
-    const session = await requireAuth();
-    const courses = coursesService.getAllCourses();
-    const progress = await learningRepository.getProgress(session.user.id);
+    // Fetch all published courses with their modules and lessons
+    const courses = await prisma.course.findMany({
+      where: { published: true },
+      include: {
+        modules: {
+          orderBy: { order: 'asc' },
+          include: {
+            lessons: { orderBy: { order: 'asc' } },
+          },
+        },
+      },
+    });
 
-    const enriched = courses.map((course) => ({
-      ...course,
-      completedLessons: progress.filter(
-        (p) => p.courseId === course.id && p.completed,
-      ).length,
-      totalLessons: course.lessons.length,
-    }));
-
-    return successResponse(enriched);
+    return successResponse(courses);
   } catch (error) {
     return handleApiError(error);
   }
