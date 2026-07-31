@@ -46,6 +46,11 @@ enum ChatRole {
   SYSTEM
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 // ---------------------------------------------------------------------------
 // Auth — NextAuth (@auth/prisma-adapter compatible)
 // ---------------------------------------------------------------------------
@@ -61,6 +66,7 @@ model User {
   resetTokenExpiry DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  role             Role      @default(USER)
 
   accounts                Account[]
   sessions                Session[]
@@ -252,6 +258,85 @@ model FraudReport {
 // Learning Academy
 // ---------------------------------------------------------------------------
 
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  thumbnail   String?
+  instructor  String?
+  difficulty  String   @default("beginner") // beginner, intermediate, advanced
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  modules          Module[]
+  learningProgress LearningProgress[]
+  quizResults      QuizResult[]
+}
+
+model Module {
+  id        String   @id @default(cuid())
+  courseId  String
+  title     String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@index([courseId])
+  @@index([courseId, order])
+}
+
+model Lesson {
+  id            String   @id @default(cuid())
+  moduleId      String
+  title         String
+  description   String?
+  duration      String?
+  videoUrl      String?  // YouTube URL
+  pdfUrl        String?
+  assignmentUrl String?
+  order         Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  module           Module             @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  learningProgress LearningProgress[]
+  quizzes          Quiz[]
+
+  @@index([moduleId])
+  @@index([moduleId, order])
+}
+
+model Quiz {
+  id        String   @id @default(cuid())
+  lessonId  String
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lesson    Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  questions QuizQuestion[]
+
+  @@index([lessonId])
+}
+
+model QuizQuestion {
+  id           String   @id @default(cuid())
+  quizId       String
+  question     String
+  options      Json     // Array of strings
+  correctIndex Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId])
+}
+
 model LearningProgress {
   id          String    @id @default(cuid())
   userId      String
@@ -262,11 +347,14 @@ model LearningProgress {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId, lessonId])
   @@index([userId])
   @@index([userId, courseId])
+  @@index([lessonId])
 }
 
 model QuizResult {
@@ -279,7 +367,8 @@ model QuizResult {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([userId, courseId])

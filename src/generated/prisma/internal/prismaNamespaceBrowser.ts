@@ -61,6 +61,11 @@ export const ModelName = {
   Budget: 'Budget',
   Goal: 'Goal',
   FraudReport: 'FraudReport',
+  Course: 'Course',
+  Module: 'Module',
+  Lesson: 'Lesson',
+  Quiz: 'Quiz',
+  QuizQuestion: 'QuizQuestion',
   LearningProgress: 'LearningProgress',
   QuizResult: 'QuizResult',
   Roadmap: 'Roadmap',
@@ -102,7 +107,8 @@ export const UserScalarFieldEnum = {
   resetToken: 'resetToken',
   resetTokenExpiry: 'resetTokenExpiry',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  role: 'role'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -238,6 +244,74 @@ export const FraudReportScalarFieldEnum = {
 } as const
 
 export type FraudReportScalarFieldEnum = (typeof FraudReportScalarFieldEnum)[keyof typeof FraudReportScalarFieldEnum]
+
+
+export const CourseScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  thumbnail: 'thumbnail',
+  instructor: 'instructor',
+  difficulty: 'difficulty',
+  published: 'published',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CourseScalarFieldEnum = (typeof CourseScalarFieldEnum)[keyof typeof CourseScalarFieldEnum]
+
+
+export const ModuleScalarFieldEnum = {
+  id: 'id',
+  courseId: 'courseId',
+  title: 'title',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ModuleScalarFieldEnum = (typeof ModuleScalarFieldEnum)[keyof typeof ModuleScalarFieldEnum]
+
+
+export const LessonScalarFieldEnum = {
+  id: 'id',
+  moduleId: 'moduleId',
+  title: 'title',
+  description: 'description',
+  duration: 'duration',
+  videoUrl: 'videoUrl',
+  pdfUrl: 'pdfUrl',
+  assignmentUrl: 'assignmentUrl',
+  order: 'order',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type LessonScalarFieldEnum = (typeof LessonScalarFieldEnum)[keyof typeof LessonScalarFieldEnum]
+
+
+export const QuizScalarFieldEnum = {
+  id: 'id',
+  lessonId: 'lessonId',
+  title: 'title',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QuizScalarFieldEnum = (typeof QuizScalarFieldEnum)[keyof typeof QuizScalarFieldEnum]
+
+
+export const QuizQuestionScalarFieldEnum = {
+  id: 'id',
+  quizId: 'quizId',
+  question: 'question',
+  options: 'options',
+  correctIndex: 'correctIndex',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QuizQuestionScalarFieldEnum = (typeof QuizQuestionScalarFieldEnum)[keyof typeof QuizQuestionScalarFieldEnum]
 
 
 export const LearningProgressScalarFieldEnum = {

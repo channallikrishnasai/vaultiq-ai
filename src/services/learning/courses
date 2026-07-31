@@ -11,6 +11,7 @@ export interface Lesson {
   duration: string;
   content: string;
   youtubeId?: string;
+  youtubeUrl?: string;
 }
 
 export interface Course {
@@ -29,11 +30,11 @@ const COURSES: Course[] = [
     title: "Personal Finance Basics",
     description: "Master budgeting, saving, and money management fundamentals.",
     level: "beginner",
-    youtubeUrl: "https://www.youtube.com/watch?v=bEcvzGvFwEw",
+    youtubeUrl: "https://www.youtube.com/watch?v=T7JHfLGm_GY",
     lessons: [
-      { id: "fb-1", title: "Understanding Income & Expenses", duration: "10 min", content: "Learn to track your cash flow and identify spending patterns.", youtubeId: "WEDIj9JBTC8" },
-      { id: "fb-2", title: "Building a Budget", duration: "12 min", content: "Create a 50/30/20 budget tailored to Indian households.", youtubeId: "D-mG8Y2L3xU" },
-      { id: "fb-3", title: "Emergency Fund Essentials", duration: "8 min", content: "Why and how to build 3-6 months of expenses as safety net.", youtubeId: "bEcvzGvFwEw" },
+      { id: "fb-1", title: "Understanding Income & Expenses", duration: "10 min", content: "Learn to track your cash flow and identify spending patterns.", youtubeUrl: "https://www.youtube.com/watch?v=T7JHfLGm_GY", youtubeId: "T7JHfLGm_GY" },
+      { id: "fb-2", title: "Building a Budget", duration: "12 min", content: "Create a 50/30/20 budget tailored to Indian households.", youtubeUrl: "https://www.youtube.com/watch?v=-bqeNE1DOzA", youtubeId: "-bqeNE1DOzA" },
+      { id: "fb-3", title: "Emergency Fund Essentials", duration: "8 min", content: "Why and how to build 3-6 months of expenses as safety net.", youtubeUrl: "https://www.youtube.com/watch?v=g-hir-4WzfU", youtubeId: "g-hir-4WzfU" },
     ],
     quiz: [
       { id: "fb-q1", question: "What is the recommended emergency fund size?", options: ["1 month", "3-6 months expenses", "1 year income", "No fund needed"], correctIndex: 1 },
@@ -45,11 +46,11 @@ const COURSES: Course[] = [
     title: "Investing 101",
     description: "Introduction to stocks, mutual funds, and SIP investing.",
     level: "beginner",
-    youtubeUrl: "https://www.youtube.com/watch?v=WEDIj9JBTC8",
+    youtubeUrl: "https://www.youtube.com/watch?v=kTxx_Jpnpn0",
     lessons: [
-      { id: "inv-1", title: "What is Investing?", duration: "10 min", content: "Difference between saving and investing, power of compounding.", youtubeId: "bEcvzGvFwEw" },
-      { id: "inv-2", title: "Mutual Funds & SIPs", duration: "15 min", content: "How SIPs work, types of mutual funds, expense ratios.", youtubeId: "D-mG8Y2L3xU" },
-      { id: "inv-3", title: "Stock Market Basics", duration: "12 min", content: "NSE, BSE, demat accounts, and basic stock terminology.", youtubeId: "WEDIj9JBTC8" },
+      { id: "inv-1", title: "What is Investing?", duration: "10 min", content: "Difference between saving and investing, power of compounding.", youtubeUrl: "https://www.youtube.com/watch?v=kTxx_Jpnpn0", youtubeId: "kTxx_Jpnpn0" },
+      { id: "inv-2", title: "Mutual Funds & SIPs", duration: "15 min", content: "How SIPs work, types of mutual funds, expense ratios.", youtubeUrl: "https://www.youtube.com/watch?v=PbldLCsspgE", youtubeId: "PbldLCsspgE" },
+      { id: "inv-3", title: "Stock Market Basics", duration: "12 min", content: "NSE, BSE, demat accounts, and basic stock terminology.", youtubeUrl: "https://www.youtube.com/watch?v=p7HKvqRI_Bo", youtubeId: "p7HKvqRI_Bo" },
     ],
     quiz: [
       { id: "inv-q1", question: "SIP stands for:", options: ["Stock Investment Plan", "Systematic Investment Plan", "Savings Interest Program", "Secure Income Portfolio"], correctIndex: 1 },
@@ -61,11 +62,11 @@ const COURSES: Course[] = [
     title: "Fraud & Scam Awareness",
     description: "Protect yourself from financial fraud, phishing, and scams.",
     level: "beginner",
-    youtubeUrl: "https://www.youtube.com/watch?v=SBGfH8smblQ",
+    youtubeUrl: "https://www.youtube.com/watch?v=gIOz1dZGllg",
     lessons: [
-      { id: "fr-1", title: "Common Scam Types", duration: "10 min", content: "OTP fraud, phishing, investment scams, and social engineering.", youtubeId: "bEcvzGvFwEw" },
-      { id: "fr-2", title: "Red Flags to Watch", duration: "8 min", content: "Urgency tactics, guaranteed returns, and suspicious links.", youtubeId: "D-mG8Y2L3xU" },
-      { id: "fr-3", title: "Reporting & Recovery", duration: "7 min", content: "How to report fraud and steps for damage control.", youtubeId: "WEDIj9JBTC8" },
+      { id: "fr-1", title: "Common Scam Types", duration: "10 min", content: "OTP fraud, phishing, investment scams, and social engineering.", youtubeUrl: "https://www.youtube.com/watch?v=gIOz1dZGllg", youtubeId: "gIOz1dZGllg" },
+      { id: "fr-2", title: "Red Flags to Watch", duration: "8 min", content: "Urgency tactics, guaranteed returns, and suspicious links.", youtubeUrl: "https://www.youtube.com/watch?v=KsIdX4FF3xU", youtubeId: "KsIdX4FF3xU" },
+      { id: "fr-3", title: "Reporting & Recovery", duration: "7 min", content: "How to report fraud and steps for damage control.", youtubeUrl: "https://www.youtube.com/watch?v=UR0VPinSmbg", youtubeId: "UR0VPinSmbg" },
     ],
     quiz: [
       { id: "fr-q1", question: "You should NEVER share:", options: ["Your name", "OTP/PIN/passwords", "Email address", "City name"], correctIndex: 1 },
@@ -77,11 +78,11 @@ const COURSES: Course[] = [
     title: "Tax Planning for Indians",
     description: "Understand income tax, deductions, and tax-saving investments.",
     level: "intermediate",
-    youtubeUrl: "https://www.youtube.com/watch?v=D-mG8Y2L3xU",
+    youtubeUrl: "https://www.youtube.com/watch?v=xIE-BW_hR5c",
     lessons: [
-      { id: "tx-1", title: "Income Tax Slabs", duration: "12 min", content: "Old vs new tax regime, applicable slabs for FY 2025-26.", youtubeId: "bEcvzGvFwEw" },
-      { id: "tx-2", title: "Section 80C Deductions", duration: "10 min", content: "PPF, ELSS, LIC, and other 80C instruments up to ₹1.5L.", youtubeId: "D-mG8Y2L3xU" },
-      { id: "tx-3", title: "Capital Gains Tax", duration: "10 min", content: "STCG vs LTCG on equity, debt, and property.", youtubeId: "WEDIj9JBTC8" },
+      { id: "tx-1", title: "Income Tax Slab", duration: "12 min", content: "Old vs new tax regime, applicable slabs for FY 2025-26.", youtubeUrl: "https://www.youtube.com/watch?v=xIE-BW_hR5c", youtubeId: "xIE-BW_hR5c" },
+      { id: "tx-2", title: "Section 80C Deduction", duration: "10 min", content: "PPF, ELSS, LIC, and other 80C instruments up to ₹1.5L.", youtubeUrl: "https://www.youtube.com/watch?v=XYy1z8mTA8E", youtubeId: "XYy1z8mTA8E" },
+      { id: "tx-3", title: "Capital Gains Tax", duration: "10 min", content: "STCG vs LTCG on equity, debt, and property.", youtubeUrl: "https://www.youtube.com/watch?v=zOYC9JIGx_A", youtubeId: "zOYC9JIGx_A" },
     ],
     quiz: [
       { id: "tx-q1", question: "Section 80C maximum deduction is:", options: ["₹50,000", "₹1,00,000", "₹1,50,000", "₹2,00,000"], correctIndex: 2 },

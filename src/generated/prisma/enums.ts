@@ -56,6 +56,14 @@ export const ChatRole = {
 export type ChatRole = (typeof ChatRole)[keyof typeof ChatRole]
 
 
+export const Role = {
+  USER: 'USER',
+  ADMIN: 'ADMIN'
+} as const
+
+export type Role = (typeof Role)[keyof typeof Role]
+
+
 export const AlertType = {
   PRICE_ABOVE: 'PRICE_ABOVE',
   PRICE_BELOW: 'PRICE_BELOW',

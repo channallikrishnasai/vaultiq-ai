@@ -4,6 +4,25 @@ import { learningRepository } from "@/repositories/learning.repository";
 import { successResponse } from "@/lib/api-response";
 import { handleApiError } from "@/lib/api-handler";
 
+export async function GET(request: Request) {
+  try {
+    const session = await requireAuth();
+    const url = new URL(request.url);
+    const courseId = url.searchParams.get("courseId");
+    
+    const progress = await learningRepository.getProgress(session.user.id);
+    
+    if (courseId) {
+      const filtered = progress.filter((p) => p.courseId === courseId);
+      return successResponse(filtered);
+    }
+    
+    return successResponse(progress);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const session = await requireAuth();
