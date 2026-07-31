@@ -14,6 +14,8 @@ const DashboardScene = dynamic(() => import("./DashboardScene"), { ssr: false })
 const NeuralNetwork = dynamic(() => import("./NeuralNetwork"), { ssr: false });
 const DashboardFloatingCards = dynamic(() => import("./DashboardFloatingCards"), { ssr: false });
 const DashboardIntelligence = dynamic(() => import("./DashboardIntelligence"), { ssr: false });
+const FinancialCopilotCard = dynamic(() => import("./FinancialCopilotCard"), { ssr: false });
+const DocumentCenterCard = dynamic(() => import("./DocumentCenterCard"), { ssr: false });
 
 interface DashboardLayoutProps {
   userId: string;
@@ -159,6 +161,13 @@ export default function DashboardLayout({ userId, user }: DashboardLayoutProps) 
         </div>
       )}
 
+      {/* ── AI Financial Copilot Card ── */}
+      {uiReady && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-10 w-full max-w-[560px] px-4">
+          <FinancialCopilotCard />
+        </div>
+      )}
+
       {/* ── Neural network SVG ── */}
       <NeuralNetwork visible={uiReady} />
 
@@ -257,6 +266,13 @@ export default function DashboardLayout({ userId, user }: DashboardLayoutProps) 
       {uiReady && (
         <div className="absolute bottom-4 left-4 z-10 w-[340px]">
           <DashboardIntelligence />
+        </div>
+      )}
+
+      {/* ── Document Center Card — bottom right of main area ── */}
+      {uiReady && (
+        <div className="absolute bottom-4 right-4 z-10 w-[260px]">
+          <DocumentCenterCard />
         </div>
       )}
 

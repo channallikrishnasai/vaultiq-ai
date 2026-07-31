@@ -243,6 +243,8 @@ export type UserWhereInput = {
   notifications?: Prisma.NotificationListRelationFilter
   financialTwins?: Prisma.FinancialTwinListRelationFilter
   aiProfile?: Prisma.XOR<Prisma.AiProfileNullableScalarRelationFilter, Prisma.AiProfileWhereInput> | null
+  documents?: Prisma.DocumentListRelationFilter
+  documentInsights?: Prisma.DocumentInsightListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -277,6 +279,8 @@ export type UserOrderByWithRelationInput = {
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   financialTwins?: Prisma.FinancialTwinOrderByRelationAggregateInput
   aiProfile?: Prisma.AiProfileOrderByWithRelationInput
+  documents?: Prisma.DocumentOrderByRelationAggregateInput
+  documentInsights?: Prisma.DocumentInsightOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -314,6 +318,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.NotificationListRelationFilter
   financialTwins?: Prisma.FinancialTwinListRelationFilter
   aiProfile?: Prisma.XOR<Prisma.AiProfileNullableScalarRelationFilter, Prisma.AiProfileWhereInput> | null
+  documents?: Prisma.DocumentListRelationFilter
+  documentInsights?: Prisma.DocumentInsightListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -380,6 +386,8 @@ export type UserCreateInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -414,6 +422,8 @@ export type UserUncheckedCreateInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -448,6 +458,8 @@ export type UserUpdateInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -482,6 +494,8 @@ export type UserUncheckedUpdateInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -877,6 +891,34 @@ export type UserUpdateOneRequiredWithoutAiProfileNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAiProfileInput, Prisma.UserUpdateWithoutAiProfileInput>, Prisma.UserUncheckedUpdateWithoutAiProfileInput>
 }
 
+export type UserCreateNestedOneWithoutDocumentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentsInput, Prisma.UserUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDocumentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentsInput, Prisma.UserUncheckedCreateWithoutDocumentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentsInput
+  upsert?: Prisma.UserUpsertWithoutDocumentsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentsInput, Prisma.UserUpdateWithoutDocumentsInput>, Prisma.UserUncheckedUpdateWithoutDocumentsInput>
+}
+
+export type UserCreateNestedOneWithoutDocumentInsightsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentInsightsInput, Prisma.UserUncheckedCreateWithoutDocumentInsightsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentInsightsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDocumentInsightsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDocumentInsightsInput, Prisma.UserUncheckedCreateWithoutDocumentInsightsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDocumentInsightsInput
+  upsert?: Prisma.UserUpsertWithoutDocumentInsightsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDocumentInsightsInput, Prisma.UserUpdateWithoutDocumentInsightsInput>, Prisma.UserUncheckedUpdateWithoutDocumentInsightsInput>
+}
+
 export type UserCreateWithoutAccountsInput = {
   id?: string
   name?: string | null
@@ -908,6 +950,8 @@ export type UserCreateWithoutAccountsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -941,6 +985,8 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -990,6 +1036,8 @@ export type UserUpdateWithoutAccountsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -1023,6 +1071,8 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -1056,6 +1106,8 @@ export type UserCreateWithoutSessionsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -1089,6 +1141,8 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -1138,6 +1192,8 @@ export type UserUpdateWithoutSessionsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -1171,6 +1227,8 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutProfileInput = {
@@ -1204,6 +1262,8 @@ export type UserCreateWithoutProfileInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProfileInput = {
@@ -1237,6 +1297,8 @@ export type UserUncheckedCreateWithoutProfileInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProfileInput = {
@@ -1286,6 +1348,8 @@ export type UserUpdateWithoutProfileInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProfileInput = {
@@ -1319,6 +1383,8 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutExpensesInput = {
@@ -1352,6 +1418,8 @@ export type UserCreateWithoutExpensesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutExpensesInput = {
@@ -1385,6 +1453,8 @@ export type UserUncheckedCreateWithoutExpensesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutExpensesInput = {
@@ -1434,6 +1504,8 @@ export type UserUpdateWithoutExpensesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutExpensesInput = {
@@ -1467,6 +1539,8 @@ export type UserUncheckedUpdateWithoutExpensesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutIncomesInput = {
@@ -1500,6 +1574,8 @@ export type UserCreateWithoutIncomesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutIncomesInput = {
@@ -1533,6 +1609,8 @@ export type UserUncheckedCreateWithoutIncomesInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutIncomesInput = {
@@ -1582,6 +1660,8 @@ export type UserUpdateWithoutIncomesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutIncomesInput = {
@@ -1615,6 +1695,8 @@ export type UserUncheckedUpdateWithoutIncomesInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutBudgetsInput = {
@@ -1648,6 +1730,8 @@ export type UserCreateWithoutBudgetsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBudgetsInput = {
@@ -1681,6 +1765,8 @@ export type UserUncheckedCreateWithoutBudgetsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBudgetsInput = {
@@ -1730,6 +1816,8 @@ export type UserUpdateWithoutBudgetsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBudgetsInput = {
@@ -1763,6 +1851,8 @@ export type UserUncheckedUpdateWithoutBudgetsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutGoalsInput = {
@@ -1796,6 +1886,8 @@ export type UserCreateWithoutGoalsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutGoalsInput = {
@@ -1829,6 +1921,8 @@ export type UserUncheckedCreateWithoutGoalsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutGoalsInput = {
@@ -1878,6 +1972,8 @@ export type UserUpdateWithoutGoalsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutGoalsInput = {
@@ -1911,6 +2007,8 @@ export type UserUncheckedUpdateWithoutGoalsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFraudReportsInput = {
@@ -1944,6 +2042,8 @@ export type UserCreateWithoutFraudReportsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFraudReportsInput = {
@@ -1977,6 +2077,8 @@ export type UserUncheckedCreateWithoutFraudReportsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFraudReportsInput = {
@@ -2026,6 +2128,8 @@ export type UserUpdateWithoutFraudReportsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFraudReportsInput = {
@@ -2059,6 +2163,8 @@ export type UserUncheckedUpdateWithoutFraudReportsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutLearningProgressInput = {
@@ -2092,6 +2198,8 @@ export type UserCreateWithoutLearningProgressInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutLearningProgressInput = {
@@ -2125,6 +2233,8 @@ export type UserUncheckedCreateWithoutLearningProgressInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutLearningProgressInput = {
@@ -2174,6 +2284,8 @@ export type UserUpdateWithoutLearningProgressInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutLearningProgressInput = {
@@ -2207,6 +2319,8 @@ export type UserUncheckedUpdateWithoutLearningProgressInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutQuizResultsInput = {
@@ -2240,6 +2354,8 @@ export type UserCreateWithoutQuizResultsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutQuizResultsInput = {
@@ -2273,6 +2389,8 @@ export type UserUncheckedCreateWithoutQuizResultsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutQuizResultsInput = {
@@ -2322,6 +2440,8 @@ export type UserUpdateWithoutQuizResultsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutQuizResultsInput = {
@@ -2355,6 +2475,8 @@ export type UserUncheckedUpdateWithoutQuizResultsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutRoadmapsInput = {
@@ -2388,6 +2510,8 @@ export type UserCreateWithoutRoadmapsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutRoadmapsInput = {
@@ -2421,6 +2545,8 @@ export type UserUncheckedCreateWithoutRoadmapsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutRoadmapsInput = {
@@ -2470,6 +2596,8 @@ export type UserUpdateWithoutRoadmapsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRoadmapsInput = {
@@ -2503,6 +2631,8 @@ export type UserUncheckedUpdateWithoutRoadmapsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutEmergencyPlansInput = {
@@ -2536,6 +2666,8 @@ export type UserCreateWithoutEmergencyPlansInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutEmergencyPlansInput = {
@@ -2569,6 +2701,8 @@ export type UserUncheckedCreateWithoutEmergencyPlansInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutEmergencyPlansInput = {
@@ -2618,6 +2752,8 @@ export type UserUpdateWithoutEmergencyPlansInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutEmergencyPlansInput = {
@@ -2651,6 +2787,8 @@ export type UserUncheckedUpdateWithoutEmergencyPlansInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPlatformRecommendationsInput = {
@@ -2684,6 +2822,8 @@ export type UserCreateWithoutPlatformRecommendationsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPlatformRecommendationsInput = {
@@ -2717,6 +2857,8 @@ export type UserUncheckedCreateWithoutPlatformRecommendationsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPlatformRecommendationsInput = {
@@ -2766,6 +2908,8 @@ export type UserUpdateWithoutPlatformRecommendationsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPlatformRecommendationsInput = {
@@ -2799,6 +2943,8 @@ export type UserUncheckedUpdateWithoutPlatformRecommendationsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutChatHistoryInput = {
@@ -2832,6 +2978,8 @@ export type UserCreateWithoutChatHistoryInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutChatHistoryInput = {
@@ -2865,6 +3013,8 @@ export type UserUncheckedCreateWithoutChatHistoryInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutChatHistoryInput = {
@@ -2914,6 +3064,8 @@ export type UserUpdateWithoutChatHistoryInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutChatHistoryInput = {
@@ -2947,6 +3099,8 @@ export type UserUncheckedUpdateWithoutChatHistoryInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutPortfoliosInput = {
@@ -2980,6 +3134,8 @@ export type UserCreateWithoutPortfoliosInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutPortfoliosInput = {
@@ -3013,6 +3169,8 @@ export type UserUncheckedCreateWithoutPortfoliosInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutPortfoliosInput = {
@@ -3062,6 +3220,8 @@ export type UserUpdateWithoutPortfoliosInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutPortfoliosInput = {
@@ -3095,6 +3255,8 @@ export type UserUncheckedUpdateWithoutPortfoliosInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutWatchlistsInput = {
@@ -3128,6 +3290,8 @@ export type UserCreateWithoutWatchlistsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutWatchlistsInput = {
@@ -3161,6 +3325,8 @@ export type UserUncheckedCreateWithoutWatchlistsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutWatchlistsInput = {
@@ -3210,6 +3376,8 @@ export type UserUpdateWithoutWatchlistsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutWatchlistsInput = {
@@ -3243,6 +3411,8 @@ export type UserUncheckedUpdateWithoutWatchlistsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAlertsInput = {
@@ -3276,6 +3446,8 @@ export type UserCreateWithoutAlertsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAlertsInput = {
@@ -3309,6 +3481,8 @@ export type UserUncheckedCreateWithoutAlertsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAlertsInput = {
@@ -3358,6 +3532,8 @@ export type UserUpdateWithoutAlertsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAlertsInput = {
@@ -3391,6 +3567,8 @@ export type UserUncheckedUpdateWithoutAlertsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutNotificationsInput = {
@@ -3424,6 +3602,8 @@ export type UserCreateWithoutNotificationsInput = {
   alerts?: Prisma.AlertCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -3457,6 +3637,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -3506,6 +3688,8 @@ export type UserUpdateWithoutNotificationsInput = {
   alerts?: Prisma.AlertUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -3539,6 +3723,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFinancialTwinsInput = {
@@ -3572,6 +3758,8 @@ export type UserCreateWithoutFinancialTwinsInput = {
   alerts?: Prisma.AlertCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFinancialTwinsInput = {
@@ -3605,6 +3793,8 @@ export type UserUncheckedCreateWithoutFinancialTwinsInput = {
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFinancialTwinsInput = {
@@ -3654,6 +3844,8 @@ export type UserUpdateWithoutFinancialTwinsInput = {
   alerts?: Prisma.AlertUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFinancialTwinsInput = {
@@ -3687,6 +3879,8 @@ export type UserUncheckedUpdateWithoutFinancialTwinsInput = {
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutBillsInput = {
@@ -3720,6 +3914,8 @@ export type UserCreateWithoutBillsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBillsInput = {
@@ -3753,6 +3949,8 @@ export type UserUncheckedCreateWithoutBillsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
   aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBillsInput = {
@@ -3802,6 +4000,8 @@ export type UserUpdateWithoutBillsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBillsInput = {
@@ -3835,6 +4035,8 @@ export type UserUncheckedUpdateWithoutBillsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
   aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAiProfileInput = {
@@ -3868,6 +4070,8 @@ export type UserCreateWithoutAiProfileInput = {
   alerts?: Prisma.AlertCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAiProfileInput = {
@@ -3901,6 +4105,8 @@ export type UserUncheckedCreateWithoutAiProfileInput = {
   alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutUserInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAiProfileInput = {
@@ -3950,6 +4156,8 @@ export type UserUpdateWithoutAiProfileInput = {
   alerts?: Prisma.AlertUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAiProfileInput = {
@@ -3983,6 +4191,320 @@ export type UserUncheckedUpdateWithoutAiProfileInput = {
   alerts?: Prisma.AlertUncheckedUpdateManyWithoutUserNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutDocumentsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  passwordHash?: string | null
+  image?: string | null
+  resetToken?: string | null
+  resetTokenExpiry?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
+  budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
+  goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
+  fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
+  learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
+  quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
+  roadmaps?: Prisma.RoadmapCreateNestedManyWithoutUserInput
+  emergencyPlans?: Prisma.EmergencyPlanCreateNestedManyWithoutUserInput
+  platformRecommendations?: Prisma.PlatformRecommendationCreateNestedManyWithoutUserInput
+  chatHistory?: Prisma.ChatHistoryCreateNestedManyWithoutUserInput
+  portfolios?: Prisma.PortfolioCreateNestedManyWithoutUserInput
+  watchlists?: Prisma.WatchlistCreateNestedManyWithoutUserInput
+  alerts?: Prisma.AlertCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
+  aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutDocumentsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  passwordHash?: string | null
+  image?: string | null
+  resetToken?: string | null
+  resetTokenExpiry?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
+  budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
+  goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
+  fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
+  learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
+  quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
+  roadmaps?: Prisma.RoadmapUncheckedCreateNestedManyWithoutUserInput
+  emergencyPlans?: Prisma.EmergencyPlanUncheckedCreateNestedManyWithoutUserInput
+  platformRecommendations?: Prisma.PlatformRecommendationUncheckedCreateNestedManyWithoutUserInput
+  chatHistory?: Prisma.ChatHistoryUncheckedCreateNestedManyWithoutUserInput
+  portfolios?: Prisma.PortfolioUncheckedCreateNestedManyWithoutUserInput
+  watchlists?: Prisma.WatchlistUncheckedCreateNestedManyWithoutUserInput
+  alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
+  aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documentInsights?: Prisma.DocumentInsightUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutDocumentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentsInput, Prisma.UserUncheckedCreateWithoutDocumentsInput>
+}
+
+export type UserUpsertWithoutDocumentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentsInput, Prisma.UserUncheckedUpdateWithoutDocumentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentsInput, Prisma.UserUncheckedCreateWithoutDocumentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentsInput, Prisma.UserUncheckedUpdateWithoutDocumentsInput>
+}
+
+export type UserUpdateWithoutDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
+  budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
+  goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
+  fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
+  learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
+  quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
+  roadmaps?: Prisma.RoadmapUpdateManyWithoutUserNestedInput
+  emergencyPlans?: Prisma.EmergencyPlanUpdateManyWithoutUserNestedInput
+  platformRecommendations?: Prisma.PlatformRecommendationUpdateManyWithoutUserNestedInput
+  chatHistory?: Prisma.ChatHistoryUpdateManyWithoutUserNestedInput
+  portfolios?: Prisma.PortfolioUpdateManyWithoutUserNestedInput
+  watchlists?: Prisma.WatchlistUpdateManyWithoutUserNestedInput
+  alerts?: Prisma.AlertUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
+  aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
+  budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
+  goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
+  fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
+  learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
+  quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
+  roadmaps?: Prisma.RoadmapUncheckedUpdateManyWithoutUserNestedInput
+  emergencyPlans?: Prisma.EmergencyPlanUncheckedUpdateManyWithoutUserNestedInput
+  platformRecommendations?: Prisma.PlatformRecommendationUncheckedUpdateManyWithoutUserNestedInput
+  chatHistory?: Prisma.ChatHistoryUncheckedUpdateManyWithoutUserNestedInput
+  portfolios?: Prisma.PortfolioUncheckedUpdateManyWithoutUserNestedInput
+  watchlists?: Prisma.WatchlistUncheckedUpdateManyWithoutUserNestedInput
+  alerts?: Prisma.AlertUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
+  aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documentInsights?: Prisma.DocumentInsightUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutDocumentInsightsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  passwordHash?: string | null
+  image?: string | null
+  resetToken?: string | null
+  resetTokenExpiry?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
+  expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
+  incomes?: Prisma.IncomeCreateNestedManyWithoutUserInput
+  budgets?: Prisma.BudgetCreateNestedManyWithoutUserInput
+  goals?: Prisma.GoalCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillCreateNestedManyWithoutUserInput
+  fraudReports?: Prisma.FraudReportCreateNestedManyWithoutUserInput
+  learningProgress?: Prisma.LearningProgressCreateNestedManyWithoutUserInput
+  quizResults?: Prisma.QuizResultCreateNestedManyWithoutUserInput
+  roadmaps?: Prisma.RoadmapCreateNestedManyWithoutUserInput
+  emergencyPlans?: Prisma.EmergencyPlanCreateNestedManyWithoutUserInput
+  platformRecommendations?: Prisma.PlatformRecommendationCreateNestedManyWithoutUserInput
+  chatHistory?: Prisma.ChatHistoryCreateNestedManyWithoutUserInput
+  portfolios?: Prisma.PortfolioCreateNestedManyWithoutUserInput
+  watchlists?: Prisma.WatchlistCreateNestedManyWithoutUserInput
+  alerts?: Prisma.AlertCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  financialTwins?: Prisma.FinancialTwinCreateNestedManyWithoutUserInput
+  aiProfile?: Prisma.AiProfileCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutDocumentInsightsInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: Date | string | null
+  passwordHash?: string | null
+  image?: string | null
+  resetToken?: string | null
+  resetTokenExpiry?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
+  expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
+  incomes?: Prisma.IncomeUncheckedCreateNestedManyWithoutUserInput
+  budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutUserInput
+  goals?: Prisma.GoalUncheckedCreateNestedManyWithoutUserInput
+  bills?: Prisma.BillUncheckedCreateNestedManyWithoutUserInput
+  fraudReports?: Prisma.FraudReportUncheckedCreateNestedManyWithoutUserInput
+  learningProgress?: Prisma.LearningProgressUncheckedCreateNestedManyWithoutUserInput
+  quizResults?: Prisma.QuizResultUncheckedCreateNestedManyWithoutUserInput
+  roadmaps?: Prisma.RoadmapUncheckedCreateNestedManyWithoutUserInput
+  emergencyPlans?: Prisma.EmergencyPlanUncheckedCreateNestedManyWithoutUserInput
+  platformRecommendations?: Prisma.PlatformRecommendationUncheckedCreateNestedManyWithoutUserInput
+  chatHistory?: Prisma.ChatHistoryUncheckedCreateNestedManyWithoutUserInput
+  portfolios?: Prisma.PortfolioUncheckedCreateNestedManyWithoutUserInput
+  watchlists?: Prisma.WatchlistUncheckedCreateNestedManyWithoutUserInput
+  alerts?: Prisma.AlertUncheckedCreateNestedManyWithoutUserInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  financialTwins?: Prisma.FinancialTwinUncheckedCreateNestedManyWithoutUserInput
+  aiProfile?: Prisma.AiProfileUncheckedCreateNestedOneWithoutUserInput
+  documents?: Prisma.DocumentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutDocumentInsightsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentInsightsInput, Prisma.UserUncheckedCreateWithoutDocumentInsightsInput>
+}
+
+export type UserUpsertWithoutDocumentInsightsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDocumentInsightsInput, Prisma.UserUncheckedUpdateWithoutDocumentInsightsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDocumentInsightsInput, Prisma.UserUncheckedCreateWithoutDocumentInsightsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDocumentInsightsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDocumentInsightsInput, Prisma.UserUncheckedUpdateWithoutDocumentInsightsInput>
+}
+
+export type UserUpdateWithoutDocumentInsightsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
+  expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
+  incomes?: Prisma.IncomeUpdateManyWithoutUserNestedInput
+  budgets?: Prisma.BudgetUpdateManyWithoutUserNestedInput
+  goals?: Prisma.GoalUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUpdateManyWithoutUserNestedInput
+  fraudReports?: Prisma.FraudReportUpdateManyWithoutUserNestedInput
+  learningProgress?: Prisma.LearningProgressUpdateManyWithoutUserNestedInput
+  quizResults?: Prisma.QuizResultUpdateManyWithoutUserNestedInput
+  roadmaps?: Prisma.RoadmapUpdateManyWithoutUserNestedInput
+  emergencyPlans?: Prisma.EmergencyPlanUpdateManyWithoutUserNestedInput
+  platformRecommendations?: Prisma.PlatformRecommendationUpdateManyWithoutUserNestedInput
+  chatHistory?: Prisma.ChatHistoryUpdateManyWithoutUserNestedInput
+  portfolios?: Prisma.PortfolioUpdateManyWithoutUserNestedInput
+  watchlists?: Prisma.WatchlistUpdateManyWithoutUserNestedInput
+  alerts?: Prisma.AlertUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  financialTwins?: Prisma.FinancialTwinUpdateManyWithoutUserNestedInput
+  aiProfile?: Prisma.AiProfileUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDocumentInsightsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  resetTokenExpiry?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
+  expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
+  incomes?: Prisma.IncomeUncheckedUpdateManyWithoutUserNestedInput
+  budgets?: Prisma.BudgetUncheckedUpdateManyWithoutUserNestedInput
+  goals?: Prisma.GoalUncheckedUpdateManyWithoutUserNestedInput
+  bills?: Prisma.BillUncheckedUpdateManyWithoutUserNestedInput
+  fraudReports?: Prisma.FraudReportUncheckedUpdateManyWithoutUserNestedInput
+  learningProgress?: Prisma.LearningProgressUncheckedUpdateManyWithoutUserNestedInput
+  quizResults?: Prisma.QuizResultUncheckedUpdateManyWithoutUserNestedInput
+  roadmaps?: Prisma.RoadmapUncheckedUpdateManyWithoutUserNestedInput
+  emergencyPlans?: Prisma.EmergencyPlanUncheckedUpdateManyWithoutUserNestedInput
+  platformRecommendations?: Prisma.PlatformRecommendationUncheckedUpdateManyWithoutUserNestedInput
+  chatHistory?: Prisma.ChatHistoryUncheckedUpdateManyWithoutUserNestedInput
+  portfolios?: Prisma.PortfolioUncheckedUpdateManyWithoutUserNestedInput
+  watchlists?: Prisma.WatchlistUncheckedUpdateManyWithoutUserNestedInput
+  alerts?: Prisma.AlertUncheckedUpdateManyWithoutUserNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  financialTwins?: Prisma.FinancialTwinUncheckedUpdateManyWithoutUserNestedInput
+  aiProfile?: Prisma.AiProfileUncheckedUpdateOneWithoutUserNestedInput
+  documents?: Prisma.DocumentUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -4010,6 +4532,8 @@ export type UserCountOutputType = {
   alerts: number
   notifications: number
   financialTwins: number
+  documents: number
+  documentInsights: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -4032,6 +4556,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   alerts?: boolean | UserCountOutputTypeCountAlertsArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   financialTwins?: boolean | UserCountOutputTypeCountFinancialTwinsArgs
+  documents?: boolean | UserCountOutputTypeCountDocumentsArgs
+  documentInsights?: boolean | UserCountOutputTypeCountDocumentInsightsArgs
 }
 
 /**
@@ -4177,6 +4703,20 @@ export type UserCountOutputTypeCountFinancialTwinsArgs<ExtArgs extends runtime.T
   where?: Prisma.FinancialTwinWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDocumentInsightsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DocumentInsightWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -4210,6 +4750,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   financialTwins?: boolean | Prisma.User$financialTwinsArgs<ExtArgs>
   aiProfile?: boolean | Prisma.User$aiProfileArgs<ExtArgs>
+  documents?: boolean | Prisma.User$documentsArgs<ExtArgs>
+  documentInsights?: boolean | Prisma.User$documentInsightsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -4275,6 +4817,8 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   financialTwins?: boolean | Prisma.User$financialTwinsArgs<ExtArgs>
   aiProfile?: boolean | Prisma.User$aiProfileArgs<ExtArgs>
+  documents?: boolean | Prisma.User$documentsArgs<ExtArgs>
+  documentInsights?: boolean | Prisma.User$documentInsightsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -4304,6 +4848,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     financialTwins: Prisma.$FinancialTwinPayload<ExtArgs>[]
     aiProfile: Prisma.$AiProfilePayload<ExtArgs> | null
+    documents: Prisma.$DocumentPayload<ExtArgs>[]
+    documentInsights: Prisma.$DocumentInsightPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -4731,6 +5277,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   financialTwins<T extends Prisma.User$financialTwinsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$financialTwinsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FinancialTwinPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   aiProfile<T extends Prisma.User$aiProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$aiProfileArgs<ExtArgs>>): Prisma.Prisma__AiProfileClient<runtime.Types.Result.GetResult<Prisma.$AiProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  documents<T extends Prisma.User$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  documentInsights<T extends Prisma.User$documentInsightsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$documentInsightsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentInsightPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5652,6 +6200,54 @@ export type User$aiProfileArgs<ExtArgs extends runtime.Types.Extensions.Internal
    */
   include?: Prisma.AiProfileInclude<ExtArgs> | null
   where?: Prisma.AiProfileWhereInput
+}
+
+/**
+ * User.documents
+ */
+export type User$documentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Document
+   */
+  select?: Prisma.DocumentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Document
+   */
+  omit?: Prisma.DocumentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInclude<ExtArgs> | null
+  where?: Prisma.DocumentWhereInput
+  orderBy?: Prisma.DocumentOrderByWithRelationInput | Prisma.DocumentOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentScalarFieldEnum | Prisma.DocumentScalarFieldEnum[]
+}
+
+/**
+ * User.documentInsights
+ */
+export type User$documentInsightsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DocumentInsight
+   */
+  select?: Prisma.DocumentInsightSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DocumentInsight
+   */
+  omit?: Prisma.DocumentInsightOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DocumentInsightInclude<ExtArgs> | null
+  where?: Prisma.DocumentInsightWhereInput
+  orderBy?: Prisma.DocumentInsightOrderByWithRelationInput | Prisma.DocumentInsightOrderByWithRelationInput[]
+  cursor?: Prisma.DocumentInsightWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DocumentInsightScalarFieldEnum | Prisma.DocumentInsightScalarFieldEnum[]
 }
 
 /**

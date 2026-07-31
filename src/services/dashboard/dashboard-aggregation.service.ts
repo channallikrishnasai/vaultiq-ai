@@ -23,7 +23,7 @@ export async function aggregateDashboardData(userId: string): Promise<DashboardD
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-  const [expensesRaw, expensesList, goalsRaw, goalsList, portfolioRaw, healthScore, fraudReports, activeTwin] =
+  const [expensesRaw, expensesList, goalsRaw, goalsList, portfolioRaw, healthScore, fraudReports, activeTwin, documentStats] =
     await Promise.all([
       prisma.expense.findMany({
         where: { userId, date: { gte: startOfMonth, lte: endOfMonth } },
@@ -54,6 +54,23 @@ export async function aggregateDashboardData(userId: string): Promise<DashboardD
         where: { userId, isActive: true },
         select: { name: true, snapshot: true },
       }),
+      (async () => {
+        try {
+          const [total, processed, pending, latestInsight] = await Promise.all([
+            prisma.document.count({ where: { userId } }),
+            prisma.document.count({ where: { userId, status: "EXTRACTED" } }),
+            prisma.document.count({ where: { userId, status: { in: ["UPLOADING", "PROCESSING", "CLASSIFIED"] } } }),
+            prisma.documentInsight.findFirst({
+              where: { userId },
+              orderBy: { createdAt: "desc" },
+              select: { content: true },
+            }),
+          ]);
+          return { total, processed, pending, latestInsight: latestInsight?.content ?? null };
+        } catch {
+          return { total: 0, processed: 0, pending: 0, latestInsight: null };
+        }
+      })(),
     ]);
 
   const categoryTotals: Record<string, number> = {};
@@ -205,5 +222,6 @@ export async function aggregateDashboardData(userId: string): Promise<DashboardD
       netWorth: twinSnapshot?.netWorth ?? netWorth,
       twinName: activeTwin?.name ?? null,
     },
+    documentStats,
   };
 }

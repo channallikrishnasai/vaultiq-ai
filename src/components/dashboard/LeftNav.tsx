@@ -6,13 +6,15 @@ import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import {
   Home, LayoutDashboard, Briefcase, PiggyBank, Target, CreditCard,
-  Percent, Bot, ShieldAlert, BarChart3, Receipt, Settings, Globe, BookOpen
+  Percent, Bot, ShieldAlert, BarChart3, Receipt, Settings, Globe, BookOpen,
+  FileText, Sparkles, Brain
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const NAV_ITEMS = [
   { name: "Home",         href: "/",                    icon: Home          },
   { name: "Dashboard",    href: "/dashboard",           icon: LayoutDashboard},
+  { name: "AI Command",   href: "/dashboard/ai-command-center", icon: Brain },
   { name: "Portfolio",    href: "/dashboard/portfolio", icon: Briefcase     },
   { name: "Learning",     href: "/dashboard/learning",  icon: BookOpen      },
   { name: "Finance",      href: "/dashboard/finance",   icon: BarChart3     },
@@ -23,6 +25,8 @@ const NAV_ITEMS = [
   { name: "AI Twin",      href: "/dashboard/twin",      icon: Bot           },
   { name: "Fraud Shield", href: "/dashboard/fraud",     icon: ShieldAlert   },
   { name: "Reports",      href: "/dashboard/reports",   icon: BarChart3     },
+  { name: "Doc Center",   href: "/dashboard/documents", icon: FileText      },
+  { name: "Predictions",  href: "/dashboard/predictions", icon: Sparkles    },
   { name: "Tax Planner",  href: "/dashboard/tax",       icon: Receipt       },
   { name: "Settings",     href: "/dashboard/settings",  icon: Settings      },
 ];
@@ -33,7 +37,7 @@ const keyMap: Record<string, string> = {
   "tax planner": "tax"
 };
 
-export default function LeftNav({ activeItem = "Dashboard" }: { activeItem?: string }) {
+export default function LeftNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();

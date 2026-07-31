@@ -83,6 +83,8 @@ model User {
   notifications           Notification[]
   financialTwins          FinancialTwin[]
   aiProfile               AiProfile?
+  documents               Document[]
+  documentInsights        DocumentInsight[]
 
   @@index([createdAt])
 }
@@ -535,4 +537,71 @@ model AiProfile {
   updatedAt       DateTime     @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ---------------------------------------------------------------------------
+// Document Center
+// ---------------------------------------------------------------------------
+
+enum DocumentCategory {
+  BANK_STATEMENT
+  SALARY_SLIP
+  TAX_DOCUMENT
+  INSURANCE_POLICY
+  MUTUAL_FUND_STATEMENT
+  STOCK_HOLDING_STATEMENT
+  CREDIT_CARD_STATEMENT
+  LOAN_DOCUMENT
+  INVESTMENT_REPORT
+  OTHER
+}
+
+enum DocumentStatus {
+  UPLOADING
+  PROCESSING
+  CLASSIFIED
+  EXTRACTED
+  FAILED
+}
+
+model Document {
+  id              String           @id @default(cuid())
+  userId          String
+  fileName        String
+  fileType        String
+  fileSize        Int
+  category        DocumentCategory @default(OTHER)
+  status          DocumentStatus   @default(UPLOADING)
+  classification  Json?
+  extraction      Json?
+  transactions    Json?
+  insightsData    Json?
+  metadata        Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  insights DocumentInsight[]
+
+  @@index([userId])
+  @@index([userId, category])
+  @@index([userId, status])
+  @@index([userId, createdAt])
+}
+
+model DocumentInsight {
+  id          String   @id @default(cuid())
+  documentId  String
+  userId      String
+  insightType String
+  content     String
+  severity    String   @default("info")
+  createdAt   DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([documentId])
+  @@index([userId, createdAt])
 }

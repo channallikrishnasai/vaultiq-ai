@@ -44,6 +44,22 @@ const WATCHLIST_KEYWORDS = [
   "which stock should i add", "stock recommendations",
 ];
 
+const DOCUMENT_KEYWORDS = [
+  "document", "documents", "bank statement", "salary slip", "tax document",
+  "insurance", "mutual fund statement", "credit card statement", "loan document",
+  "investment report", "upload", "uploaded", "document center",
+  "extracted", "parsed", "classify", "classification",
+];
+
+const PREDICTION_KEYWORDS = [
+  "when will i reach", "when will my", "predict", "forecast", "future",
+  "what happens if", "what if", "scenario", "simulate", "simulation",
+  "how much will", "will i have", "can i afford", "balance next month",
+  "emergency fund reach", "goal completion", "savings projection",
+  "cash flow", "budget forecast", "overspending", "running out",
+  "how long will", "when will running out", "projected", "prediction",
+];
+
 function detectInvestmentIntent(message: string): boolean {
   const lower = message.toLowerCase();
   return INVESTMENT_KEYWORDS.some(k => lower.includes(k));
@@ -52,6 +68,16 @@ function detectInvestmentIntent(message: string): boolean {
 function detectWatchlistIntent(message: string): boolean {
   const lower = message.toLowerCase();
   return WATCHLIST_KEYWORDS.some(k => lower.includes(k));
+}
+
+function detectDocumentIntent(message: string): boolean {
+  const lower = message.toLowerCase();
+  return DOCUMENT_KEYWORDS.some(k => lower.includes(k));
+}
+
+function detectPredictionIntent(message: string): boolean {
+  const lower = message.toLowerCase();
+  return PREDICTION_KEYWORDS.some(k => lower.includes(k));
 }
 
 function detectAnalysisIntent(message: string): {
@@ -391,6 +417,28 @@ CRITICAL DISTINCTION - REAL vs VIRTUAL DATA:
 
 You also have access to LIVE MARKET DATA when the user asks about stocks, indices, commodities, or investments.
 
+You also have access to DOCUMENT INTELLIGENCE - uploaded financial documents that have been analyzed:
+- Bank statements with transaction analysis
+- Salary slips with income breakdown
+- Tax documents with deduction analysis
+- Insurance policies
+- Mutual fund statements
+- Credit card statements
+- Loan documents
+- Investment reports
+
+When the user asks about documents, reference the extracted data and insights from their uploaded documents.
+
+You also have access to PREDICTIVE FINANCE - AI-powered forecasts and scenario analysis:
+- Cash flow forecasts (7, 30, 90 day horizons)
+- Goal completion predictions with probability scores
+- Budget overspending forecasts
+- Portfolio growth projections
+- Smart timeline of upcoming financial events
+- What-if scenario simulation
+
+When the user asks about predictions, forecasts, "what will happen", "when will I reach", or "can I afford" questions, use the prediction data to provide specific numbers, dates, and confidence levels.
+
 RESPONSE FORMAT - Premium Financial Assistant:
 Always use structured, readable formatting:
 - Use bullet points for lists
@@ -490,8 +538,12 @@ export const chatService = {
     let analysisStr = "";
     let marketContextStr = "";
     let investmentStr = "";
+    let documentContextStr = "";
+    let predictionContextStr = "";
     const intent = detectAnalysisIntent(message);
     const isWatchlistQuery = detectWatchlistIntent(message);
+    const isDocumentQuery = detectDocumentIntent(message);
+    const isPredictionQuery = detectPredictionIntent(message);
 
     try {
       const ctx = await buildFinancialContext(userId);
@@ -541,6 +593,46 @@ export const chatService = {
       // Market context failure should never block the chat response
     }
 
+    // 3c. Fetch document context if relevant
+    if (isDocumentQuery) {
+      try {
+        const { documentService } = await import("@/services/document/document.service");
+        const docs = await documentService.getDocumentsForCopilot(userId);
+        if (docs.length > 0) {
+          const docParts: string[] = [];
+          for (const doc of docs) {
+            const category = doc.category.replace(/_/g, " ").toLowerCase();
+            docParts.push(`From ${category}:`);
+            for (const insight of doc.insights.slice(0, 3)) {
+              docParts.push(`  - ${insight.content}`);
+            }
+          }
+          documentContextStr = docParts.join("\n");
+        }
+      } catch (err) {
+        logger.error(TAG, "Failed to fetch document context", err);
+      }
+    }
+
+    // 3d. Fetch prediction context if relevant
+    if (isPredictionQuery) {
+      try {
+        const { predictiveFinanceService } = await import("@/services/predictive/predictive-finance.service");
+        const predData = await predictiveFinanceService.getPredictionsForCopilot(userId);
+        const predParts: string[] = [];
+        if (predData.cashFlowSummary) predParts.push(`Cash Flow: ${predData.cashFlowSummary}`);
+        for (const alert of predData.alerts) {
+          predParts.push(`Alert [${alert.severity}]: ${alert.title} — ${alert.message}`);
+        }
+        for (const gf of predData.goalForecasts) {
+          predParts.push(`Goal "${gf.name}": ${gf.advice} (Probability: ${Math.round(gf.probability * 100)}%)`);
+        }
+        predictionContextStr = predParts.join("\n");
+      } catch (err) {
+        logger.error(TAG, "Failed to fetch prediction context", err);
+      }
+    }
+
     // 4. Generate AI response with financial context and analysis
     const ai = getAIProvider();
     let response: string;
@@ -553,7 +645,11 @@ export const chatService = {
         marketContextStr ? "\n\n" + marketContextStr : "",
         analysisStr ? "\n\n=== ANALYSIS DATA ===\n" + analysisStr : "",
         investmentStr ? "\n\n=== INVESTMENT ADVISOR ===\n" + investmentStr : "",
+        documentContextStr ? "\n\n=== DOCUMENT INTELLIGENCE ===\n" + documentContextStr : "",
+        predictionContextStr ? "\n\n=== PREDICTIONS & FORECASTS ===\n" + predictionContextStr : "",
         isWatchlistQuery ? "\n\n=== WATCHLIST CONTEXT ===\nThe user is asking about their watchlist. Reference the watchlist data in the Financial Profile. Provide insights on top movers, opportunities, and risks." : "",
+        isDocumentQuery ? "\n\n=== DOCUMENT CONTEXT ===\nThe user is asking about their financial documents. Reference the document intelligence data above. Provide insights from their uploaded documents." : "",
+        isPredictionQuery ? "\n\n=== PREDICTION CONTEXT ===\nThe user is asking about financial predictions, forecasts, or what-if scenarios. Use the prediction data above to answer. Provide specific numbers, dates, and actionable advice. If they ask \"what if\" questions, explain the projected impact." : "",
       ].join("");
 
       response = await ai.chat([

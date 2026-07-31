@@ -407,7 +407,9 @@ export const ModelName = {
   Notification: 'Notification',
   FinancialTwin: 'FinancialTwin',
   Bill: 'Bill',
-  AiProfile: 'AiProfile'
+  AiProfile: 'AiProfile',
+  Document: 'Document',
+  DocumentInsight: 'DocumentInsight'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -423,7 +425,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "session" | "verificationToken" | "profile" | "expense" | "income" | "budget" | "goal" | "fraudReport" | "learningProgress" | "quizResult" | "roadmap" | "emergencyPlan" | "platformRecommendation" | "chatHistory" | "portfolio" | "trade" | "watchlist" | "alert" | "notification" | "financialTwin" | "bill" | "aiProfile"
+    modelProps: "user" | "account" | "session" | "verificationToken" | "profile" | "expense" | "income" | "budget" | "goal" | "fraudReport" | "learningProgress" | "quizResult" | "roadmap" | "emergencyPlan" | "platformRecommendation" | "chatHistory" | "portfolio" | "trade" | "watchlist" | "alert" | "notification" | "financialTwin" | "bill" | "aiProfile" | "document" | "documentInsight"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2203,6 +2205,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Document: {
+      payload: Prisma.$DocumentPayload<ExtArgs>
+      fields: Prisma.DocumentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocumentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentPayload>[]
+        }
+        delete: {
+          args: Prisma.DocumentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentPayload>
+        }
+        update: {
+          args: Prisma.DocumentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocumentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocumentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocument>
+        }
+        groupBy: {
+          args: Prisma.DocumentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocumentInsight: {
+      payload: Prisma.$DocumentInsightPayload<ExtArgs>
+      fields: Prisma.DocumentInsightFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentInsightFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentInsightPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentInsightFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentInsightPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentInsightFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentInsightPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentInsightFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentInsightPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentInsightFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentInsightPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentInsightCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentInsightPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentInsightCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DocumentInsightCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentInsightPayload>[]
+        }
+        delete: {
+          args: Prisma.DocumentInsightDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentInsightPayload>
+        }
+        update: {
+          args: Prisma.DocumentInsightUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentInsightPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentInsightDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentInsightUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DocumentInsightUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentInsightPayload>[]
+        }
+        upsert: {
+          args: Prisma.DocumentInsightUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentInsightPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentInsightAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentInsight>
+        }
+        groupBy: {
+          args: Prisma.DocumentInsightGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentInsightGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentInsightCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentInsightCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2590,6 +2740,39 @@ export const AiProfileScalarFieldEnum = {
 export type AiProfileScalarFieldEnum = (typeof AiProfileScalarFieldEnum)[keyof typeof AiProfileScalarFieldEnum]
 
 
+export const DocumentScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  fileName: 'fileName',
+  fileType: 'fileType',
+  fileSize: 'fileSize',
+  category: 'category',
+  status: 'status',
+  classification: 'classification',
+  extraction: 'extraction',
+  transactions: 'transactions',
+  insightsData: 'insightsData',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+export const DocumentInsightScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  userId: 'userId',
+  insightType: 'insightType',
+  content: 'content',
+  severity: 'severity',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentInsightScalarFieldEnum = (typeof DocumentInsightScalarFieldEnum)[keyof typeof DocumentInsightScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2748,6 +2931,20 @@ export type EnumAlertStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$Pris
 export type EnumNotificationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationType'>
     
 
+
+/**
+ * Reference to a field of type 'DocumentCategory'
+ */
+export type EnumDocumentCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentCategory'>
+    
+
+
+/**
+ * Reference to a field of type 'DocumentStatus'
+ */
+export type EnumDocumentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentStatus'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -2882,6 +3079,8 @@ export type GlobalOmitConfig = {
   financialTwin?: Prisma.FinancialTwinOmit
   bill?: Prisma.BillOmit
   aiProfile?: Prisma.AiProfileOmit
+  document?: Prisma.DocumentOmit
+  documentInsight?: Prisma.DocumentInsightOmit
 }
 
 /* Types for Logging */

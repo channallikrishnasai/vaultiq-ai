@@ -161,3 +161,13 @@ export type Bill = Prisma.BillModel
  * 
  */
 export type AiProfile = Prisma.AiProfileModel
+/**
+ * Model Document
+ * 
+ */
+export type Document = Prisma.DocumentModel
+/**
+ * Model DocumentInsight
+ * 
+ */
+export type DocumentInsight = Prisma.DocumentInsightModel

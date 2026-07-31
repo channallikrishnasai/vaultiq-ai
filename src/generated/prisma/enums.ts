@@ -87,3 +87,30 @@ export const NotificationType = {
 } as const
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
+
+
+export const DocumentCategory = {
+  BANK_STATEMENT: 'BANK_STATEMENT',
+  SALARY_SLIP: 'SALARY_SLIP',
+  TAX_DOCUMENT: 'TAX_DOCUMENT',
+  INSURANCE_POLICY: 'INSURANCE_POLICY',
+  MUTUAL_FUND_STATEMENT: 'MUTUAL_FUND_STATEMENT',
+  STOCK_HOLDING_STATEMENT: 'STOCK_HOLDING_STATEMENT',
+  CREDIT_CARD_STATEMENT: 'CREDIT_CARD_STATEMENT',
+  LOAN_DOCUMENT: 'LOAN_DOCUMENT',
+  INVESTMENT_REPORT: 'INVESTMENT_REPORT',
+  OTHER: 'OTHER'
+} as const
+
+export type DocumentCategory = (typeof DocumentCategory)[keyof typeof DocumentCategory]
+
+
+export const DocumentStatus = {
+  UPLOADING: 'UPLOADING',
+  PROCESSING: 'PROCESSING',
+  CLASSIFIED: 'CLASSIFIED',
+  EXTRACTED: 'EXTRACTED',
+  FAILED: 'FAILED'
+} as const
+
+export type DocumentStatus = (typeof DocumentStatus)[keyof typeof DocumentStatus]

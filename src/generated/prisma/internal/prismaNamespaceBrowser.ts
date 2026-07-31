@@ -74,7 +74,9 @@ export const ModelName = {
   Notification: 'Notification',
   FinancialTwin: 'FinancialTwin',
   Bill: 'Bill',
-  AiProfile: 'AiProfile'
+  AiProfile: 'AiProfile',
+  Document: 'Document',
+  DocumentInsight: 'DocumentInsight'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -439,6 +441,39 @@ export const AiProfileScalarFieldEnum = {
 } as const
 
 export type AiProfileScalarFieldEnum = (typeof AiProfileScalarFieldEnum)[keyof typeof AiProfileScalarFieldEnum]
+
+
+export const DocumentScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  fileName: 'fileName',
+  fileType: 'fileType',
+  fileSize: 'fileSize',
+  category: 'category',
+  status: 'status',
+  classification: 'classification',
+  extraction: 'extraction',
+  transactions: 'transactions',
+  insightsData: 'insightsData',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+export const DocumentInsightScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  userId: 'userId',
+  insightType: 'insightType',
+  content: 'content',
+  severity: 'severity',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentInsightScalarFieldEnum = (typeof DocumentInsightScalarFieldEnum)[keyof typeof DocumentInsightScalarFieldEnum]
 
 
 export const SortOrder = {

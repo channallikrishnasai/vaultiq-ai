@@ -70,6 +70,12 @@ export interface DashboardData {
     netWorth: number;
     twinName: string | null;
   };
+  documentStats: {
+    total: number;
+    processed: number;
+    pending: number;
+    latestInsight: string | null;
+  };
 }
 
 export interface AIProfile {
