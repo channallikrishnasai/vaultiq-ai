@@ -68,7 +68,7 @@ registerTool({
         name: params.name as string,
         targetAmount: params.targetAmount as number,
         currentAmount: 0,
-        type: (params.type as string) || "SAVINGS",
+        type: (params.type as "SAVINGS" | "INVESTMENT" | "EMERGENCY") || "SAVINGS",
         deadline: params.deadline ? new Date(params.deadline as string) : null,
       },
     });

@@ -19,25 +19,45 @@ function GlobalAIChatInner() {
 
   useEffect(() => {
     setMounted(true);
-    try {
-      const savedMin = localStorage.getItem("ai-chat-minimized");
-      if (savedMin) setIsMinimized(JSON.parse(savedMin));
-      const savedClosed = localStorage.getItem("ai-chat-closed");
-      if (savedClosed) setIsClosed(JSON.parse(savedClosed));
-    } catch {}
+    if (typeof window !== "undefined") {
+      try {
+        const savedMin = localStorage.getItem("ai-chat-minimized");
+        if (savedMin) setIsMinimized(JSON.parse(savedMin));
+        const savedClosed = localStorage.getItem("ai-chat-closed");
+        if (savedClosed) setIsClosed(JSON.parse(savedClosed));
+      } catch {}
+    }
   }, []);
 
   useEffect(() => {
-    if (mounted) {
+    if (mounted && typeof window !== "undefined") {
       localStorage.setItem("ai-chat-minimized", JSON.stringify(isMinimized));
     }
   }, [isMinimized, mounted]);
 
   useEffect(() => {
-    if (mounted) {
+    if (mounted && typeof window !== "undefined") {
       localStorage.setItem("ai-chat-closed", JSON.stringify(isClosed));
     }
   }, [isClosed, mounted]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "ai-chat-minimized" && e.newValue !== null) {
+        try {
+          setIsMinimized(JSON.parse(e.newValue));
+        } catch {}
+      }
+      if (e.key === "ai-chat-closed" && e.newValue !== null) {
+        try {
+          setIsClosed(JSON.parse(e.newValue));
+        } catch {}
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   if (!session?.user?.id || !mounted) {
     return null;

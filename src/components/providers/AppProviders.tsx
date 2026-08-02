@@ -17,7 +17,7 @@ export default function AppProviders({ children, session }: { children: React.Re
         <AuthSessionProvider session={session}>
           <LearningProgressProvider>
             {/* Sidebar */}
-            <LeftNav activeItem="Dashboard" />
+            <LeftNav />
             {/* Main content */}
             <main className="flex-1 h-full overflow-x-hidden overflow-y-auto">
               {children}

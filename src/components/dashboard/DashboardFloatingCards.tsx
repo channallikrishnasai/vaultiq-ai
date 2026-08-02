@@ -61,6 +61,7 @@ function AnimatedNumber({
     return () => {
       clearTimeout(timer);
       cancelAnimationFrame(frameRef.current);
+      frameRef.current = 0;
     };
   }, [value, duration, delay]);
 
@@ -420,15 +421,32 @@ export default function DashboardFloatingCards({
   const activeSessionIdRef = useRef<string>(crypto.randomUUID());
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("kpi-minimized-state");
-      if (saved) setMinimized(JSON.parse(saved));
-    } catch {}
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("kpi-minimized-state");
+        if (saved) setMinimized(JSON.parse(saved));
+      } catch {}
+    }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("kpi-minimized-state", JSON.stringify(minimized));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("kpi-minimized-state", JSON.stringify(minimized));
+    }
   }, [minimized]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "kpi-minimized-state" && e.newValue !== null) {
+        try {
+          setMinimized(JSON.parse(e.newValue));
+        } catch {}
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   useEffect(() => {
     chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });

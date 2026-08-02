@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BarChart3, Star, Bell, ChevronLeft, ChevronRight, TrendingUp, Activity } from "lucide-react";
+import { BarChart3, Star, Bell, ChevronLeft, ChevronRight, TrendingUp, Activity, X } from "lucide-react";
 import WatchlistWidget from "./WatchlistWidget";
 import MarketMoversWidget from "./MarketMoversWidget";
 import ActiveAlertsWidget from "./ActiveAlertsWidget";
@@ -44,8 +44,97 @@ const tabs: TabConfig[] = [
 export default function MarketPanel() {
   const [activeTab, setActiveTab] = useState<Tab>("watchlist");
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isClosed, setIsClosed] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      try {
+        const savedCollapsed = localStorage.getItem("market-panel-collapsed");
+        if (savedCollapsed !== null) setIsCollapsed(JSON.parse(savedCollapsed));
+        const savedClosed = localStorage.getItem("market-panel-closed");
+        if (savedClosed !== null) setIsClosed(JSON.parse(savedClosed));
+        const savedTab = localStorage.getItem("market-panel-active-tab");
+        if (savedTab !== null && (savedTab === "watchlist" || savedTab === "movers" || savedTab === "alerts")) {
+          setActiveTab(savedTab as Tab);
+        }
+      } catch {}
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mounted && typeof window !== "undefined") {
+      localStorage.setItem("market-panel-collapsed", JSON.stringify(isCollapsed));
+    }
+  }, [isCollapsed, mounted]);
+
+  useEffect(() => {
+    if (mounted && typeof window !== "undefined") {
+      localStorage.setItem("market-panel-closed", JSON.stringify(isClosed));
+    }
+  }, [isClosed, mounted]);
+
+  useEffect(() => {
+    if (mounted && typeof window !== "undefined") {
+      localStorage.setItem("market-panel-active-tab", activeTab);
+    }
+  }, [activeTab, mounted]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "market-panel-collapsed" && e.newValue !== null) {
+        try {
+          setIsCollapsed(JSON.parse(e.newValue));
+        } catch {}
+      }
+      if (e.key === "market-panel-closed" && e.newValue !== null) {
+        try {
+          setIsClosed(JSON.parse(e.newValue));
+        } catch {}
+      }
+      if (e.key === "market-panel-active-tab" && e.newValue !== null) {
+        if (e.newValue === "watchlist" || e.newValue === "movers" || e.newValue === "alerts") {
+          setActiveTab(e.newValue as Tab);
+        }
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   const activeTabConfig = tabs.find((t) => t.id === activeTab);
+
+  if (isClosed) {
+    return (
+      <motion.button
+        onClick={() => setIsClosed(false)}
+        whileHover={{ scale: 1.1, backgroundColor: "rgba(24,24,27,0.9)", borderColor: "rgba(212,175,55,0.4)" }}
+        whileTap={{ scale: 0.95 }}
+        style={{
+          position: "fixed",
+          right: "16px",
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: "42px",
+          height: "42px",
+          borderRadius: "12px",
+          background: "rgba(9,9,11,0.85)",
+          border: "1px solid rgba(212,175,55,0.25)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.6)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          zIndex: 9999,
+        }}
+        title="Open Market Panel"
+      >
+        <Activity size={18} className="text-[#D4AF37] hover:text-[#F5D060] transition-colors animate-pulse" />
+      </motion.button>
+    );
+  }
 
   return (
     <motion.div
@@ -74,9 +163,9 @@ export default function MarketPanel() {
             exit={{ opacity: 0 }}
             className="flex flex-col h-full bg-zinc-900/20 backdrop-blur-sm border-l border-zinc-800/30"
           >
-            {/* Tab navigation */}
-            <div className="relative px-2 pt-3 pb-1">
-              <div className="flex gap-1 p-1 bg-zinc-800/30 rounded-xl">
+            {/* Tab navigation & Close */}
+            <div className="relative px-2 pt-3 pb-1 flex items-center gap-2">
+              <div className="flex-1 flex gap-1 p-1 bg-zinc-800/30 rounded-xl">
                 {tabs.map((tab) => {
                   const isActive = activeTab === tab.id;
                   return (
@@ -102,6 +191,13 @@ export default function MarketPanel() {
                   );
                 })}
               </div>
+              <button
+                onClick={() => setIsClosed(true)}
+                className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-rose-400 transition-colors flex-shrink-0"
+                title="Close Market Panel"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             </div>
 
             {/* Tab content */}
@@ -126,32 +222,41 @@ export default function MarketPanel() {
 
       {/* Collapsed state - show icons */}
       {isCollapsed && (
-        <div className="flex flex-col items-center gap-3 pt-4">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  setIsCollapsed(false);
-                }}
-                className={`relative p-2.5 rounded-xl transition-all ${
-                  isActive ? `${tab.bgColor} ${tab.color}` : "text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-300"
-                }`}
-                title={tab.label}
-              >
-                {tab.icon}
-                {isActive && (
-                  <motion.div
-                    layoutId="collapsedIndicator"
-                    className={`absolute -left-3 top-1/2 -translate-y-1/2 w-0.5 h-4 ${tab.bgColor.replace("/10", "")} rounded-full`}
-                    transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
-                  />
-                )}
-              </button>
-            );
-          })}
+        <div className="flex flex-col items-center gap-3 pt-4 h-full pb-4 justify-between">
+          <div className="flex flex-col items-center gap-3">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setIsCollapsed(false);
+                  }}
+                  className={`relative p-2.5 rounded-xl transition-all ${
+                    isActive ? `${tab.bgColor} ${tab.color}` : "text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-300"
+                  }`}
+                  title={tab.label}
+                >
+                  {tab.icon}
+                  {isActive && (
+                    <motion.div
+                      layoutId="collapsedIndicator"
+                      className={`absolute -left-3 top-1/2 -translate-y-1/2 w-0.5 h-4 ${tab.bgColor.replace("/10", "")} rounded-full`}
+                      transition={{ type: "spring", bounce: 0.15, duration: 0.5 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            onClick={() => setIsClosed(true)}
+            className="p-2.5 rounded-xl text-zinc-500 hover:text-rose-400 hover:bg-zinc-850 transition-all flex items-center justify-center"
+            title="Close Panel"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
     </motion.div>

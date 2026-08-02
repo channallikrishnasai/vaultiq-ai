@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { globalOrb } from "@/lib/global-orb";
 import { logger } from "@/lib/logger";
+import DashboardIntelligence from "./DashboardIntelligence";
 
 const TAG = "AIChat";
 
@@ -147,7 +148,26 @@ export default function AIChat({
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [showSessions, setShowSessions] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [mode, setMode] = useState<"chat" | "insights">("chat");
   const uiReady = true;
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const savedMode = localStorage.getItem("ai-chat-mode");
+        if (savedMode === "chat" || savedMode === "insights") {
+          setMode(savedMode);
+        }
+      } catch {}
+    }
+  }, []);
+
+  const handleSetMode = (newMode: "chat" | "insights") => {
+    setMode(newMode);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("ai-chat-mode", newMode);
+    }
+  };
 
   // Sync with global orb and set state
   useEffect(() => {
@@ -573,321 +593,371 @@ export default function AIChat({
           </div>
         </div>
 
-        {/* Sessions dropdown */}
-        <AnimatePresence>
-          {showSessions && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              style={{
-                overflow: "hidden",
-                borderBottom: "1px solid rgba(255,255,255,0.05)",
-              }}
-            >
-              <div
-                style={{
-                  maxHeight: 200,
-                  overflowY: "auto",
-                  padding: "6px 0",
-                  scrollbarWidth: "thin",
-                  scrollbarColor: "rgba(255,255,255,0.08) transparent",
-                }}
-              >
-                {sessions.length === 0 ? (
-                  <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", padding: "8px 16px", textAlign: "center" }}>
-                    No chat history yet
-                  </p>
-                ) : (
-                  sessions.map((s) => (
-                    <motion.div
-                      key={s.session_id}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => loadSession(s.session_id)}
-                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); loadSession(s.session_id); } }}
-                      whileHover={{ background: "rgba(212,175,55,0.06)" }}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        width: "100%",
-                        padding: "7px 16px",
-                        background: sessionIdRef.current === s.session_id ? "rgba(212,175,55,0.08)" : "rgba(0,0,0,0)",
-                        border: "none",
-                        cursor: "pointer",
-                        textAlign: "left",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 11,
-                          color: sessionIdRef.current === s.session_id ? "#D4AF37" : "rgba(255,255,255,0.5)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          maxWidth: 220,
-                        }}
-                      >
-                        {s.summary || "New chat"}
-                      </span>
-                      <button
-                        onClick={(e) => deleteSession(s.session_id, e)}
-                        style={{
-                          background: "rgba(0,0,0,0)",
-                          border: "none",
-                          color: "rgba(255,255,255,0.2)",
-                          cursor: "pointer",
-                          padding: 2,
-                          display: "flex",
-                          alignItems: "center",
-                          flexShrink: 0,
-                        }}
-                        className="hover:text-rose-400 transition-colors"
-                        title="Delete chat"
-                      >
-                        <Trash2 size={11} />
-                      </button>
-                    </motion.div>
-                  ))
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Messages container */}
-        <div
-          ref={scrollRef}
-          style={{
-            flex: 1,
-            overflowY: "auto",
-            padding: "10px 16px",
-            scrollbarWidth: "thin",
-            scrollbarColor: "rgba(255,255,255,0.08) transparent",
-          }}
-        >
-          <AnimatePresence initial={false}>
-            {loadingHistory && (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "8px 12px",
-                  borderRadius: 10,
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.05)",
-                  marginTop: 10,
-                }}
-              >
-                <Waveform active />
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
-                  Loading chat history…
-                </span>
-              </motion.div>
-            )}
-
-            {!loadingHistory && messages.length === 0 && (
-              <motion.div
-                key="welcome"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-              >
-                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.65 }}>
-                  Your financial intelligence is online. Ask me anything about your portfolio,
-                  goals, or financial health.
-                </p>
-              </motion.div>
-            )}
-
-            {messages.map((m, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                style={{
-                  display: "flex",
-                  justifyContent: m.role === "user" ? "flex-end" : "flex-start",
-                  marginTop: i > 0 ? 10 : 0,
-                }}
-              >
-                {m.role === "user" ? (
-                  <span
-                    style={{
-                      display: "inline-block",
-                      fontSize: 12,
-                      color: "rgba(236,253,245,0.88)",
-                      padding: "7px 12px",
-                      borderRadius: 10,
-                      background: "rgba(52,211,153,0.08)",
-                      border: "1px solid rgba(52,211,153,0.16)",
-                      maxWidth: "85%",
-                    }}
-                  >
-                    {m.content}
-                  </span>
-                ) : (
-                  <div style={{ maxWidth: "85%" }}>
-                    <p
-                      style={{
-                        fontSize: 9,
-                        letterSpacing: "0.14em",
-                        textTransform: "uppercase",
-                        color: "rgba(212,175,55,0.45)",
-                        marginBottom: 4,
-                      }}
-                    >
-                      VaultIQ AI
-                    </p>
-                    <div
-                      style={{
-                        display: "inline-block",
-                        padding: "8px 12px",
-                        borderRadius: 10,
-                        background: "rgba(212,175,55,0.04)",
-                        border: "1px solid rgba(212,175,55,0.1)",
-                      }}
-                    >
-                      <MarkdownContent text={m.content} />
-                      {!m.streamed && (
-                        <motion.span
-                          animate={{ opacity: [1, 0] }}
-                          transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-                          style={{
-                            display: "inline-block",
-                            width: 2,
-                            height: 12,
-                            background: "rgba(212,175,55,0.8)",
-                            marginLeft: 2,
-                            verticalAlign: "middle",
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-
-            {thinking && (
-              <motion.div
-                key="thinking"
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 10,
-                  padding: "8px 12px",
-                  borderRadius: 10,
-                  background: "rgba(255,255,255,0.02)",
-                  border: "1px solid rgba(255,255,255,0.05)",
-                  marginTop: 10,
-                }}
-              >
-                <Waveform active />
-                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
-                  Analyzing your profile…
-                </span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Mode Selector Tabs */}
+        <div style={{ display: "flex", borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
+          <button
+            onClick={() => handleSetMode("chat")}
+            style={{
+              flex: 1,
+              padding: "10px",
+              fontSize: "11px",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: mode === "chat" ? "#D4AF37" : "rgba(255,255,255,0.4)",
+              background: mode === "chat" ? "rgba(212,175,55,0.05)" : "transparent",
+              border: "none",
+              borderBottom: mode === "chat" ? "2px solid #D4AF37" : "2px solid transparent",
+              cursor: "pointer",
+              transition: "all 0.2s"
+            }}
+          >
+            Advisor Chat
+          </button>
+          <button
+            onClick={() => handleSetMode("insights")}
+            style={{
+              flex: 1,
+              padding: "10px",
+              fontSize: "11px",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: mode === "insights" ? "#D4AF37" : "rgba(255,255,255,0.4)",
+              background: mode === "insights" ? "rgba(212,175,55,0.05)" : "transparent",
+              border: "none",
+              borderBottom: mode === "insights" ? "2px solid #D4AF37" : "2px solid transparent",
+              cursor: "pointer",
+              transition: "all 0.2s"
+            }}
+          >
+            AI Insights
+          </button>
         </div>
 
-        {/* Quick prompts */}
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "8px 14px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
-          {PROMPTS.slice(0, 3).map(({ icon: Icon, label }) => (
-            <motion.button
-              key={label}
-              onClick={() => sendMessage(label)}
-              whileHover={{ borderColor: "rgba(212,175,55,0.35)", background: "rgba(212,175,55,0.07)" }}
-              whileTap={{ scale: 0.97 }}
+        {mode === "insights" ? (
+          <div style={{ flex: 1, overflowY: "auto" }} className="scrollbar-thin">
+            <DashboardIntelligence isEmbed />
+          </div>
+        ) : (
+          <>
+            {/* Sessions dropdown */}
+            <AnimatePresence>
+              {showSessions && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    overflow: "hidden",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                  }}
+                >
+                  <div
+                    style={{
+                      maxHeight: 200,
+                      overflowY: "auto",
+                      padding: "6px 0",
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "rgba(255,255,255,0.08) transparent",
+                    }}
+                  >
+                    {sessions.length === 0 ? (
+                      <p style={{ fontSize: 11, color: "rgba(255,255,255,0.25)", padding: "8px 16px", textAlign: "center" }}>
+                        No chat history yet
+                      </p>
+                    ) : (
+                      sessions.map((s) => (
+                        <motion.div
+                          key={s.session_id}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => loadSession(s.session_id)}
+                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); loadSession(s.session_id); } }}
+                          whileHover={{ background: "rgba(212,175,55,0.06)" }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            width: "100%",
+                            padding: "7px 16px",
+                            background: sessionIdRef.current === s.session_id ? "rgba(212,175,55,0.08)" : "rgba(0,0,0,0)",
+                            border: "none",
+                            cursor: "pointer",
+                            textAlign: "left",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 11,
+                              color: sessionIdRef.current === s.session_id ? "#D4AF37" : "rgba(255,255,255,0.5)",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              maxWidth: 220,
+                            }}
+                          >
+                            {s.summary || "New chat"}
+                          </span>
+                          <button
+                            onClick={(e) => deleteSession(s.session_id, e)}
+                            style={{
+                              background: "rgba(0,0,0,0)",
+                              border: "none",
+                              color: "rgba(255,255,255,0.2)",
+                              cursor: "pointer",
+                              padding: 2,
+                              display: "flex",
+                              alignItems: "center",
+                              flexShrink: 0,
+                            }}
+                            className="hover:text-rose-400 transition-colors"
+                            title="Delete chat"
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        </motion.div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Messages container */}
+            <div
+              ref={scrollRef}
+              style={{
+                flex: 1,
+                overflowY: "auto",
+                padding: "10px 16px",
+                scrollbarWidth: "thin",
+                scrollbarColor: "rgba(255,255,255,0.08) transparent",
+              }}
+            >
+              <AnimatePresence initial={false}>
+                {loadingHistory && (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                      background: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      marginTop: 10,
+                    }}
+                  >
+                    <Waveform active />
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+                      Loading chat history…
+                    </span>
+                  </motion.div>
+                )}
+
+                {!loadingHistory && messages.length === 0 && (
+                  <motion.div
+                    key="welcome"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.65 }}>
+                      Your financial intelligence is online. Ask me anything about your portfolio,
+                      goals, or financial health.
+                    </p>
+                  </motion.div>
+                )}
+
+                {messages.map((m, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      display: "flex",
+                      justifyContent: m.role === "user" ? "flex-end" : "flex-start",
+                      marginTop: i > 0 ? 10 : 0,
+                    }}
+                  >
+                    {m.role === "user" ? (
+                      <span
+                        style={{
+                          display: "inline-block",
+                          fontSize: 12,
+                          color: "rgba(236,253,245,0.88)",
+                          padding: "7px 12px",
+                          borderRadius: 10,
+                          background: "rgba(52,211,153,0.08)",
+                          border: "1px solid rgba(52,211,153,0.16)",
+                          maxWidth: "85%",
+                        }}
+                      >
+                        {m.content}
+                      </span>
+                    ) : (
+                      <div style={{ maxWidth: "85%" }}>
+                        <p
+                          style={{
+                            fontSize: 9,
+                            letterSpacing: "0.14em",
+                            textTransform: "uppercase",
+                            color: "rgba(212,175,55,0.45)",
+                            marginBottom: 4,
+                          }}
+                        >
+                          VaultIQ AI
+                        </p>
+                        <div
+                          style={{
+                            display: "inline-block",
+                            padding: "8px 12px",
+                            borderRadius: 10,
+                            background: "rgba(212,175,55,0.04)",
+                            border: "1px solid rgba(212,175,55,0.1)",
+                          }}
+                        >
+                          <MarkdownContent text={m.content} />
+                          {!m.streamed && (
+                            <motion.span
+                              animate={{ opacity: [1, 0] }}
+                              transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                              style={{
+                                display: "inline-block",
+                                width: 2,
+                                height: 12,
+                                background: "rgba(212,175,55,0.8)",
+                                marginLeft: 2,
+                                verticalAlign: "middle",
+                              }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+
+                {thinking && (
+                  <motion.div
+                    key="thinking"
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 10,
+                      padding: "8px 12px",
+                      borderRadius: 10,
+                      background: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      marginTop: 10,
+                    }}
+                  >
+                    <Waveform active />
+                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
+                      Analyzing your profile…
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Quick prompts */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "8px 14px", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+              {PROMPTS.slice(0, 3).map(({ icon: Icon, label }) => (
+                <motion.button
+                  key={label}
+                  onClick={() => sendMessage(label)}
+                  whileHover={{ borderColor: "rgba(212,175,55,0.35)", background: "rgba(212,175,55,0.07)" }}
+                  whileTap={{ scale: 0.97 }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 4,
+                    fontSize: 10,
+                    padding: "5px 10px",
+                    borderRadius: 7,
+                    background: "rgba(255,255,255,0.025)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    color: "rgba(255,255,255,0.4)",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <Icon size={10} style={{ color: "rgba(212,175,55,0.6)" }} />
+                  {label}
+                </motion.button>
+              ))}
+            </div>
+
+            {/* Input row */}
+            <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 4,
-                fontSize: 10,
-                padding: "5px 10px",
-                borderRadius: 7,
-                background: "rgba(255,255,255,0.025)",
-                border: "1px solid rgba(255,255,255,0.07)",
-                color: "rgba(255,255,255,0.4)",
-                cursor: "pointer",
-                transition: "all 0.15s",
+                gap: 8,
+                padding: "10px 14px",
+                borderTop: "1px solid rgba(255,255,255,0.05)",
               }}
             >
-              <Icon size={10} style={{ color: "rgba(212,175,55,0.6)" }} />
-              {label}
-            </motion.button>
-          ))}
-        </div>
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
+                placeholder="Ask VaultIQ…"
+                style={{
+                  flex: 1,
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  borderRadius: 8,
+                  padding: "8px 10px",
+                  fontSize: 12,
+                  color: "rgba(255,255,255,0.88)",
+                  outline: "none",
+                  transition: "border-color 0.15s",
+                }}
+                onFocus={(e) => {
+                  (e.target as HTMLInputElement).style.borderColor = "rgba(212,175,55,0.32)";
+                }}
+                onBlur={(e) => {
+                  (e.target as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.09)";
+                }}
+              />
 
-        {/* Input row */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "10px 14px",
-            borderTop: "1px solid rgba(255,255,255,0.05)",
-          }}
-        >
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
-            placeholder="Ask VaultIQ…"
-            style={{
-              flex: 1,
-              background: "rgba(255,255,255,0.03)",
-              border: "1px solid rgba(255,255,255,0.09)",
-              borderRadius: 8,
-              padding: "8px 10px",
-              fontSize: 12,
-              color: "rgba(255,255,255,0.88)",
-              outline: "none",
-              transition: "border-color 0.15s",
-            }}
-            onFocus={(e) => {
-              (e.target as HTMLInputElement).style.borderColor = "rgba(212,175,55,0.32)";
-            }}
-            onBlur={(e) => {
-              (e.target as HTMLInputElement).style.borderColor = "rgba(255,255,255,0.09)";
-            }}
-          />
-
-          {/* Send */}
-          <motion.button
-            onClick={() => sendMessage(input)}
-            disabled={!input.trim() || thinking}
-            whileHover={{ y: -1, boxShadow: "0 0 18px rgba(212,175,55,0.45)" }}
-            whileTap={{ scale: 0.94 }}
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 8,
-              background: "linear-gradient(135deg, #F5D060, #C8922A)",
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: !input.trim() || thinking ? "not-allowed" : "pointer",
-              opacity: !input.trim() || thinking ? 0.32 : 1,
-              flexShrink: 0,
-            }}
-          >
-            <Send size={13} color="#000" />
-          </motion.button>
-        </div>
+              {/* Send */}
+              <motion.button
+                onClick={() => sendMessage(input)}
+                disabled={!input.trim() || thinking}
+                whileHover={{ y: -1, boxShadow: "0 0 18px rgba(212,175,55,0.45)" }}
+                whileTap={{ scale: 0.94 }}
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 8,
+                  background: "linear-gradient(135deg, #F5D060, #C8922A)",
+                  border: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: !input.trim() || thinking ? "not-allowed" : "pointer",
+                  opacity: !input.trim() || thinking ? 0.32 : 1,
+                  flexShrink: 0,
+                }}
+              >
+                <Send size={13} color="#000" />
+              </motion.button>
+            </div>
+          </>
+        )}
       </motion.div>
     );
   }

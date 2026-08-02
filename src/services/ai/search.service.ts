@@ -191,7 +191,7 @@ class SearchServiceImpl {
         subtitle: d.category.replace(/_/g, " "),
         icon: "FileText",
         color: "text-purple-500",
-        relevance: this.calculateRelevance(query, d.name + " " + d.category),
+        relevance: this.calculateRelevance(query, d.fileName + " " + d.category),
         data: { category: d.category, status: d.status },
       }));
     } catch (error) {

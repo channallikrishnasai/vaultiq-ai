@@ -679,7 +679,7 @@ export function CourseViewerClient({
                             </div>
                             {/* Back */}
                             <div className="absolute inset-0 bg-emerald-500/10 rounded-xl flex items-center justify-center p-4 text-center border border-emerald-500/30 [transform:rotateY(180deg)] [backface-visibility:hidden]">
-                              <p className="text-sm font-medium text-emerald-300">Don't lose money (and start as early as possible).</p>
+                              <p className="text-sm font-medium text-emerald-300">Don&#39;t lose money (and start as early as possible).</p>
                             </div>
                           </div>
                         </div>
@@ -688,7 +688,7 @@ export function CourseViewerClient({
                           <div className="absolute inset-0 transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
                             {/* Front */}
                             <div className="absolute inset-0 bg-zinc-800/80 rounded-xl flex items-center justify-center p-4 text-center border border-zinc-700/50 [backface-visibility:hidden]">
-                              <p className="text-sm font-medium text-zinc-200">What does "Diversification" mean?</p>
+                              <p className="text-sm font-medium text-zinc-200">What does &quot;Diversification&quot; mean?</p>
                             </div>
                             {/* Back */}
                             <div className="absolute inset-0 bg-cyan-500/10 rounded-xl flex items-center justify-center p-4 text-center border border-cyan-500/30 [transform:rotateY(180deg)] [backface-visibility:hidden]">

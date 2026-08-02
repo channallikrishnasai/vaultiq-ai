@@ -15,7 +15,7 @@ export async function GET() {
       expenseRepository.findAll(userId),
       budgetRepository.findAll(userId),
       tradingRepository.getPortfolios(userId),
-      prisma.income.findMany({ where: { userId }, select: { amount: true } }),
+      prisma.income.findMany({ where: { userId }, select: { amount: true, date: true } }),
     ]);
 
     const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -51,6 +51,35 @@ export async function GET() {
       });
     }
 
+    // Monthly Trend (last 6 months)
+    const monthlyTrend = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const year = d.getFullYear();
+      const monthIdx = d.getMonth();
+      const label = d.toLocaleDateString("en-US", { month: "short" });
+
+      const monthExpenses = expenses
+        .filter(e => {
+          const ed = new Date(e.date);
+          return ed.getFullYear() === year && ed.getMonth() === monthIdx;
+        })
+        .reduce((sum, e) => sum + e.amount, 0);
+
+      const monthIncome = incomes
+        .filter(inc => {
+          const id = new Date(inc.date);
+          return id.getFullYear() === year && id.getMonth() === monthIdx;
+        })
+        .reduce((sum, inc) => sum + inc.amount, 0);
+
+      monthlyTrend.push({
+        month: label,
+        income: monthIncome,
+        expenses: monthExpenses,
+      });
+    }
+
     return successResponse({
       summary: {
         totalExpenses,
@@ -60,6 +89,7 @@ export async function GET() {
       },
       categorySummary,
       statements,
+      monthlyTrend,
     });
   } catch (error) {
     return handleApiError(error);
