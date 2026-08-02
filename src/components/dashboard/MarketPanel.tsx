@@ -44,7 +44,7 @@ const tabs: TabConfig[] = [
 export default function MarketPanel() {
   const [activeTab, setActiveTab] = useState<Tab>("watchlist");
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isClosed, setIsClosed] = useState(false);
+  const [isClosed, setIsClosed] = useState(true);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -53,8 +53,6 @@ export default function MarketPanel() {
       try {
         const savedCollapsed = localStorage.getItem("market-panel-collapsed");
         if (savedCollapsed !== null) setIsCollapsed(JSON.parse(savedCollapsed));
-        const savedClosed = localStorage.getItem("market-panel-closed");
-        if (savedClosed !== null) setIsClosed(JSON.parse(savedClosed));
         const savedTab = localStorage.getItem("market-panel-active-tab");
         if (savedTab !== null && (savedTab === "watchlist" || savedTab === "movers" || savedTab === "alerts")) {
           setActiveTab(savedTab as Tab);
@@ -68,12 +66,6 @@ export default function MarketPanel() {
       localStorage.setItem("market-panel-collapsed", JSON.stringify(isCollapsed));
     }
   }, [isCollapsed, mounted]);
-
-  useEffect(() => {
-    if (mounted && typeof window !== "undefined") {
-      localStorage.setItem("market-panel-closed", JSON.stringify(isClosed));
-    }
-  }, [isClosed, mounted]);
 
   useEffect(() => {
     if (mounted && typeof window !== "undefined") {

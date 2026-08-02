@@ -231,7 +231,7 @@ export default function DashboardLayout({ userId, user }: DashboardLayoutProps) 
 
         {/* ── AI Financial Copilot Card ── */}
         {uiReady && !cleanMode && !isWidgetClosed("copilot") && (
-          <div className="absolute top-28 left-1/2 -translate-x-1/2 z-10 w-full max-w-[560px] px-6">
+          <div className="absolute top-28 right-6 z-10 w-[340px]">
             <div className="relative">
               <button
                 onClick={() => closeWidget("copilot")}
