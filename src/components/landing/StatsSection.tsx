@@ -5,7 +5,7 @@ import { stats } from "@/lib/landing-data";
 
 export default function StatsSection() {
   return (
-    <section className="relative border-y border-zinc-800/60 bg-zinc-950 py-16 sm:py-20">
+    <section className="relative border-y border-white/[0.06] bg-[#050508] py-16 sm:py-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {stats.map((stat, index) => (
@@ -16,7 +16,7 @@ export default function StatsSection() {
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.4 }}
               className={`flex flex-col items-center text-center ${
-                index < stats.length - 1 ? "md:border-r md:border-zinc-800/60" : ""
+                index < stats.length - 1 ? "md:border-r md:border-white/[0.06]" : ""
               }`}
             >
               <span className="bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-3xl font-bold text-transparent sm:text-4xl">
