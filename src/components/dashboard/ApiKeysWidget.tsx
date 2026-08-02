@@ -17,28 +17,53 @@ export default function ApiKeysWidget() {
 
   useEffect(() => {
     setMounted(true);
-    try {
-      const savedMin = localStorage.getItem("api-keys-minimized");
-      if (savedMin !== null) setIsMinimized(JSON.parse(savedMin));
-      const savedOpenai = localStorage.getItem("vaultiq-openai-key");
-      if (savedOpenai) setOpenaiKey(savedOpenai);
-      const savedGroq = localStorage.getItem("vaultiq-groq-key");
-      if (savedGroq) setGroqKey(savedGroq);
-    } catch {}
+    if (typeof window !== "undefined") {
+      try {
+        const savedMin = localStorage.getItem("api-keys-minimized");
+        if (savedMin !== null) setIsMinimized(JSON.parse(savedMin));
+        const savedOpenai = localStorage.getItem("vaultiq-openai-key");
+        if (savedOpenai) setOpenaiKey(savedOpenai);
+        const savedGroq = localStorage.getItem("vaultiq-groq-key");
+        if (savedGroq) setGroqKey(savedGroq);
+      } catch {}
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "api-keys-minimized" && e.newValue !== null) {
+        try {
+          setIsMinimized(JSON.parse(e.newValue));
+        } catch {}
+      }
+      if (e.key === "vaultiq-openai-key") {
+        setOpenaiKey(e.newValue || "");
+      }
+      if (e.key === "vaultiq-groq-key") {
+        setGroqKey(e.newValue || "");
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
   }, []);
 
   const saveKeys = () => {
-    localStorage.setItem("vaultiq-openai-key", openaiKey);
-    localStorage.setItem("vaultiq-groq-key", groqKey);
-    toast.success("API Keys saved successfully");
+    if (typeof window !== "undefined") {
+      localStorage.setItem("vaultiq-openai-key", openaiKey);
+      localStorage.setItem("vaultiq-groq-key", groqKey);
+      toast.success("API Keys saved successfully");
+    }
   };
 
   const clearKeys = () => {
-    localStorage.removeItem("vaultiq-openai-key");
-    localStorage.removeItem("vaultiq-groq-key");
-    setOpenaiKey("");
-    setGroqKey("");
-    toast.success("API Keys cleared");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("vaultiq-openai-key");
+      localStorage.removeItem("vaultiq-groq-key");
+      setOpenaiKey("");
+      setGroqKey("");
+      toast.success("API Keys cleared");
+    }
   };
 
   const copyToClipboard = (text: string, type: "openai" | "groq") => {
@@ -58,7 +83,9 @@ export default function ApiKeysWidget() {
   const toggleMinimize = () => {
     const nextVal = !isMinimized;
     setIsMinimized(nextVal);
-    localStorage.setItem("api-keys-minimized", JSON.stringify(nextVal));
+    if (typeof window !== "undefined") {
+      localStorage.setItem("api-keys-minimized", JSON.stringify(nextVal));
+    }
   };
 
   if (!mounted) return null;

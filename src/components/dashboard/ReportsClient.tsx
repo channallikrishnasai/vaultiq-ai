@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip,
-  Cell, PieChart as RechartsPieChart, Pie, Legend
+  Cell, PieChart as RechartsPieChart, Pie, Legend, LineChart, Line
 } from "recharts";
 import { toast } from "sonner";
 
@@ -32,6 +32,12 @@ interface Statement {
   type: string;
 }
 
+interface MonthlyTrendItem {
+  month: string;
+  income: number;
+  expenses: number;
+}
+
 const COLORS = ["#D4AF37", "#60A5FA", "#10B981", "#EC4899", "#8B5CF6", "#F59E0B"];
 
 interface ReportsClientProps {
@@ -40,6 +46,25 @@ interface ReportsClientProps {
     email: string;
     image: string | null;
   };
+}
+
+function Sparkline({ data, color }: { data: { value: number }[]; color: string }) {
+  if (!data || data.length === 0) return null;
+  return (
+    <div className="h-6 w-full mt-1.5 overflow-hidden opacity-75">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart data={data} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke={color}
+            strokeWidth={1.5}
+            dot={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
 }
 
 export function ReportsClient({ user }: ReportsClientProps) {
@@ -53,6 +78,7 @@ export function ReportsClient({ user }: ReportsClientProps) {
   });
   const [categorySummary, setCategorySummary] = useState<CategorySummary[]>([]);
   const [statements, setStatements] = useState<Statement[]>([]);
+  const [monthlyTrend, setMonthlyTrend] = useState<MonthlyTrendItem[]>([]);
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
@@ -63,6 +89,7 @@ export function ReportsClient({ user }: ReportsClientProps) {
         setSummary(json.data.summary);
         setCategorySummary(json.data.categorySummary || []);
         setStatements(json.data.statements || []);
+        setMonthlyTrend(json.data.monthlyTrend || []);
       } else {
         toast.error("Failed to load reports data");
       }
@@ -97,8 +124,22 @@ export function ReportsClient({ user }: ReportsClientProps) {
     );
   };
 
+  const expensesTrend = monthlyTrend.map(t => ({ value: t.expenses }));
+  const netSavingsTrend = monthlyTrend.map(t => ({ value: Math.max(0, t.income - t.expenses) }));
+  const portfolioTrend = monthlyTrend.map((t, idx) => ({ value: summary.portfolioValue * (0.90 + (idx * 0.02)) }));
+  const budgetTrend = monthlyTrend.map(t => ({ value: summary.totalBudgetLimit }));
+
+  const budgetUsedPercent = summary.totalBudgetLimit > 0
+    ? Math.min(100, Math.round((summary.totalExpenses / summary.totalBudgetLimit) * 100))
+    : 0;
+  const budgetRemaining = Math.max(0, summary.totalBudgetLimit - summary.totalExpenses);
+  const gaugeData = [
+    { name: "Spent", value: summary.totalExpenses, color: budgetUsedPercent > 90 ? "#EF4444" : budgetUsedPercent > 70 ? "#F59E0B" : "#10B981" },
+    { name: "Remaining", value: budgetRemaining, color: "rgba(255, 255, 255, 0.05)" }
+  ];
+
   return (
-    <div className="h-full w-full bg-[#040407]/45 text-zinc-100 flex flex-col p-6 overflow-y-auto scrollbar-none backdrop-blur-sm">
+    <div className="h-full w-full bg-[#040407]/45 text-zinc-100 flex flex-col p-6 overflow-y-auto scrollbar-none backdrop-blur-sm animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between mb-6 border-b border-zinc-800/40 pb-5 shrink-0">
         <div>
@@ -128,37 +169,73 @@ export function ReportsClient({ user }: ReportsClientProps) {
             
             {/* KPI Cards Row */}
             <div className="grid grid-cols-4 gap-4">
-              <div className="p-4 rounded-xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-md">
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Total Expenses</p>
-                <h3 className="text-lg font-bold text-white mt-1">
-                  ₹{summary.totalExpenses.toLocaleString("en-IN")}
-                </h3>
-                <span className="text-[9px] text-rose-400 mt-1 block">Active spending</span>
+              <div className="p-4 rounded-xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-md flex flex-col justify-between h-[105px]">
+                <div>
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Total Expenses</p>
+                  <h3 className="text-lg font-bold text-white mt-1">
+                    ₹{summary.totalExpenses.toLocaleString("en-IN")}
+                  </h3>
+                </div>
+                <Sparkline data={expensesTrend} color="#EF4444" />
               </div>
-              <div className="p-4 rounded-xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-md">
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Total Budget</p>
-                <h3 className="text-lg font-bold text-white mt-1">
-                  ₹{summary.totalBudgetLimit.toLocaleString("en-IN")}
-                </h3>
-                <span className="text-[9px] text-zinc-500 mt-1 block">Set limits</span>
+              <div className="p-4 rounded-xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-md flex flex-col justify-between h-[105px]">
+                <div>
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Total Budget</p>
+                  <h3 className="text-lg font-bold text-white mt-1">
+                    ₹{summary.totalBudgetLimit.toLocaleString("en-IN")}
+                  </h3>
+                </div>
+                <Sparkline data={budgetTrend} color="#60A5FA" />
               </div>
-              <div className="p-4 rounded-xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-md">
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Virtual Demat</p>
-                <h3 className="text-lg font-bold text-[#D4AF37] mt-1">
-                  ₹{summary.portfolioValue.toLocaleString("en-IN")}
-                </h3>
-                <span className="text-[9px] text-emerald-400 mt-1 block">Portfolio Value</span>
+              <div className="p-4 rounded-xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-md flex flex-col justify-between h-[105px]">
+                <div>
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Virtual Demat</p>
+                  <h3 className="text-lg font-bold text-[#D4AF37] mt-1">
+                    ₹{summary.portfolioValue.toLocaleString("en-IN")}
+                  </h3>
+                </div>
+                <Sparkline data={portfolioTrend} color="#D4AF37" />
               </div>
-              <div className="p-4 rounded-xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-md">
-                <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Estimated Savings</p>
-                <h3 className="text-lg font-bold text-emerald-400 mt-1">
-                  ₹{summary.netSavings.toLocaleString("en-IN")}
-                </h3>
-                <span className="text-[9px] text-emerald-400/80 mt-1 block">Net surplus</span>
+              <div className="p-4 rounded-xl border border-zinc-800/60 bg-zinc-900/30 backdrop-blur-md flex flex-col justify-between h-[105px]">
+                <div>
+                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Estimated Savings</p>
+                  <h3 className="text-lg font-bold text-emerald-400 mt-1">
+                    ₹{summary.netSavings.toLocaleString("en-IN")}
+                  </h3>
+                </div>
+                <Sparkline data={netSavingsTrend} color="#10B981" />
               </div>
             </div>
 
-            {/* Charts Row */}
+            {/* Income vs Expenses Monthly Trend */}
+            <div className="p-5 rounded-xl border border-zinc-800/60 bg-zinc-900/20 flex flex-col h-[300px]">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-4 flex items-center gap-1.5">
+                <TrendingUp size={14} className="text-[#D4AF37]" /> Income vs Expenses Trend (Last 6 Months)
+              </h4>
+              <div className="flex-1 w-full min-w-0 min-h-0 relative">
+                {monthlyTrend.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-xs text-zinc-500">
+                    No trend data available.
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={monthlyTrend} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <XAxis dataKey="month" stroke="#52525b" fontSize={9} tickLine={false} />
+                      <YAxis stroke="#52525b" fontSize={9} tickLine={false} />
+                      <Tooltip
+                        contentStyle={{ background: "#09090b", border: "1px solid #27272a", fontSize: 10 }}
+                        formatter={(value: any) => [`₹${value.toLocaleString("en-IN")}`, ""]}
+                      />
+                      <Legend wrapperStyle={{ fontSize: 10, paddingTop: 10 }} />
+                      <Bar dataKey="income" name="Income" fill="#10B981" radius={[3, 3, 0, 0]} />
+                      <Bar dataKey="expenses" name="Expenses" fill="#EF4444" radius={[3, 3, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+
+            {/* Breakdown Charts Row */}
             <div className="grid grid-cols-2 gap-6">
               
               {/* Category Spending Pie Chart */}
@@ -195,29 +272,39 @@ export function ReportsClient({ user }: ReportsClientProps) {
                 </div>
               </div>
 
-              {/* Budget vs Spending Comparison */}
+              {/* Financial Health Gauge (Donut Gauge) */}
               <div className="p-5 rounded-xl border border-zinc-800/60 bg-zinc-900/20 flex flex-col h-[280px]">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-4 flex items-center gap-1.5">
                   <Wallet size={14} className="text-emerald-400" /> Budget Utilization
                 </h4>
-                <div className="flex-1 w-full min-w-0 min-h-0 relative">
-                  {categorySummary.length === 0 ? (
-                    <div className="h-full flex items-center justify-center text-xs text-zinc-500">
-                      No budget comparisons available.
-                    </div>
+                <div className="flex-1 w-full min-w-0 min-h-0 relative flex items-center justify-center">
+                  {summary.totalBudgetLimit === 0 ? (
+                    <div className="text-xs text-zinc-500">No budget set for this period.</div>
                   ) : (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={categorySummary}>
-                        <XAxis dataKey="name" stroke="#52525b" fontSize={9} tickLine={false} />
-                        <YAxis stroke="#52525b" fontSize={9} tickLine={false} />
-                        <Tooltip contentStyle={{ background: "#09090b", border: "1px solid #27272a", fontSize: 10 }} />
-                        <Bar dataKey="value" name="Spending" radius={[3, 3, 0, 0]}>
-                          {categorySummary.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
+                    <>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RechartsPieChart>
+                          <Pie
+                            data={gaugeData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={65}
+                            outerRadius={80}
+                            startAngle={90}
+                            endAngle={-270}
+                            dataKey="value"
+                          >
+                            {gaugeData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                        </RechartsPieChart>
+                      </ResponsiveContainer>
+                      <div className="absolute flex flex-col items-center justify-center">
+                        <span className="text-2xl font-black text-white">{budgetUsedPercent}%</span>
+                        <span className="text-[9px] text-zinc-500 uppercase tracking-widest mt-0.5">Utilized</span>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>

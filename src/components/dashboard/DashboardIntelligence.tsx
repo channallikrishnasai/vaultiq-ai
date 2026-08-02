@@ -117,11 +117,11 @@ async function fetchIntelligence(): Promise<IntelligenceData> {
   return res.json();
 }
 
-export default function DashboardIntelligence() {
+export default function DashboardIntelligence({ isEmbed = false }: { isEmbed?: boolean } = {}) {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"brief" | "alerts" | "health" | "goals" | "cashflow" | "twin">("brief");
 
-  const { data, isLoading } = useQuery<IntelligenceData>({
+  const { data, isLoading, error, isError } = useQuery<IntelligenceData>({
     queryKey: ["intelligence"],
     queryFn: fetchIntelligence,
     staleTime: 30_000,
@@ -135,7 +135,7 @@ export default function DashboardIntelligence() {
 
   if (isLoading && !data) {
     return (
-      <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/30 p-6">
+      <div className={isEmbed ? "p-4" : "rounded-2xl border border-zinc-800/60 bg-zinc-900/30 p-6"}>
         <div className="flex items-center gap-3 mb-4">
           <RefreshCw size={14} className="text-[#D4AF37] animate-spin" />
           <span className="text-sm text-zinc-400">Loading intelligence...</span>
@@ -145,6 +145,24 @@ export default function DashboardIntelligence() {
             <div key={i} className="h-16 rounded-lg bg-zinc-800/30 animate-pulse" />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className={isEmbed ? "p-4 animate-fade-in" : "rounded-2xl border border-zinc-800/60 bg-zinc-900/30 p-6 animate-fade-in"}>
+        <div className="flex items-center gap-3 mb-2 text-red-400">
+          <AlertTriangle size={14} />
+          <span className="text-sm font-semibold">Failed to load intelligence</span>
+        </div>
+        <p className="text-xs text-zinc-500 mb-4">{(error as Error)?.message || "Something went wrong"}</p>
+        <button
+          onClick={handleRefresh}
+          className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-lg text-xs font-medium transition-all"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -161,7 +179,7 @@ export default function DashboardIntelligence() {
   ];
 
   return (
-    <div className="rounded-2xl border border-zinc-800/60 bg-zinc-900/30 overflow-hidden">
+    <div className={isEmbed ? "w-full h-full overflow-hidden flex flex-col" : "rounded-2xl border border-zinc-800/60 bg-zinc-900/30 overflow-hidden"}>
       {/* Header Tabs */}
       <div className="flex items-center gap-1 px-3 pt-3 overflow-x-auto scrollbar-none">
         {tabs.map((tab) => (

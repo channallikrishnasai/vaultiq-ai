@@ -64,8 +64,14 @@ export default function AICommandCenter({ userId }: AICommandCenterProps) {
         fetch("/api/financial-hub/recent-actions"),
       ]);
 
-      if (hubRes.ok) setHubData(await hubRes.json());
-      if (actionsRes.ok) setRecentActions(await actionsRes.json());
+      if (hubRes.ok) {
+        const hubJson = await hubRes.json();
+        setHubData(hubJson.data ?? hubJson);
+      }
+      if (actionsRes.ok) {
+        const actionsJson = await actionsRes.json();
+        setRecentActions(Array.isArray(actionsJson) ? actionsJson : (actionsJson.data ?? []));
+      }
     } catch {
       // Fallback data
     } finally {

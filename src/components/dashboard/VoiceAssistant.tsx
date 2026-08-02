@@ -9,6 +9,18 @@ interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
 }
 
+interface SpeechRecognitionType {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onend: () => void;
+  onerror: (event: Event) => void;
+}
+
 interface VoiceAssistantProps {
   userId: string;
   onTranscript?: (text: string) => void;
@@ -21,7 +33,7 @@ export default function VoiceAssistant({ userId, onTranscript, onResponse }: Voi
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<SpeechRecognitionType | null>(null);
   const [supported, setSupported] = useState(true);
 
   useEffect(() => {
@@ -32,17 +44,18 @@ export default function VoiceAssistant({ userId, onTranscript, onResponse }: Voi
       return;
     }
 
-    const recognition = new (SpeechRecognition as new () => SpeechRecognition)();
+    const recognition = new (SpeechRecognition as unknown as new () => SpeechRecognitionType)();
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = "en-IN";
 
-    recognition.onresult = (event: { resultIndex: number; results: { length: number; [index: number]: { isFinal: boolean; 0: { transcript: string } } } }) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       let interim = "";
       let final = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const t = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
+        const result = event.results[i];
+        const t = result[0].transcript;
+        if (result.isFinal) {
           final += t;
         } else {
           interim += t;
