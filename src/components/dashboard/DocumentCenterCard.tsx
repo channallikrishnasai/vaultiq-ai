@@ -16,6 +16,7 @@ export default function DocumentCenterCard() {
   const router = useRouter();
   const [stats, setStats] = useState<DocStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [minimized, setMinimized] = useState(false);
 
   useEffect(() => {
     fetch("/api/documents/stats")
@@ -24,6 +25,37 @@ export default function DocumentCenterCard() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  if (minimized) {
+    return (
+      <motion.button
+        onClick={() => setMinimized(false)}
+        whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(212,175,55,0.4)" }}
+        whileTap={{ scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        style={{
+          position: "fixed",
+          bottom: "24px",
+          left: "24px",
+          width: "48px",
+          height: "48px",
+          borderRadius: "50%",
+          background: "rgba(4,4,8,0.95)",
+          border: "1px solid rgba(212,175,55,0.25)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          zIndex: 9999,
+        }}
+        title="Open Document Center"
+      >
+        <FileText size={20} style={{ color: "#D4AF37" }} />
+      </motion.button>
+    );
+  }
 
   return (
     <motion.div
@@ -53,7 +85,19 @@ export default function DocumentCenterCard() {
             <p className="text-[9px] text-zinc-500">AI Document Intelligence</p>
           </div>
         </div>
-        <ArrowUpRight size={14} className="text-zinc-500" />
+        <div className="flex items-center gap-1">
+          <button
+            onClick={(e) => { e.stopPropagation(); setMinimized(true); }}
+            className="p-1 rounded-md hover:bg-white/5 transition-colors"
+            title="Minimize"
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="5.5" stroke="rgba(113,113,122,0.5)" />
+              <path d="M3.5 6H8.5" stroke="rgba(113,113,122,0.8)" strokeWidth="1.2" strokeLinecap="round" />
+            </svg>
+          </button>
+          <ArrowUpRight size={14} className="text-zinc-500" />
+        </div>
       </div>
 
       {loading ? (
