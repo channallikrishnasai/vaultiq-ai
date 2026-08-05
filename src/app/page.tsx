@@ -4,6 +4,7 @@ import StatsSection from "@/components/landing/StatsSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import HowItWorks from "@/components/landing/HowItWorks";
 import DeepDiveFeatures from "@/components/landing/DeepDiveFeatures";
+import PricingSection from "@/components/landing/PricingSection";
 import Footer from "@/components/landing/Footer";
 
 export default function Home() {
@@ -15,6 +16,7 @@ export default function Home() {
       <FeaturesSection />
       <HowItWorks />
       <DeepDiveFeatures />
+      <PricingSection />
       <Footer />
     </>
   );
